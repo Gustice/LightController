@@ -1,0 +1,34 @@
+{
+    "configurations": [
+        {
+            "name": "MinGW",
+            "intelliSenseMode": "clang-x64",
+            "compilerPath": "C:\\MinGW\\bin\\gcc.exe",
+            "includePath": [
+                "${workspaceFolder}/espMock/**",
+                "${workspaceFolder}/include/**",
+                "${workspaceFolder}/parts/**",
+                "${workspaceFolder}/../../components/**",
+                "${workspaceFolder}/../../components/MyHal/includes"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "browse": {
+                "path": [
+                    "${workspaceFolder}/espMock/**",
+                    "${workspaceFolder}/include/**",
+                    "${workspaceFolder}/parts/**",
+                    "${workspaceFolder}/../../components/**"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            },
+            "cppStandard": "c++11",
+            "cStandard": "c99"
+        }
+    ],
+    "version": 4
+}

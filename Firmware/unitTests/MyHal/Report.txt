@@ -1,0 +1,45 @@
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+TestRunner.exe is a Catch v2.7.2 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Check if initialized port reserves internal pin
+-------------------------------------------------------------------------------
+D:\Arbeitsordner\ESP32\Projects\MyKeyBoard\components\MyHal\Tests\IntegrationTest.cpp(17)
+...............................................................................
+
+D:\Arbeitsordner\ESP32\Projects\MyKeyBoard\components\MyHal\Tests\IntegrationTest.cpp(20): PASSED:
+  REQUIRE( dut.GetReserved() == 0x0001 )
+with expansion:
+  1 == 1
+
+-------------------------------------------------------------------------------
+Check if several initialized ports reserve pin
+-------------------------------------------------------------------------------
+D:\Arbeitsordner\ESP32\Projects\MyKeyBoard\components\MyHal\Tests\IntegrationTest.cpp(23)
+...............................................................................
+
+D:\Arbeitsordner\ESP32\Projects\MyKeyBoard\components\MyHal\Tests\IntegrationTest.cpp(26): PASSED:
+  REQUIRE( dut1.GetReserved() == 0x0002 )
+with expansion:
+  2 == 2
+
+D:\Arbeitsordner\ESP32\Projects\MyKeyBoard\components\MyHal\Tests\IntegrationTest.cpp(28): PASSED:
+  REQUIRE( dut2.GetReserved() == 0x0006 )
+with expansion:
+  6 == 6
+
+D:\Arbeitsordner\ESP32\Projects\MyKeyBoard\components\MyHal\Tests\IntegrationTest.cpp(30): PASSED:
+  REQUIRE( dut3.GetReserved() == 0x000E )
+with expansion:
+  14 == 14
+
+D:\Arbeitsordner\ESP32\Projects\MyKeyBoard\components\MyHal\Tests\IntegrationTest.cpp(32): PASSED:
+  REQUIRE( dut3.GetReserved() == dut1.GetReserved() )
+with expansion:
+  14 == 14
+
+===============================================================================
+All tests passed (5 assertions in 3 test cases)
+

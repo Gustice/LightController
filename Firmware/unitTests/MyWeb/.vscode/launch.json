@@ -1,0 +1,46 @@
+// { // Use this if you are compiling with GNU
+//     "version": "0.2.0",
+//     "configurations": [
+//         {
+//             "name": "Launch UnitTests",
+//             "type": "cppdbg",
+//             "request": "launch",
+//             "program": "${workspaceFolder}/tbuild/Debug/TestRunner.exe",
+//             "args": [],
+//             "stopAtEntry": false,
+//             "environment": [],
+//             "externalConsole": false,
+//             "MIMode": "gdb",
+//             "miDebuggerPath": "C:\\mingw\\bin\\gdb.exe",
+//             "setupCommands": [
+//                 {
+//                     "description": "Enable pretty-printing for gdb",
+//                     "text": "-enable-pretty-printing",
+//                     "ignoreFailures": true
+//                 }
+//             ],
+//             // Gets sure source is compiled before debugging 
+//             "preLaunchTask": "CMake: Build Project"
+//         }
+//     ]
+// }
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch UnitTests",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/tbuild/Debug/TestRunner.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "preLaunchTask": "CMake: Build Project"
+        }
+    ]
+}

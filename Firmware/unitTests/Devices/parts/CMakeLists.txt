@@ -1,0 +1,5 @@
+add_subdirectory(EncoderTests)
+add_subdirectory(Apa102Tests)
+add_subdirectory(WS2812Tests)
+add_subdirectory(Pca9685Tests)
+add_subdirectory(RgbwStripTests)

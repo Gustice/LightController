@@ -1,0 +1,12 @@
+{
+    "files.associations": {
+        "*.tcc": "cpp",
+        "string_view": "cpp",
+        "regex": "cpp",
+        "array": "cpp",
+        "string": "cpp",
+        "bitset": "cpp",
+        "initializer_list": "cpp",
+        "utility": "cpp"
+    }
+}
