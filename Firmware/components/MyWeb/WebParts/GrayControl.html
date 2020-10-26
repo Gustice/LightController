@@ -1,0 +1,108 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>RGBI-Control</title>
+    <link rel="stylesheet" href="/CommonStyles.css">
+    <script src="/CommonScripts.js"></script>
+</head>
+<header>
+    <p></p>
+</header>
+
+<body>
+    <form title="Gray-Setup" id="grayChannel" name="grayChannel" style="background-color: lightsteelblue;"
+        onsubmit='return onSubmit(this)'>
+        <table>
+            <td>
+                <label>Apply color to</label><br>
+                <input type="text" name="appTo" value="1" style="width: 12em;"><br>
+                <input type="reset"><br><br>
+                <input type="submit">
+            </td>
+            <td>
+                <table>
+                    <th style="background-color: lightgray;">Ch1</th>
+                    <th style="background-color: lightgray;">Ch2</th>
+                    <th style="background-color: lightgray;">Ch3</th>
+                    <th style="background-color: lightgray;">Ch4</th>
+                    <th style="background-color: lightgray;">Ch5</th>
+                    <th style="background-color: lightgray;">Ch6</th>
+                    <th style="background-color: lightgray;">Ch7</th>
+                    <th style="background-color: lightgray;">Ch8</th>
+                    <tr>
+                        <td><input type="range" id="Ch1" oninput="g1Out.value = this.value;" min="0" max="255" step="1" value="0"><br></td>
+                        <td><input type="range" id="Ch2" oninput="g2Out.value = this.value;" min="0" max="255" step="1" value="0"><br></td>
+                        <td><input type="range" id="Ch3" oninput="g3Out.value = this.value;" min="0" max="255" step="1" value="0"><br></td>
+                        <td><input type="range" id="Ch4" oninput="g4Out.value = this.value;" min="0" max="255" step="1" value="0"><br></td>
+                        <td><input type="range" id="Ch5" oninput="g5Out.value = this.value;" min="0" max="255" step="1" value="0"><br></td>
+                        <td><input type="range" id="Ch6" oninput="g6Out.value = this.value;" min="0" max="255" step="1" value="0"><br></td>
+                        <td><input type="range" id="Ch7" oninput="g7Out.value = this.value;" min="0" max="255" step="1" value="0"><br></td>
+                        <td><input type="range" id="Ch8" oninput="g8Out.value = this.value;" min="0" max="255" step="1" value="0"><br></td>
+                    </tr>
+                    <tr>
+                        <td> <input type="number" name="G1" id="g1Out" type="number" oninput="Ch1.value = this.value;" class="intensValue" value="0" min="0" max="255" form="grayChannel"></input> </td>
+                        <td> <input type="number" name="G2" id="g2Out" type="number" oninput="Ch2.value = this.value;" class="intensValue" value="0" min="0" max="255" form="grayChannel"></input> </td>
+                        <td> <input type="number" name="G3" id="g3Out" type="number" oninput="Ch3.value = this.value;" class="intensValue" value="0" min="0" max="255" form="grayChannel"></input> </td>
+                        <td> <input type="number" name="G4" id="g4Out" type="number" oninput="Ch4.value = this.value;" class="intensValue" value="0" min="0" max="255" form="grayChannel"></input> </td>
+                        <td> <input type="number" name="G5" id="g5Out" type="number" oninput="Ch5.value = this.value;" class="intensValue" value="0" min="0" max="255" form="grayChannel"></input> </td>
+                        <td> <input type="number" name="G6" id="g6Out" type="number" oninput="Ch6.value = this.value;" class="intensValue" value="0" min="0" max="255" form="grayChannel"></input> </td>
+                        <td> <input type="number" name="G7" id="g7Out" type="number" oninput="Ch7.value = this.value;" class="intensValue" value="0" min="0" max="255" form="grayChannel"></input> </td>
+                        <td> <input type="number" name="G8" id="g8Out" type="number" oninput="Ch8.value = this.value;" class="intensValue" value="0" min="0" max="255" form="grayChannel"></input> </td>
+                    </tr>
+                    <table>
+                    <th style="background-color: lightgray;">Ch9</th>
+                    <th style="background-color: lightgray;">Ch10</th>
+                    <th style="background-color: lightgray;">Ch11</th>
+                    <th style="background-color: lightgray;">Ch12</th>
+                    <th style="background-color: lightgray;">Ch13</th>
+                    <th style="background-color: lightgray;">Ch14</th>
+                    <th style="background-color: lightgray;">Ch15</th>
+                    <th style="background-color: lightgray;">Ch16</th>
+                    <tr>
+
+                    <tr>
+                        <td><input type="range" id="Ch9"  oninput="g9Out.value = this.value;" min="0" max="255" step="1" value="0"><br></td>
+                        <td><input type="range" id="Ch10" oninput="g10Out.value = this.value;" min="0" max="255" step="1" value="0"><br></td>
+                        <td><input type="range" id="Ch11" oninput="g11Out.value = this.value;" min="0" max="255" step="1" value="0"><br></td>
+                        <td><input type="range" id="Ch12" oninput="g12Out.value = this.value;" min="0" max="255" step="1" value="0"><br></td>
+                        <td><input type="range" id="Ch13" oninput="g13Out.value = this.value;" min="0" max="255" step="1" value="0"><br></td>
+                        <td><input type="range" id="Ch14" oninput="g14Out.value = this.value;" min="0" max="255" step="1" value="0"><br></td>
+                        <td><input type="range" id="Ch15" oninput="g15Out.value = this.value;" min="0" max="255" step="1" value="0"><br></td>
+                        <td><input type="range" id="Ch16" oninput="g16Out.value = this.value;" min="0" max="255" step="1" value="0"><br></td>
+                    </tr>
+                    <tr>
+                        <td> <input type="number" name="G9" id="g9Out" type="number" oninput="Ch1.value = this.value;" class="intensValue" value="0" min="0" max="255" form="grayChannel"></input> </td>
+                        <td> <input type="number" name="G10" id="g10Out" type="number" oninput="Ch2.value = this.value;" class="intensValue" value="0" min="0" max="255" form="grayChannel"></input> </td>
+                        <td> <input type="number" name="G11" id="g11Out" type="number" oninput="Ch3.value = this.value;" class="intensValue" value="0" min="0" max="255" form="grayChannel"></input> </td>
+                        <td> <input type="number" name="G12" id="g12Out" type="number" oninput="Ch4.value = this.value;" class="intensValue" value="0" min="0" max="255" form="grayChannel"></input> </td>
+                        <td> <input type="number" name="G13" id="g13Out" type="number" oninput="Ch5.value = this.value;" class="intensValue" value="0" min="0" max="255" form="grayChannel"></input> </td>
+                        <td> <input type="number" name="G14" id="g14Out" type="number" oninput="Ch6.value = this.value;" class="intensValue" value="0" min="0" max="255" form="grayChannel"></input> </td>
+                        <td> <input type="number" name="G15" id="g15Out" type="number" oninput="Ch7.value = this.value;" class="intensValue" value="0" min="0" max="255" form="grayChannel"></input> </td>
+                        <td> <input type="number" name="G16" id="g16Out" type="number" oninput="Ch8.value = this.value;" class="intensValue" value="0" min="0" max="255" form="grayChannel"></input> </td>
+                    </tr>                </table>
+            </td>
+        </table>
+    </form>
+    <script>
+        var SetUrl = "/SetPort/IValues";
+
+        picker.addEventListener("input", function () {
+            document.getElementById("rgbSelected").innerHTML = picker.value;
+            console.log("Picker set " + picker.value);
+            var color = picker.value
+            var rgb = toRgb(color);
+            redCh.value = rgb.r;
+            greenCh.value = rgb.g;
+            blueCh.value = rgb.b;
+            redSl.value = rgb.r;
+            greenSl.value = rgb.g;
+            blueSl.value = rgb.b;
+
+            previewField.style["background-color"] = picker.value;
+        }, false);
+    </script>
+
+</body>
+
+</html>

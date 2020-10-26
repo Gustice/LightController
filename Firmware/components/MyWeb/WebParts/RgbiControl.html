@@ -1,0 +1,96 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>RGBI-Control</title>
+    <link rel="stylesheet" href="/CommonStyles.css">
+    <script src="/CommonScripts.js"></script>
+</head>
+<header>
+    <p></p>
+</header>
+
+<body>
+    <form title="RGB-Setup" id="rgbiChannel" name="rgbiChannel" style="background-color: lightsteelblue;"
+        onsubmit='return onSubmit(this)'>
+        <table>
+            <td>
+                <label>Stripe length</label>
+                <input type="number" name="len" value="1" style="width: 4em;"><br>
+                <label>Apply color to</label><br>
+                <input type="text" name="appTo" value="1" style="width: 12em;"><br>
+                <input type="reset"><br><br>
+                <input type="submit">
+            </td>
+            <td>
+                <table>
+                    <th style="background-color: lightsalmon;">R</th>
+                    <th style="background-color: lightgreen;">G</th>
+                    <th style="background-color: lightblue;">B</th>
+                    <th style="background-color: gray;">I</th>
+                    <tr>
+                        <td><input type="range" id="red" oninput="rOut.value = this.value; UpdateColor();" min="0"
+                                max="255" step="1" value="0"><br></td>
+                        <td><input type="range" id="green" oninput="gOut.value = this.value; UpdateColor();" min="0"
+                                max="255" step="1" value="0"><br></td>
+                        <td><input type="range" id="blue" oninput="bOut.value = this.value; UpdateColor();" min="0"
+                                max="255" step="1" value="0"><br></td>
+                        <td><input type="range" id="intens" oninput="iOut.value = this.value" min="0" max="100" step="1"
+                                value="0"><br></td>
+                    </tr>
+                    <tr>
+                        <td> <input type="number" name="R" id="rOut" type="number"
+                                oninput="red.value = this.value; UpdateColor();" class="intensValue" value="0" min="0"
+                                max="255" form="rgbiChannel"></input> </td>
+                        <td> <input type="number" name="G" id="gOut" type="number"
+                                oninput="green.value = this.value; UpdateColor();" class="intensValue" value="0" min="0"
+                                max="255" form="rgbiChannel"></input> </td>
+                        <td> <input type="number" name="B" id="bOut" type="number"
+                                oninput="blue.value = this.value; UpdateColor();" class="intensValue" value="0" min="0"
+                                max="255" form="rgbiChannel"></input> </td>
+                        <td> <input type="number" name="I" id="iOut" type="number"
+                                oninput="intens.value = this.value" class="intensValue" value="0" min="0" max="100"
+                                form="rgbiChannel"></input> </td>
+                    </tr>
+                </table>
+            </td>
+            <td>
+                <input type="color" id="rgbSelector" style="width: 70px; height: 30px;"><br>
+                <input id="preview" readonly style="width: 70px; height: 70px;"><br>
+                <span id="rgbSelected">#000000</span>
+            </td>
+        </table>
+    </form>
+    <script>
+        var SetUrl = "/SetPort/RGBIValues";
+
+        var picker = document.getElementById("rgbSelector");
+        var redCh = document.getElementById("rOut");
+        var greenCh = document.getElementById("gOut");
+        var blueCh = document.getElementById("bOut");
+        var redSl = document.getElementById("red");
+        var greenSl = document.getElementById("green");
+        var blueSl = document.getElementById("blue");
+        var previewField = document.getElementById("preview");
+
+        var theColor = picker.value;
+        picker.addEventListener("input", function () {
+            document.getElementById("rgbSelected").innerHTML = picker.value;
+            console.log("Picker set " + picker.value);
+            var color = picker.value
+            var rgb = toRgb(color);
+            redCh.value = rgb.r;
+            greenCh.value = rgb.g;
+            blueCh.value = rgb.b;
+            redSl.value = rgb.r;
+            greenSl.value = rgb.g;
+            blueSl.value = rgb.b;
+
+            previewField.style["background-color"] = picker.value;
+        }, false);
+
+    </script>
+
+</body>
+
+</html>
