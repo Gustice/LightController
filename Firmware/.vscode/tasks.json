@@ -1,0 +1,109 @@
+{
+    "options": {"env": { }},
+    // See https://go.microsoft.com/fwlink/?LinkId=733558 
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        // To use this task configuration you must 
+        //  - start the terminal 
+        //  - execute %IDF_PATH%\export.bat and 
+        //  - start this project by typing "code ."
+        // Note: In My case following paths are added 
+        // (IDF_PATH is manually defined in System-Variables)
+        //    E:\Software\Espressif\tools\xtensa-esp32-elf\esp-2020r1-8.2.0\xtensa-esp32-elf\bin
+        //    E:\Software\Espressif\tools\xtensa-esp32s2-elf\esp-2020r1-8.2.0\xtensa-esp32s2-elf\bin
+        //    E:\Software\Espressif\tools\esp32ulp-elf\2.28.51-esp-20191205\esp32ulp-elf-binutils\bin
+        //    E:\Software\Espressif\tools\esp32s2ulp-elf\2.28.51-esp-20191205\esp32s2ulp-elf-binutils\bin
+        //    E:\Software\Espressif\tools\cmake\3.16.4\bin
+        //    E:\Software\Espressif\tools\openocd-esp32\v0.10.0-esp32-20200309\openocd-esp32\bin
+        //    E:\Software\Espressif\tools\ninja\1.10.0\
+        //    E:\Software\Espressif\tools\idf-exe\1.0.1\
+        //    E:\Software\Espressif\tools\ccache\3.7\
+        //    E:\Software\Espressif\python_env\idf4.2_py3.8_env\Scripts
+        //    D:\Arbeitsordner\ESP32\esp-idf\tools
+
+        { // Init by MenuConfig
+            "label": "menuconfig",
+            "type": "shell",
+            "command": "idf.py",
+            "args": ["menuconfig"],
+            "presentation": {
+                "reveal": "always",
+            },
+            "problemMatcher": []
+        },
+        // Build Environment
+        {
+            "label": "Build project",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "type": "shell",
+            "command": "idf.py",
+            "args": ["build"],
+            "presentation": {
+                "reveal": "always",
+                "echo": true
+            },
+            "options": {"shell": {}},
+            // "problemMatcher": ["$gcc"] // Gcc matcher does't work here
+            "problemMatcher": {
+                "owner": "cpp",
+                "fileLocation": "absolute",
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                }
+            }
+        },
+
+        // Flash Environment and Monitor
+        {
+            "label": "flash & monitor",
+            // "group": {
+            //     "kind": "test",
+            //     "isDefault": true
+            // },
+            "command": "idf.py",
+            "type": "shell",
+            "args": [
+                "-p",
+                "COM${input:ComPortNum}",
+                "flash",
+                "monitor"
+            ],
+            "presentation": {
+                "reveal": "always",
+            },
+            "problemMatcher": []
+        },
+
+        // Clean Project
+        {
+            "label": "Clean Project",
+            "command": "idf.py",
+            "type": "shell",
+            "args": ["clean"],
+            "problemMatcher": []
+        },
+        {
+            "label": "Full-Clean Project",
+            "command": "idf.py",
+            "type": "shell",
+            "args": ["fullclean"],
+            "problemMatcher": []
+        }
+    ],
+    "inputs": [
+        {
+          "id": "ComPortNum",
+          "type": "promptString",
+          "description": "Type the number of used COM port"
+        }
+    ]
+}

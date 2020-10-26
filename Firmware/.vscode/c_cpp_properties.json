@@ -1,0 +1,35 @@
+{
+    "configurations": [
+        {
+            "name": "ESP32-Win",
+            "includePath": [
+                "${workspaceRoot}/main/**",
+                "${workspaceRoot}/components/**",
+                "${workspaceRoot}/components/MyHal/includes",
+                "${workspaceRoot}/components/MyHal/private",
+                "${env:IDF_PATH}/components/**",
+                "${workspaceRoot}/build/config/**",
+                "E:/Software/Espressif/tools/xtensa-esp32-elf/esp-2020r1-8.2.0/xtensa-esp32-elf/xtensa-esp32-elf/include"
+            ],
+            "defines": [
+                "LOG_LOCAL_LEVEL=ESP_LOG_VERBOSE",
+                "CONFIG_LOG_TIMESTAMP_SOURCE_RTOS",
+                "CONFIG_FREERTOS_HZ=100"
+            ],
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "clang-x64",
+            "browse": {
+                "path": [
+                    "${workspaceRoot}/main/**",
+                    "${workspaceRoot}/components/**",
+                    "${workspaceRoot}/build/config/*",
+                    "${env:IDF_PATH}/components/**"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": "${workspaceRoot}/.vscode/browse.vc.db"
+            }
+        }
+    ],
+    "version": 4
+}
