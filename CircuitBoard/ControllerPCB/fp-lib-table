@@ -1,0 +1,3 @@
+(fp_lib_table
+  (lib (name _ProjectParts)(type KiCad)(uri D:/Arbeitsordner/ESP32/Projects/LightController/CircuitBoard/ProjectParts.pretty)(options "")(descr ""))
+)
