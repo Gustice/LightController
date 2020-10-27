@@ -1,5 +1,6 @@
 ---
 Language:        Cpp
+# See Details at: https://clang.llvm.org/docs/ClangFormatStyleOptions.html
 # BasedOnStyle:  LLVM
 AccessModifierOffset: -2
 AlignAfterOpenBracket: DontAlign
