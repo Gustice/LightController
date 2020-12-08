@@ -1,13 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
 project(HyHalTests)
-add_compile_options("/std:c++latest")
-
-## Better to use export: 
-# export CC=/usr/local/bin/gcc
-# export CXX=/usr/local/bin/g++
-set(CMAKE_C_COMPILER C:/MinGW/bin/gcc.exe)
-set(CMAKE_CXX_COMPILER C:/MinGW/bin/g++.exe)
-
 
 # DUT 
 project (dut)

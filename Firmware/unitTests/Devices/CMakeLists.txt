@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 project(HyDeviceTests)
 
-add_compile_options("/std:c++latest")
-
 # DUT 
 project (dut)
 get_filename_component(DUT_PARENT_DIR ../../components/Devices ABSOLUTE)

@@ -2,7 +2,7 @@
 
 TEST_CASE("Construction of ColorPost object just for fun", "[colorPost]") { RgbPost dut(1); }
 
-static const Color_t color_Black = {0, 0, 0, 0};
+static const Color_t _colorBlack = {0, 0, 0, 0};
 
 bool ColorCompare(Color_t c1, Color_t c2) {
     if (c1.red != c2.red)
@@ -26,7 +26,7 @@ TEST_CASE("Test if constructed object is initiated correctly", "[colorPost]") {
         RgbPost dut(10);
         const Color_t *c = dut.GetColors();
         for (size_t i = 0; i < 10; i++) {
-            CHECK(ColorCompare(c[i], color_Black));
+            CHECK(ColorCompare(c[i], _colorBlack));
         }
     }
 }
@@ -52,13 +52,13 @@ TEST_CASE("Different attempts of setting one color in object containing on slot"
         dut.EvalPost(c, 1, 5, "n");
         const Color_t *dR = dut.GetColors();
 
-        CHECK(ColorCompare(*dR, color_Black));
+        CHECK(ColorCompare(*dR, _colorBlack));
     }
     SECTION("Setting nothing empty '' -> Error / no effect") {
         dut.EvalPost(c, 1, 5, "");
         const Color_t *dR = dut.GetColors();
 
-        CHECK(ColorCompare(*dR, color_Black));
+        CHECK(ColorCompare(*dR, _colorBlack));
     }
     SECTION("Setting first LED with 1") {
         dut.EvalPost(c, 1, 5, "1");
@@ -76,7 +76,7 @@ TEST_CASE("Different attempts of setting one color in object containing on slot"
         dut.EvalPost(c, 1, 5, "2");
         const Color_t *dR = dut.GetColors();
 
-        CHECK(ColorCompare(*dR, color_Black));
+        CHECK(ColorCompare(*dR, _colorBlack));
     }
 }
 
@@ -104,7 +104,7 @@ TEST_CASE("Different attempts of setting one color in object containing three sl
             if (i == 0)
                 CHECK(ColorCompare(c, dR[i]));
             else
-                CHECK(ColorCompare(dR[i], color_Black));
+                CHECK(ColorCompare(dR[i], _colorBlack));
         }
     }
     SECTION("Setting last LED with 3") {
@@ -116,14 +116,14 @@ TEST_CASE("Different attempts of setting one color in object containing three sl
             if (i == 2)
                 CHECK(ColorCompare(c, dR[i]));
             else
-                CHECK(ColorCompare(dR[i], color_Black));
+                CHECK(ColorCompare(dR[i], _colorBlack));
         }
     }
     // SECTION("Setting second LED with 2 -> should be ignored") {
     //     dut.EvalPost(c, size, 5, "2");
     //     const Color_t *dR = dut.GetColors();
 
-    //     CHECK(ColorCompare(*dR, color_Black));
+    //     CHECK(ColorCompare(*dR, _colorBlack));
     // }
 }
 // Input looks somewhat like that

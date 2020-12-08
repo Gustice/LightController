@@ -1,34 +1,26 @@
-{
+{ // https://code.visualstudio.com/docs/cpp/c-cpp-properties-schema-reference
     "configurations": [
         {
             "name": "ESP32-Win",
-            "includePath": [
+            // Folder with header to be included -> For intellisens engine
+            //  GoTo-Reference-List and tag database ("browse") relies on same paths if not specified
+            "includePath": [ 
                 "${workspaceRoot}/main/**",
-                "${workspaceRoot}/components/**",
-                "${workspaceRoot}/components/MyHal/includes",
-                "${workspaceRoot}/components/MyHal/private",
+                "${workspaceRoot}/components/**", // comes in handy when first components are created
                 "${env:IDF_PATH}/components/**",
-                "${workspaceRoot}/build/config/**",
-                "E:/Software/Espressif/tools/xtensa-esp32-elf/esp-2020r1-8.2.0/xtensa-esp32-elf/xtensa-esp32-elf/include"
+                "${workspaceRoot}/build/config" // After first build, this contains configured defines.
             ],
             "defines": [
                 "LOG_LOCAL_LEVEL=ESP_LOG_VERBOSE",
                 "CONFIG_LOG_TIMESTAMP_SOURCE_RTOS",
                 "CONFIG_FREERTOS_HZ=100"
             ],
+            // Path to compiler perhaps has to be adjusted
+            "compilerPath": "C:/espressif/tools/xtensa-esp32-elf/esp-2020r1-8.2.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-g++.exe",
+            //"browse": { // Tag-Parser for Go-To-Definition-Function or tag-database. This is same as "includePath" if omitted
             "cStandard": "c11",
             "cppStandard": "c++17",
-            "intelliSenseMode": "clang-x64",
-            "browse": {
-                "path": [
-                    "${workspaceRoot}/main/**",
-                    "${workspaceRoot}/components/**",
-                    "${workspaceRoot}/build/config/*",
-                    "${env:IDF_PATH}/components/**"
-                ],
-                "limitSymbolsToIncludedHeaders": true,
-                "databaseFilename": "${workspaceRoot}/.vscode/browse.vc.db"
-            }
+            "intelliSenseMode": "clang-x64"
         }
     ],
     "version": 4
