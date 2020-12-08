@@ -3,12 +3,12 @@
 
 uint16_t analogOutSignal;
 
-TEST_CASE("Construction of DAC object just for fun", "[dac]") {
+TEST_CASE("Construction of DAC object yields no error", "[dac]") {
     DacPort dut(DAC_CHANNEL_1);
     REQUIRE(true);
 }
 
-TEST_CASE("Construction of DAC yields successful init", "[dac]") {
+TEST_CASE("Construction of DAC object yields success", "[dac]") {
     DacPort dut(DAC_CHANNEL_1);
     REQUIRE(dut.GetInitOkState() == true);
 }

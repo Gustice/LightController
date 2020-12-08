@@ -63,8 +63,8 @@ typedef struct Ws2812Color_def {
 static void PrettyPrintSentData(uint8_t *txData, size_t len, size_t ledCnt) {
     char buffer[256];
     for (int i = 0; i < ledCnt; i++) {
-        sprintf(buffer, "    LED %4d data: %3d_B  %3d_G  %3d_R", i, buffer[i * 3 + 2],
-                buffer[i * 3], buffer[i * 3 + 1]);
+        sprintf(buffer, "    LED %4d data: %3d_B  %3d_G  %3d_R", i, txData[i * 3 + 2],
+                txData[i * 3], txData[i * 3 + 1]);
         UNSCOPED_INFO(buffer);
     }
 }

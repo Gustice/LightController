@@ -21,7 +21,7 @@
 class DacPort : public PortBase {
   public:
     DacPort(dac_channel_t channel);
-    ~DacPort();
+    ~DacPort(){};
 
     void WritePort(uint8_t value);
 

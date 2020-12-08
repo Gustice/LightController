@@ -28,7 +28,7 @@ DacPort::DacPort(dac_channel_t channel) : PortBase("HAL-Dac") {
 }
 
 void DacPort::WritePort(uint8_t value) {
-    esp_err_t rErr;
+    esp_err_t rErr = ESP_OK;
     rErr = dac_output_voltage(_channel, value);
 
     if (rErr != ESP_OK) {

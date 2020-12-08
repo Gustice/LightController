@@ -6,7 +6,7 @@ TEST_CASE("Construction of I2C object as precondition", "[i2c]") {
     REQUIRE(true);
 }
 
-TEST_CASE("Construction of DAC yields successful init", "[i2c]") {
+TEST_CASE("Construction of I2C yields successful init", "[i2c]") {
     I2cPort dut(I2cPort::I2cInterfaces::Int1);
     REQUIRE(dut.GetInitOkState() == true);
 }

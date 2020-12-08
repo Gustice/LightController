@@ -28,6 +28,7 @@ add_library(MyLibrary_Static STATIC
                             )
 add_executable(TestRunner   $<TARGET_OBJECTS:gpioTests> 
                             $<TARGET_OBJECTS:adcTests> 
+                            $<TARGET_OBJECTS:dacTests> 
                             $<TARGET_OBJECTS:i2cTests> 
                             $<TARGET_OBJECTS:pwmTests> 
                             $<TARGET_OBJECTS:spiTests> 
