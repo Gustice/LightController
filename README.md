@@ -77,6 +77,7 @@ This project is anything but finished. I have several open tasks and they someho
 - The is some kind of configuration management completely missing. It would be necessary to provide a flash stored configuration of the device which introduces used interfaces and LED count so the GUI could be rendered accordingly
 - The web GUI is as simple as it can be. There are no web sockets implemented or anything else. 
 - Linear power states with configurable current flow are not designed yet.
+- Wide parts are written more in c-style rather than c++. Sorry i was a little in hurry
 
 ## ToDos
 
@@ -85,4 +86,5 @@ This project is anything but finished. I have several open tasks and they someho
 - Design for linear Endstage (expander board)
 - Adaption of ZigBee
 - Interactive GUI with true Rest-Interface
-
+- Logging should be switched to network path. Means some network placed destination must be configured as logging destination. 
+- Bootloader would be nice. You just cant connect all your devices to your computer if you want to run an update.
