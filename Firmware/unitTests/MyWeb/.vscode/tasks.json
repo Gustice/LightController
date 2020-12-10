@@ -2,7 +2,7 @@
     // See https://go.microsoft.com/fwlink/?LinkId=733558
     // for the documentation about the tasks.json format
     "version": "2.0.0",
-    "tasks": [     
+    "tasks": [
         // { /// This is better invoked by Command CMake: Create Configuration
         //     "label": "CMake: Create Configuration",
         //     "type": "shell",
@@ -30,6 +30,7 @@
                 "cwd": "${workspaceFolder}"
             },
             "command": "build/TestRunner.exe",
+            "dependsOn": "CMake: Build Project",
             "group": {"kind": "test", "isDefault": true},
             "problemMatcher": "$gcc", // Otherwise its annoys you with warnings
         },
