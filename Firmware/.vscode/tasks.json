@@ -47,10 +47,10 @@
         
         { // Flash Environment and Monitor
             "label": "Flash & Monitor",
-            // "group": {
-            //     "kind": "test",
-            //     "isDefault": true
-            // },
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
             "command": "idf.py",
             "type": "shell",
             "args": [
@@ -62,6 +62,34 @@
             "presentation": {
                 "reveal": "always",
             },
+            "problemMatcher": []
+        },
+
+        { // Create Flash image
+            "label": "Generate Spiffs Image",
+            "command": "py",
+            "args": [
+                "${env:IDF_PATH}/components/spiffs/spiffsgen.py", 
+                "0xF0000", 
+                "fileSys",
+                "factoryCfg.fs"
+            ],
+            "problemMatcher": []
+        },
+
+        { // Flash Data-Image
+            "label": "Flash Data-Image",
+            "command": "py",
+            "type": "shell",
+            "args": [
+                "${env:IDF_PATH}/components/esptool_py/esptool/esptool.py", 
+                "--port",
+                "COM${input:ComPortNum}",
+                "--baud", "115200",
+                "write_flash",
+                "-z", "0x10000", // This has to be changed when partion.csv is updated
+                "factoryCfg.fs"
+            ],
             "problemMatcher": []
         },
 

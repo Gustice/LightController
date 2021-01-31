@@ -32,6 +32,7 @@
 #include "RotatingIndex.h"
 #include "SoftAp.h"
 #include "Ws2812.h"
+#include "ParamReader.h"
 
 extern "C" { // This switch allows the ROS C-implementation to find this main
 void app_main(void);
@@ -144,6 +145,8 @@ static deviceConfig_t deviceConfig = {
     },
 };
 
+factoryInfo_t factoryCfg;
+
 /**
  * @brief Configuration for wifi
  * @details Applied in Access-Point-Mode. Device provides an WiFi Access in this case.
@@ -151,7 +154,7 @@ static deviceConfig_t deviceConfig = {
 static wifiApConfig_t apConfig = {
     "cLight",   // ssid
     "FiatLuxx", // password
-    4,          // max_connection
+    2,          // max_connection
 };              // Connect: http://192.168.4.1/Setup
 
 Apa102 *SLedStrip;
@@ -331,6 +334,18 @@ static void IRAM_ATTR gpio_isr_handler(void *arg) { Encoder->EvalStepSync(); }
  *
  */
 void app_main(void) {
+
+    ESP_LOGI(cModTag, "Spiffs works");
+    Fs_SetupSpiFFs();
+
+    Fs_ReadFactoryConfiguration(&factoryCfg);
+    ESP_LOGI(cModTag, "Read Factory Config:\n\tSN: %s\n\tHW: %s\n\tDev: %s", 
+    factoryCfg.SerialNumber, factoryCfg.HwVersion, factoryCfg.DeviceType );
+
+    while (true) {
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
+
     static InputPort sw1(Sw1Pin);
     static InputPort sw2(Sw2Pin);
     static InputPort sdCard(SdDetect);
