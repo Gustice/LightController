@@ -34,7 +34,10 @@
         "string_view": "cpp",
         "initializer_list": "cpp",
         "chrono": "cpp",
-        "algorithm": "cpp"
+        "algorithm": "cpp",
+        "sstream": "cpp",
+        "esp_spiffs.h": "c",
+        "utils.h": "c"
     },
     "cSpell.words": [
         "attr",
@@ -55,12 +58,14 @@
         "iram attr",
         "ledc",
         "ledc channel t",
+        "leds",
         "logd",
         "logi",
         "logv",
         "logw",
         "luxx",
         "mcpwm",
+        "mdns",
         "netif",
         "rgbi",
         "rgbw",

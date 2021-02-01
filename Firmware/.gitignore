@@ -43,3 +43,6 @@ classified/
 sdkconfig
 sdkconfig.*
 !sdkconfig.defaults
+
+serverPages.fs
+factoryCfg.fs

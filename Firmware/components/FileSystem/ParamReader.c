@@ -77,7 +77,7 @@ void unmountSpiFFs(void)
     ESP_LOGI(TAG, "SPIFFS unmounted");
 }
 
-char *GetFileName(char *file)
+static char *GetFileName(char *file)
 {
     static char fileName[128];
     sprintf(fileName, "/spiffs/%s", file);
@@ -119,7 +119,7 @@ esp_err_t Fs_ReadEntry(const char *file, void *stream, size_t length)
     FILE *f = fopen(fName, "r");
     if (f == NULL)
     {
-        ESP_LOGE(TAG, "Failed to open file %s for Read", fName);
+        ESP_LOGE(TAG, "Failed to open file %s for reading", fName);
         return ESP_FAIL;
     }
 

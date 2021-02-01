@@ -1,4 +1,4 @@
-menu "Example Configuration"
+menu "App Configuration"
 
     config ESP_WIFI_SSID
         string "WiFi SSID"
@@ -17,4 +17,10 @@ menu "Example Configuration"
         default 4
         help
             Max number of the STA connects to AP.
+
+    config WEB_MOUNT_POINT
+        string "Website mount point in server"
+        default "/server"
+        help
+            Specify the mount point for server partition. This is the spiffs partition name in partitions.csv
 endmenu

@@ -13,7 +13,7 @@ class MockServer(BaseHTTPRequestHandler):
 
     def do_GET(self):
         if self.path == '/':
-            self.path = '/index.html' # redirect
+            self.path = '/welcome.html' # redirect
         if re.match("/\w+$", self.path):
             self.path += ".html"
 

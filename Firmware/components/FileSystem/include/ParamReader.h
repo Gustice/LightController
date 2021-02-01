@@ -27,7 +27,7 @@ extern "C"
     {
         char DeviceType[24];
         char SerialNumber[8]; // Something like SN:123ABC
-        char HwVersion[32]; // V 1.00.00
+        char HwVersion[16]; // V 1.00.00
         char SwVersion[12];
     } factoryInfo_t;
 
@@ -36,6 +36,7 @@ extern "C"
         uint8_t ssid[32];
         /** @note Length must be >= 8 (if not 0) */
         uint8_t password[64];
+        uint8_t max_connection;
     } WifiConfig_t;
 
     void Fs_SetupSpiFFs(void);

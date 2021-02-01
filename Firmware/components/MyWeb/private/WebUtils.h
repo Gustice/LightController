@@ -1,6 +1,7 @@
 #pragma once
 
 #include "esp_err.h"
+#include <string.h>
 
 typedef struct FileContext_def {
     const char *key;
@@ -28,6 +29,7 @@ typedef struct httpd_getUri_def {
     pProcessGet pFunc;
 } httpd_getUri_t;
 
+#define CHECK_FILE_EXTENSION(filename, ext) (strcasecmp(&filename[strlen(filename) - strlen(ext)], ext) == 0)
 
 /**
  * @brief Call-Construct to integrated included text ressources by assembler.

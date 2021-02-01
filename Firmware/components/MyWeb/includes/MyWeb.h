@@ -13,6 +13,7 @@
 
 void SetupMyWeb(QueueHandle_t colorQ, QueueHandle_t grayQ, SemaphoreHandle_t ledDataSignal);
 
+esp_err_t Init_WebFs(void);
 typedef enum RgbChannel {
     None = -1,
     RgbiSync = 0,

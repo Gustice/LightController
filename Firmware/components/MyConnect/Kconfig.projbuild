@@ -1,4 +1,4 @@
-menu "Example Connection Configuration"
+menu "Connection Configuration"
     choice EXAMPLE_CONNECT_INTERFACE
         prompt "Connect using"
         default EXAMPLE_CONNECT_WIFI
