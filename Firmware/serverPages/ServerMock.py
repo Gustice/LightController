@@ -1,4 +1,5 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
+from io import BytesIO
 import re
 
 class MockServer(BaseHTTPRequestHandler):
@@ -12,10 +13,28 @@ class MockServer(BaseHTTPRequestHandler):
         return content.encode("utf8")  # NOTE: must return a bytes object!
 
     def do_GET(self):
+        if self.path == '/api/Status/WiFiStatus':
+            self.send_response(200)
+            wStat = 'WiFiParamNotSet'
+            self.wfile.write("{}".format(wStat).encode('utf-8'))
+            return
+
         if self.path == '/':
             self.path = '/welcome.html' # redirect
-        if re.match("/\w+$", self.path):
-            self.path += ".html"
+
+        responseType = 'text/html'
+        ending = ""
+        if match := re.search('\\w+[.](\\w+)', self.path):
+            ending = match.group(1)
+        
+        print(f"        Evaluation request path '{self.path}'")
+        print(f"        Ending recognized'{ending}'")
+        if ending == 'txt':
+            responseType = 'text/txt'
+        elif ending == 'js':
+            responseType = 'application/javascript'
+        elif ending == 'css':
+            responseType = 'text/css'
 
         try:
             file_to_open = open(self.path[1:]).read()
@@ -23,6 +42,8 @@ class MockServer(BaseHTTPRequestHandler):
         except:
             file_to_open = "File not found"
             self.send_response(404)
+        
+        self.send_header('Content-type', responseType)
         self.end_headers()
         self.wfile.write(bytes(file_to_open, 'utf-8'))
 

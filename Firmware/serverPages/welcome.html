@@ -2,41 +2,53 @@
 <html lang="en">
 
 <head>
-    <title>Light-Controller</title>
+    <title>Light-Controller-Welcome</title>
+    <link rel="stylesheet" href="/normalize.css">
+    <link rel="stylesheet" href="/skeleton.css">
+    <link rel="stylesheet" href="/dark-tango-skeleton.css">
     <link rel="stylesheet" href="/CommonStyles.css">
     <script src="/CommonScripts.js"></script>
 </head>
 <header>
-    <h1>Light-Controller</h1>
-    <p>Warning: This site is under construction,
-        please don't believe any information stated on this page</p>
+    <div class="container darkui1">
+        <div class="row">
+            <h1>Light-Controller</h1>
+        </div>
+    </div>
 </header>
 
 <body>
-    <div class="myBody">
-        <h2>Options</h2>
-        <p>Select </p>
-        <ul>
-            <li><a href="/WiFiConnectInput.html">Setup WiFi</a></li>
-            <li><a href="/RgbSetupFull.html">Setup Lights</a></li>
-        </ul>
+    <div class="container darkui1">
+        <div id="WiFiSetup">
+            <!-- Content is put in by JavaScript -->
+        </div>
 
-        <h2>Implementation</h2>
-        <p>This Device includes following interfaces</p>
-        <ul>
-            <li>SyncSerial-LED-strip with up to 50 LEDs</li>
-            <li>AsyncSerial-LED-strip with upt to 50 LEDs </li>
-            <li>RGBW-LED-strip with upt to 15 LEDs </li>
-            <li>I2C-LED-expander with 16 gray-values </li>
-        </ul>
-        <p>Please note that the power limitation of used terminal must not be exceeded</p>
-        <ul>
-            <li>500 mA using the USB-Pluck</li>
-            <li>2A using the power plug </li>
-            <li>the RGB-Port bears maximum 200 mA in 12-V-mode</li>
-        </ul>
-        <h2>Help</h2>
+        <div class="row">
+            <h2>Implementation</h2>
+        </div>
+        <div class="row">
+            <div class="six columns">
+                <h5>This Device includes following interfaces</h5>
+                <ul>
+                    <li>SyncSerial-LED-strip with up to 50 LEDs</li>
+                    <li>AsyncSerial-LED-strip with upt to 50 LEDs </li>
+                    <li>RGBW-LED-strip with upt to 15 LEDs </li>
+                    <li>I2C-LED-expander with 16 gray-values </li>
+                </ul>
+            </div>
+            <div class="six columns">
+                <h5>Please note that the power limitation</h5>
+                <ul>
+                    <li>500 mA using the USB-plug</li>
+                    <li>2A using the power-plug </li>
+                    <li>the RGB-Port bears maximum 200 mA in 12-V-mode</li>
+                </ul>
+                <p>The power limitation of used terminal must not be exceeded</p>
+            </div>
+        </div>
     </div>
+    <script src="easyHttp.js"></script>
+    <script src="App.js"></script>
 </body>
 
 </html>

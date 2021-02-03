@@ -1,7 +1,3 @@
-.myBody {
-    width:800px;
-}
-  
 input[type="range"] {
     margin-top: 30px;
     margin-bottom: 30px;
@@ -12,7 +8,8 @@ input[type="range"] {
     transform: rotate(270deg);
 }
 
-.intensValue {
-    width: 4em;
+.emphasis {
+    background: #465053;
+    padding: 12px;
+    border-radius: 5px;
 }
-
