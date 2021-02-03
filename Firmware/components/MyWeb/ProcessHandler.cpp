@@ -125,14 +125,26 @@ esp_err_t ProcessGrayValuesPost(const char *message) {
         ESP_LOGE(cModTag, "Queue-Handle not set");
     }
 
-
     return ESP_OK;
 }
 
-esp_err_t ProcessRgbiGet(char *message) { return ESP_OK; }
+esp_err_t ProcessRgbiGet(char *message, char ** output) { 
+    *output = "";
+    return ESP_OK; 
+    }
 
-esp_err_t ProcessRgbwGet(char *message) { return ESP_OK; }
+esp_err_t ProcessRgbwGet(char *message, char ** output) { 
+    *output = "";
+    return ESP_OK; 
+    }
+esp_err_t ProcessRgbwSingleGet(char *message, char ** output) { 
+    *output = "";
+    return ESP_OK; 
+    }
 
-esp_err_t ProcessRgbwSingleGet(char *message) { return ESP_OK; }
+esp_err_t ProcessGrayValuesGet(char *message, char ** output) { 
+    *output = "";
+    return ESP_OK; 
+    }
 
-esp_err_t ProcessGrayValuesGet(char *message) { return ESP_OK; }
+

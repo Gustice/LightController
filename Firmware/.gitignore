@@ -46,3 +46,4 @@ sdkconfig.*
 
 serverPages.fs
 factoryCfg.fs
+_sandbox/*

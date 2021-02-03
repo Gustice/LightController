@@ -12,7 +12,7 @@ esp_err_t ProcessGrayValuesPost(const char *message);
 esp_err_t ProcessSaveToPage(const char *message);
 esp_err_t ProcessResetPages(const char *messange);
 
-esp_err_t ProcessRgbiGet(char *message);
-esp_err_t ProcessRgbwGet(char *message);
-esp_err_t ProcessRgbwSingleGet(char *message);
-esp_err_t ProcessGrayValuesGet(char *message);
+esp_err_t ProcessRgbiGet(char *message, char ** output);
+esp_err_t ProcessRgbwGet(char *message, char ** output);
+esp_err_t ProcessRgbwSingleGet(char *message, char ** output);
+esp_err_t ProcessGrayValuesGet(char *message, char ** output);

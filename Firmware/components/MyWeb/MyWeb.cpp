@@ -1,10 +1,11 @@
 
 #include "includes/MyWeb.h"
 
-#include <string.h>
+#include "ProcessHandler.h"
 #include "cJSON.h"
 #include "esp_eth.h"
 #include "esp_netif.h"
+#include "esp_vfs.h"
 #include "nvs_flash.h"
 #include "protocol_common.h"
 #include <esp_event.h>
@@ -12,23 +13,22 @@
 #include <esp_log.h>
 #include <esp_system.h>
 #include <esp_wifi.h>
+#include <fcntl.h>
 #include <nvs_flash.h>
 #include <sstream>
+#include <string.h>
 #include <sys/param.h>
 #include <sys/stat.h>
-#include "ProcessHandler.h"
-#include "esp_vfs.h"
-#include <fcntl.h>
 
 #include "ColorPosts.h"
+#include "ParamReader.h"
 #include "SoftAp.h"
 #include "WebUtils.h"
-#include "ParamReader.h"
 
 
 static const char *cModTag = "WEB";
-static const char * webBasePath = CONFIG_WEB_MOUNT_POINT;
-#define FILE_PATH_MAX (ESP_VFS_PATH_MAX + 128)
+static const char *webBasePath = CONFIG_WEB_MOUNT_POINT;
+#define FILE_PATH_MAX   (ESP_VFS_PATH_MAX + 128)
 #define SCRATCH_BUFSIZE (10240)
 
 RgbPost *rgbPostCh1;
@@ -44,7 +44,7 @@ typedef struct rest_server_context {
 
 // /**
 //  * @brief Get-Handler für Page-Content
-//  * 
+//  *
 //  */
 // static const httpd_uriPart_t getUriHandlers[]{
 //     {"/", (void *)FileSource_index_html},
@@ -52,7 +52,7 @@ typedef struct rest_server_context {
 //     {"/RgbSetupFull.html", (void *)FileSource_RgbSetupFull_html},
 //     {"/WiFiConnectInput", (void *)FileSource_WiFiConnectInput_html},
 //     {"/WiFiConnectInput.html", (void *)FileSource_WiFiConnectInput_html},
-//     {"/favicon.ico", (void *)FileSource_favicon_ico}, 
+//     {"/favicon.ico", (void *)FileSource_favicon_ico},
 //     {"/CommonScripts.js", (void *)FileSource_CommonScripts_js},
 //     {"/CommonStyles.css", (void *)FileSource_CommonStyles_css},
 //     {"/RgbiControl.html", (void *)FileSource_RgbiControl_html},
@@ -91,8 +91,7 @@ typedef struct rest_server_context {
 
 
 /* Set HTTP response content type according to file extension */
-static esp_err_t set_content_type_from_file(httpd_req_t *req, const char *filepath)
-{
+static esp_err_t set_content_type_from_file(httpd_req_t *req, const char *filepath) {
     const char *type = "text/plain";
     if (CHECK_FILE_EXTENSION(filepath, ".html")) {
         type = "text/html";
@@ -111,8 +110,7 @@ static esp_err_t set_content_type_from_file(httpd_req_t *req, const char *filepa
 }
 
 /* Send HTTP response with the contents of the requested file */
-static esp_err_t pagePart_GetHandler(httpd_req_t *req)
-{
+static esp_err_t pagePart_GetHandler(httpd_req_t *req) {
     char filepath[FILE_PATH_MAX];
 
     rest_server_context_t *rest_context = (rest_server_context_t *)req->user_ctx;
@@ -158,19 +156,22 @@ static esp_err_t pagePart_GetHandler(httpd_req_t *req)
     return ESP_OK;
 }
 
-
+esp_err_t ResetWifiConfig(const char *messange) { 
+    return ResetWiFiConfig();
+    }
 
 /**
  * @brief Set-Handler for Set-Requests from Web-Gui
- * 
+ *
  */
 static const httpd_postUri_def postUriHandlers[]{
-    {"/SetPort/RGBIValues", ProcessRgbiPost},
-    {"/SetPort/RGBWValues", ProcessRgbwPost},
-    {"/SetPort/RGBWSingleValue", ProcessRgbwSinglePost},
-    {"/SetPort/IValues", ProcessGrayValuesPost},
-    {"/SaveToPage", ProcessSaveToPage},
-    {"/ResetProgramm", ProcessResetPages},
+    {"/api/Port/RGBISync", ProcessRgbiPost},
+    {"/api/Port/RGBWAsync", ProcessRgbwPost},
+    {"/api/Port/RGBWSingle", ProcessRgbwSinglePost},
+    {"/api/Port/IValues", ProcessGrayValuesPost},
+    {"/api/SaveToPage", ProcessSaveToPage},
+    {"/api/ResetProgram", ProcessResetPages},
+    {"/api/SetDevice/ResetWiFiConnect", ResetWifiConfig}
     {nullptr, nullptr},
 };
 
@@ -179,9 +180,7 @@ esp_err_t ProcessSaveToPage(const char *message) {
     return ESP_OK;
 }
 
-esp_err_t ProcessResetPages(const char *messange) {
-    return ESP_OK;
-}
+esp_err_t ProcessResetPages(const char *messange) { return ESP_OK; }
 
 /* An HTTP POST handler */
 static esp_err_t data_post_handler(httpd_req_t *req) {
@@ -216,8 +215,8 @@ static esp_err_t data_post_handler(httpd_req_t *req) {
     while (cur_len < total_len) {
         received = httpd_req_recv(req, buf + cur_len, total_len);
         if (received <= 0) {
-            httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR,
-                                "Failed to post control value");
+            httpd_resp_send_err(
+                req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to post control value");
             return ESP_FAIL;
         }
         cur_len += received;
@@ -229,33 +228,45 @@ static esp_err_t data_post_handler(httpd_req_t *req) {
     ESP_LOGI(cModTag, "====================================");
 
     /* Executing registered Handler-Function */
-    if (pFunc(buf) == ESP_OK)
-    {
+    if (pFunc(buf) == ESP_OK) {
         httpd_resp_sendstr(req, "Post control value successfully");
-        xSemaphoreGive( xNewLedWebCommand );
+
+        xSemaphoreGive(xNewLedWebCommand);
+    } else {
+        httpd_resp_send_err(
+            req, HTTPD_500_INTERNAL_SERVER_ERROR, "Something went wrong during Json parsing");
     }
-    else
-    {
-        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Something went wrong during Json parsing");
-    }
+
 
     httpd_resp_send_chunk(req, NULL, 0);
     return ESP_OK;
 }
 
 static const httpd_uri_t setPortReq = {
-    .uri = "/SetPort/*", .method = HTTP_POST, .handler = data_post_handler, .user_ctx = NULL};
+    .uri = "/api/*", .method = HTTP_POST, .handler = data_post_handler, .user_ctx = NULL};
 
+
+esp_err_t ProcessWiFiStatusGet(char *message, char **output) {
+    if (*output != nullptr)
+        return ESP_FAIL;
+
+    WifiConfig_t config; // Is actually ignored
+    *output = "WiFiParamNotSet";
+    if (LoadWiFiConfig(&config) == ESP_OK)
+        *output = "WiFiParamSet";
+    return ESP_OK;
+}
 
 /**
  * @brief Get-Handlers for Get-Data-Requests
- * 
+ *
  */
 static const httpd_getUri_t getValueHandlers[]{
-    {"/GetValues/RGBIValues", ProcessRgbiGet},
-    {"/GetValues/RGBWValues", ProcessRgbwGet},
-    {"/GetValues/RGBWSingleValue", ProcessRgbwSingleGet},
-    {"/GetValues/IValues", ProcessGrayValuesGet},
+    {"/api/Values/RGBIValues", ProcessRgbiGet},
+    {"/api/Values/RGBWValues", ProcessRgbwGet},
+    {"/api/Values/RGBWSingleValue", ProcessRgbwSingleGet},
+    {"/api/Values/IValues", ProcessGrayValuesGet},
+    {"/api/Status/WiFiStatus", ProcessWiFiStatusGet},
     {nullptr, nullptr},
 };
 
@@ -271,20 +282,54 @@ static esp_err_t data_get_handler(httpd_req_t *req) {
     }
 
     if (part->uri == nullptr) {
-        /* Respond with 404 Not Found */
         httpd_resp_send_err(req, HTTPD_404_NOT_FOUND, "Source does not exist");
         return ESP_FAIL;
     }
 
-    // todo Implement Function-Call here
-    const char *output = "This is a Test";
-    httpd_resp_send(req, output, strlen(output));
+    const int BufferSize = 256;
+    int total_len = req->content_len;
+    int cur_len = 0;
+    char buf[BufferSize];
+    int received = 0;
+    if (total_len >= BufferSize) {
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "content too long");
+        return ESP_FAIL;
+    }
+
+    while (cur_len < total_len) {
+        received = httpd_req_recv(req, buf + cur_len, total_len);
+        if (received <= 0) {
+            httpd_resp_send_err(
+                req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to post control value");
+            return ESP_FAIL;
+        }
+        cur_len += received;
+    }
+    buf[total_len] = '\0';
+
+    ESP_LOGI(cModTag, "=========== RECEIVED DATA ==========");
+    ESP_LOGI(cModTag, "Raw: %s", buf);
+    ESP_LOGI(cModTag, "====================================");
+
+    char *output = nullptr;
+    pProcessGet pFunc = (pProcessGet)part->pFunc;
+    if ((pFunc(buf, &output) == ESP_OK) && (output != nullptr)) {
+        httpd_resp_send(req, output, strlen(output));
+
+        ESP_LOGI(cModTag, "=========== Sending DATA ==========");
+        ESP_LOGI(cModTag, "Raw: %s", output);
+        ESP_LOGI(cModTag, "====================================");
+
+    } else {
+        httpd_resp_send_err(
+            req, HTTPD_500_INTERNAL_SERVER_ERROR, "Something went wrong during processing");
+    }
+
     return ESP_OK;
 }
 
 static const httpd_uri_t getPortReq = {
-    .uri = "/GetValues/*", .method = HTTP_GET, .handler = data_get_handler, .user_ctx = NULL};
-
+    .uri = "/api/*", .method = HTTP_GET, .handler = data_get_handler, .user_ctx = NULL};
 
 
 /* An HTTP POST handler */
@@ -306,8 +351,8 @@ static esp_err_t config_post_handler(httpd_req_t *req) {
         received = httpd_req_recv(req, buf + cur_len, total_len);
         if (received <= 0) {
             /* Respond with 500 Internal Server Error */
-            httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR,
-                                "Failed to post control value");
+            httpd_resp_send_err(
+                req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to post control value");
             return ESP_FAIL;
         }
         cur_len += received;
@@ -340,9 +385,9 @@ static esp_err_t config_post_handler(httpd_req_t *req) {
 }
 
 static const httpd_uri_t setDeviceReq = {.uri = "/SetDevice/WiFiConnect",
-                                         .method = HTTP_POST,
-                                         .handler = config_post_handler,
-                                         .user_ctx = NULL};
+    .method = HTTP_POST,
+    .handler = config_post_handler,
+    .user_ctx = NULL};
 
 static httpd_handle_t start_webserver(void) {
     httpd_handle_t server = NULL;
@@ -370,8 +415,8 @@ static void stop_webserver(httpd_handle_t server) {
     httpd_stop(server);
 }
 
-static void disconnect_handler(void *arg, esp_event_base_t event_base, int32_t event_id,
-                               void *event_data) {
+static void disconnect_handler(
+    void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data) {
     httpd_handle_t *server = (httpd_handle_t *)arg;
     if (*server) {
         ESP_LOGI(cModTag, "Stopping webserver");
@@ -380,8 +425,8 @@ static void disconnect_handler(void *arg, esp_event_base_t event_base, int32_t e
     }
 }
 
-static void connect_handler(void *arg, esp_event_base_t event_base, int32_t event_id,
-                            void *event_data) {
+static void connect_handler(
+    void *arg, esp_event_base_t event_base, int32_t event_id, void *event_data) {
     httpd_handle_t *server = (httpd_handle_t *)arg;
     if (*server == NULL) {
         ESP_LOGI(cModTag, "Starting webserver");
@@ -389,11 +434,12 @@ static void connect_handler(void *arg, esp_event_base_t event_base, int32_t even
     }
 }
 
-void SetupMyWeb(QueueHandle_t colorQ, QueueHandle_t grayQ, SemaphoreHandle_t newWebCmd ) {
+void SetupMyWeb(QueueHandle_t colorQ, QueueHandle_t grayQ, SemaphoreHandle_t newWebCmd) {
     xNewLedWebCommand = newWebCmd;
     ESP_LOGI(cModTag, "Initialization of web interface ... ");
 
-    rest_server_context_t *rest_context = (rest_server_context_t *) calloc(1, sizeof(rest_server_context_t));
+    rest_server_context_t *rest_context =
+        (rest_server_context_t *)calloc(1, sizeof(rest_server_context_t));
     strlcpy(rest_context->base_path, webBasePath, sizeof(rest_context->base_path));
 
     static httpd_handle_t server = NULL;
@@ -408,23 +454,11 @@ void SetupMyWeb(QueueHandle_t colorQ, QueueHandle_t grayQ, SemaphoreHandle_t new
     server = start_webserver();
 
     static httpd_uri_t pagePart = {
-        .uri = "/*", 
-        .method = HTTP_GET, 
-        .handler = pagePart_GetHandler, 
-        .user_ctx = rest_context
-        };
+        .uri = "/*", .method = HTTP_GET, .handler = pagePart_GetHandler, .user_ctx = rest_context};
     httpd_register_uri_handler(server, &pagePart);
 
     return;
 }
-
-
-
-
-
-
-
-
 
 
 // /* Simple handler for light brightness control */
@@ -443,8 +477,8 @@ void SetupMyWeb(QueueHandle_t colorQ, QueueHandle_t grayQ, SemaphoreHandle_t new
 //         received = httpd_req_recv(req, buf + cur_len, total_len);
 //         if (received <= 0) {
 //             /* Respond with 500 Internal Server Error */
-//             httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to post control value");
-//             return ESP_FAIL;
+//             httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to post control
+//             value"); return ESP_FAIL;
 //         }
 //         cur_len += received;
 //     }

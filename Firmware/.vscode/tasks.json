@@ -101,7 +101,7 @@
 
         { // Flash Data-Image
             "label": "Flash Data-Image",
-            "dependsOn": "Generate Webpage Image",
+            "dependsOn": "Generate Spiffs Image",
             "command": "py",
             "type": "shell",
             "args": [
@@ -117,6 +117,7 @@
         },
         { // Flash Data-Image
             "label": "Flash Web-Image",
+            "dependsOn": "Generate Webpage Image",
             "command": "py",
             "type": "shell",
             "args": [
