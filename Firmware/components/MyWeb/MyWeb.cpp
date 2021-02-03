@@ -262,9 +262,9 @@ esp_err_t ProcessWiFiStatusGet(char *message, char **output) {
  *
  */
 static const httpd_getUri_t getValueHandlers[]{
-    {"/api/Values/RGBIValues", ProcessRgbiGet},
-    {"/api/Values/RGBWValues", ProcessRgbwGet},
-    {"/api/Values/RGBWSingleValue", ProcessRgbwSingleGet},
+    {"/api/Values/RGBISync", ProcessRgbiGet},
+    {"/api/Values/RGBWAsync", ProcessRgbwGet},
+    {"/api/Values/RGBWSingle", ProcessRgbwSingleGet},
     {"/api/Values/IValues", ProcessGrayValuesGet},
     {"/api/Status/WiFiStatus", ProcessWiFiStatusGet},
     {nullptr, nullptr},
