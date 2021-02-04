@@ -19,302 +19,35 @@
 
 <body>
   <div class="container darkui1">
-    <div class="row">
-      <h2>Port 1: SyncSerial LED-Stripe</h2>
-      <p>Connects LED stripes with synchronous serial protocol (e.g. APA102 or LC8822). Each LED can be assigned with a
-        different color. </p>
-      <form title="RGB-Setup" id="rgbiSyncForm" name="rgbiSync"
-        onsubmit='return onSubmitColor(this, "/api/Port/RGBISync")'>
-        <div class="row">
-        </div>
-        <div class="row">
-          <div class="four columns">
-            <label for="appTo">Apply to ...</label>
-            <input type="text" class="u-full-width" id="appTo_1" name="appTo" value="1">
-            <!-- <label for="rgbSelector" id="rgbSelected">Selected Color #000000</label> -->
-            <input type="color" id="rgbSelector_1" class="u-full-width" oninput="UpdateColor(this);" style="height: 70px;"><br>
-            <button class="u-full-width" onclick="">Get Setting</button>
-            <input class="button-primary u-full-width" type="submit" value="Apply">
-          </div>
-          <div class="eight columns">
-            <table>
-              <tr>
-                <td>
-                  <button type="button" class="u-full-width" style="background-color: darkred;"
-                    onclick="rOut_1.value = red_1.value= 255; UpdateColor(this);">Red</button>
-                  <input type="range" id="red_1" oninput="rOut_1.value = this.value; UpdateColor(this);" min="0"
-                    max="255" step="1" value="0">
-                </td> <td>
-                  <button type="button" class="u-full-width" style="background-color: darkgreen;" 
-                    onclick="gOut_1.value = green_1.value= 255; UpdateColor(this);">Green</button>
-                  <input type="range" id="green_1" oninput="gOut_1.value = this.value; UpdateColor(this);" min="0"
-                    max="255" step="1" value="0">
-                  </td> <td>
-                    <button type="button" class="u-full-width" style="background-color: darkblue;"
-                    onclick="bOut_1.value = blue_1.value= 255; UpdateColor(this);">Blue</button>
-                  <input type="range" id="blue_1" oninput="bOut_1.value = this.value; UpdateColor(this);" min="0"
-                    max="255" step="1" value="0">
-                  </td> <td>
-                    <button type="button" class="u-full-width"
-                    style="background-color: gray; padding-left: 10px; padding-right: 10px;"
-                    onclick="iOut_1.value = intens_1.value= 100; UpdateColor(this);">Intensity</button>
-                  <input type="range" id="intens_1" oninput="iOut_1.value = this.value" min="0" max="100" step="1"
-                    value="0">
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="number" id="rOut_1" name="R" oninput="red_1.value = this.value; UpdateColor(this);"
-                    class="u-full-width" value="0" min="0" max="255">
-                  </td> <td>
-                    <input type="number" id="gOut_1" name="G" oninput="green_1.value = this.value; UpdateColor(this);"
-                    class="u-full-width" value="0" min="0" max="255">
-                  </td> <td>
-                    <input type="number" id="bOut_1" name="B" oninput="blue_1.value = this.value; UpdateColor(this);"
-                    class="u-full-width" value="0" min="0" max="255">
-                  </td> <td>
-                    <input type="number" id="iOut_1" name="I" oninput="intens_1.value = this.value" class="u-full-width"
-                    value="0" min="0" max="100">
-                </td>
-              </tr>
-            </table>
-          </div>
-        </div>
-      </form>
+    <div id="formSpace">
+      <!-- Content is filled by Script-->
     </div>
-
-
-    <div class="row">
-      <h2>Port 2: AsyncSerial LED-Stripe</h2>
-      <p>Connects LED stripes with asynchronous serial RTZ-protocol (e.g. WS2812 or SK6812). Each LED can be assigned
-        with
-        a different color.<br>
-        Note: There several Types available on the market. Some with RGBW-Channels, most with RGB-Channels.</p>
-      <form type="form" id="rgbwAsyncForm" name="rgbwAsync"
-        onsubmit='return onSubmitColor(this, "/api/Port/RGBWAsync")'>
-        <div class="row">
-        </div>
-        <div class="row">
-          <div class="four columns">
-            <label for="appTo">Apply to ...</label>
-            <input type="text" class="u-full-width" id="appTo" name="appTo" value="1">
-            <!-- <label for="rgbSelector" id="rgbSelected">Selected Color #000000</label> -->
-            <input type="color" id="rgbSelector_2" class="u-full-width" oninput="UpdateColor(this);"
-              style="height: 70px;"><br>
-            <button class="u-full-width" onclick="">Get Setting</button>
-            <input class="button-primary u-full-width" type="submit" value="Apply">
-          </div>
-          <div class="eight columns">
-            <table>
-              <tr>
-                <td>
-                  <button type="button" class="u-full-width" style="background-color: darkred;"
-                    onclick="rOut_2.value = red_2.value= 255; UpdateColor(this);">Red</button>
-                  <input type="range" id="red_2" oninput="rOut_2.value = this.value; UpdateColor(this);" min="0"
-                    max="255" step="1" value="0">
-                  </td> <td>
-                    <button type="button" class="u-full-width" style="background-color: darkgreen;"
-                    onclick="gOut_2.value = green_2.value= 255; UpdateColor(this);">Green</button>
-                  <input type="range" id="green_2" oninput="gOut_2.value = this.value; UpdateColor(this);" min="0"
-                    max="255" step="1" value="0">
-                  </td> <td>
-                    <button type="button" class="u-full-width" style="background-color: darkblue;"
-                    onclick="bOut_2.value = blue_2.value= 255; UpdateColor(this);">Blue</button>
-                  <input type="range" id="blue_2" oninput="bOut_2.value = this.value; UpdateColor(this);" min="0"
-                    max="255" step="1" value="0">
-                  </td> <td>
-                    <button type="button" class="u-full-width" style="background-color: lightgray; color: black;"
-                    onclick="wOut_2.value = white_2.value= 255; UpdateColor(this);">White</button>
-                  <input type="range" id="white_2" oninput="wOut_2.value = this.value" min="0" max="255" step="1"
-                    value="0">
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="number" name="R" id="rOut_2" oninput="red_2.value = this.value; UpdateColor(this);"
-                    class="u-full-width" value="0" min="0" max="255">
-                  </td> <td>
-                    <input type="number" name="G" id="gOut_2" oninput="green_2.value = this.value; UpdateColor(this);"
-                    class="u-full-width" value="0" min="0" max="255">
-                  </td> <td>
-                    <input type="number" name="B" id="bOut_2" oninput="blue_2.value = this.value; UpdateColor(this);"
-                    class="u-full-width" value="0" min="0" max="255">
-                  </td> <td>
-                    <input type="number" name="I" id="wOut_2" oninput="white_2.value = this.value" class="u-full-width"
-                    value="0" min="0" max="255">
-                </td>
-              </tr>
-            </table>
-          </div>
-        </div>
-      </form>
+    
+    <div id="saveSpace">
+      <h2>Save Image</h2>
+      <div class="row">
+        <div class="three columns"><button class="u-full-width" onclick="onSave(1)">Safe to Page 1</button></div>
+        <div class="three columns"><button class="u-full-width" onclick="onSave(2)">Safe to Page 2</button></div>
+        <div class="three columns"><button class="u-full-width" onclick="onSave(3)">Safe to Page 3</button></div>
+        <div class="three columns"><button class="u-full-width" onclick="onSave(4)">Safe to Page 4</button></div>
+      </div>
+      <div class="row">
+        <div class="four columns"><button class="button-primary u-full-width" onclick="onResetPages()">Reset Pages</button></div>
+      </div>
     </div>
-
-
-    <div class="row">
-      <h2>Port 3: RGB-LED-Stripe</h2>
-      <p>Connects ordinary RGB-LED stripes. Whole stripe is illuminated in one color</p>
-      <form type="form" id="rgbwStripForm" name="rgbwStrip"
-        onsubmit='return onSubmitColor(this, "/api/Port/RGBWSingle")'>
-        <div class="row">
-        </div>
-        <div class="row">
-          <div class="four columns">
-            <!-- <label for="rgbSelector" id="rgbSelected">Selected Color #000000</label> -->
-            <input type="color" id="rgbSelector_3" class="u-full-width" oninput="UpdateColor(this);"
-              style="height: 70px;"><br>
-            <button class="u-full-width" onclick="">Get Setting</button>
-            <input class="button-primary u-full-width" type="submit" value="Apply">
-          </div>
-          <div class="eight columns">
-            <table>
-              <tr>
-                <td>
-                  <button type="button" class="u-full-width" style="background-color: darkred;"
-                    onclick="rOut_3.value = red_3.value= 255; UpdateColor(this);">Red</button>
-                  <input type="range" id="red_3" oninput="rOut_3.value = this.value; UpdateColor(this);" min="0"
-                    max="255" step="1" value="0">
-                  </td> <td>
-                    <button type="button" class="u-full-width" style="background-color: darkgreen;"
-                    onclick="gOut_3.value = green_3.value= 255; UpdateColor(this);">Green</button>
-                  <input type="range" id="green_3" oninput="gOut_3.value = this.value; UpdateColor(this);" min="0"
-                    max="255" step="1" value="0">
-                  </td> <td>
-                    <button type="button" class="u-full-width" style="background-color: darkblue;"
-                    onclick="bOut_3.value = blue_3.value= 255; UpdateColor(this);">Blue</button>
-                  <input type="range" id="blue_3" oninput="bOut_3.value = this.value; UpdateColor(this);" min="0"
-                    max="255" step="1" value="0">
-                  </td> <td>
-                    <button type="button" class="u-full-width" style="background-color: lightgray; color: black;"
-                    onclick="wOut_3.value = white_3.value= 255; UpdateColor(this);">White</button>
-                  <input type="range" id="white_3" oninput="wOut_3.value = this.value" min="0" max="255" step="1"
-                    value="0">
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <input type="number" name="R" id="rOut_3" oninput="red_3.value = this.value; UpdateColor(this);"
-                    class="u-full-width" value="0" min="0" max="255">
-                  </td> <td>
-                    <input type="number" name="G" id="gOut_3" oninput="green_3.value = this.value; UpdateColor(this);"
-                    class="u-full-width" value="0" min="0" max="255">
-                  </td> <td>
-                    <input type="number" name="B" id="bOut_3" oninput="blue_3.value = this.value; UpdateColor(this);"
-                    class="u-full-width" value="0" min="0" max="255">
-                  </td> <td>
-                    <input type="number" name="I" id="wOut_3" oninput="white_3.value = this.value" class="u-full-width"
-                    value="0" min="0" max="255">
-                </td>
-              </tr>
-            </table>
-          </div>
-        </div>
-      </form>
-    </div>
-
-    <div class="row">
-      <h2>Port 4: LED-Expander</h2>
-      <p>Connects LED-driver that are controlled by gray values</p>
-      <form type="form" id="intensForm" name="grayCh"
-        onsubmit='return onSubmitColor(this, "/api/Port/RGBWSingle")'>
-        <div class="row">
-          <div class="four columns">
-            <button class="u-full-width" onclick="">Get Setting</button>
-          </div>
-          <div class="four columns">
-            <input class="button-primary u-full-width" type="submit" value="Apply">
-          </div>
-        </div>
-        <div class="row">
-          <div class="eight columns">
-            <table>
-              <tr>
-                <td>
-                  <button type="button" style="background-color: gray;" onclick="ch_f1.value = ch_s1.value= 255;">Out 1</button>
-                  <input type="range" id="ch_s1" oninput="ch_f1.value = this.value;" min="0" max="255" step="1" value="0"><br>
-                  <input type="number" name="G1" id="ch_f1" oninput="ch_s1.value = this.value;" class="u-full-width" value="0" min="0" max="255">
-                </td> <td>
-                  <button type="button" style="background-color: gray;" onclick="ch_f2.value = ch_s2.value= 255;">Out 2</button>
-                  <input type="range" id="ch_s2" oninput="ch_f2.value = this.value;" min="0" max="255" step="1" value="0">
-                  <input type="number" name="G2" id="ch_f2" oninput="ch_s2.value = this.value;" class="u-full-width" value="0" min="0" max="255">
-                </td> <td>
-                  <button type="button" style="background-color: gray;" onclick="ch_f3.value = ch_s3.value= 255;">Out 3</button>
-                  <input type="range" id="ch_s3" oninput="ch_f3.value = this.value;" min="0" max="255" step="1" value="0">
-                  <input type="number" name="G3" id="ch_f3" oninput="ch_s3.value = this.value;" class="u-full-width" value="0" min="0" max="255">
-                </td> <td>
-                  <button type="button" style="background-color: gray;" onclick="ch_f4.value = ch_s4.value= 255;">Out 4</button>
-                  <input type="range" id="ch_s4" oninput="ch_f4.value = this.value" min="0" max="255" step="1" value="0">
-                  <input type="number" name="G4" id="ch_f4" oninput="ch_s4.value = this.value" class="u-full-width" value="0" min="0" max="255">
-                </td> <td>
-                  <button type="button" style="background-color: gray;" onclick="ch_f5.value = ch_s5.value= 255;">Out 5</button>
-                  <input type="range" id="ch_s5" oninput="ch_f5.value = this.value" min="0" max="255" step="1" value="0">
-                  <input type="number" name="G5" id="ch_f5" oninput="ch_s5.value = this.value;" class="u-full-width" value="0" min="0" max="255">
-                </td> <td>
-                  <button type="button" style="background-color: gray;" onclick="ch_f6.value = ch_s6.value= 255;">Out 6</button>
-                  <input type="range" id="ch_s6" oninput="ch_f6.value = this.value" min="0" max="255" step="1" value="0">
-                  <input type="number" name="G6" id="ch_f6" oninput="ch_s6.value = this.value" class="u-full-width" value="0" min="0" max="255">
-                </td> <td>
-                  <button type="button" style="background-color: gray;" onclick="ch_f7.value = ch_s7.value= 255;">Out 7</button>
-                  <input type="range" id="ch_s7" oninput="ch_f7.value = this.value" min="0" max="255" step="1" value="0">
-                  <input type="number" name="G7" id="ch_f7" oninput="ch_s7.value = this.value" class="u-full-width" value="0" min="0" max="255">
-                </td> <td>
-                  <button type="button" style="background-color: gray;" onclick="ch_f8.value = ch_s8.value= 255;">Out 8</button>
-                  <input type="range" id="ch_s8" oninput="ch_f8.value = this.value" min="0" max="255" step="1" value="0">
-                  <input type="number" name="G8" id="ch_f8" oninput="ch_s8.value = this.value" class="u-full-width" value="0" min="0" max="255">
-                </td>
-              </tr>
-            </table>
-          </div>
-        </div>
-      </form>
+    
+    <div id="getSpace">
+      <h2>Get Values</h2>
+      <div class="row">
+        <div class="four columns"><button class="button-primary u-full-width" onclick="onGet(this)">Get</button></div>
+      </div>
+      <div class="row">
+        <input class="u-full-width" readonly="true" type="text" name="Values" style="height: 200px;">
+      </div>
     </div>
   </div>
   <script src="easyHttp.js"></script>
   <script src="SetupApp.js"></script>
-
-  <h2>Save Image</h2>
-  <button onclick="onSave(1)">Safe to Page 1</button>
-  <button onclick="onSave(2)">Safe to Page 2</button>
-  <button onclick="onSave(3)">Safe to Page 3</button>
-  <button onclick="onSave(4)">Safe to Page 4</button><br>
-  <button onclick="onResetPages()">Reset Pages</button>
-
-  <h2>Get Values</h2>
-  <button onclick="onGet(this)">Get</button>
-  <input readonly="true" type="text" name="Values" style="width: 60em;"><br>
   </div>
-  <script>
-    function onSave(page) {
-      var xhr = new XMLHttpRequest();
-      xhr.open("POST", "/SaveToPage", true);
-      xhr.setRequestHeader('Content-Type', 'application/text');
-      xhr.send(page);
-    }
-    function onResetPages() {
-      var xhr = new XMLHttpRequest();
-      xhr.open("POST", "/ResetProgramm", true);
-      xhr.setRequestHeader('Content-Type', 'application/text');
-      xhr.send();
-    }
-
-    function onGet(form) {
-      var SetUrl = "/GetValues/RGBValues"
-      console.log("sending to %s", SetUrl);
-
-      var xhr = new XMLHttpRequest();
-      xhr.onreadystatechange = function () {
-        if (this.readyState != 4) return;
-        if (this.status == 200) {
-          //var data = JSON.parse(this.responseText);
-          console.log(this.responseText);
-        }
-        // end of state change: it can be after some time (async)
-      };
-      xhr.open("GET", SetUrl, true);
-      xhr.setRequestHeader('Content-Type', 'application/json');
-      xhr.send();
-    }
-  </script>
 </body>
-
 </html>

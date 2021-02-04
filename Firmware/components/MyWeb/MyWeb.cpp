@@ -120,6 +120,9 @@ static esp_err_t pagePart_GetHandler(httpd_req_t *req) {
     } else {
         strlcat(filepath, req->uri, sizeof(filepath));
     }
+    // todo expand path without .html to html
+
+
     int fd = open(filepath, O_RDONLY, 0);
     if (fd == -1) {
         ESP_LOGE(cModTag, "Failed to open file : %s", filepath);
@@ -267,6 +270,7 @@ static const httpd_getUri_t getValueHandlers[]{
     {"/api/Values/RGBWSingle", ProcessRgbwSingleGet},
     {"/api/Values/IValues", ProcessGrayValuesGet},
     {"/api/Status/WiFiStatus", ProcessWiFiStatusGet},
+    {"/api/Status/DeviceConfig", ProcessGetDeviceConfig},
     {nullptr, nullptr},
 };
 

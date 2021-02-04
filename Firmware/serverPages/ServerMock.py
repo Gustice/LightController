@@ -18,6 +18,11 @@ class MockServer(BaseHTTPRequestHandler):
             wStat = 'WiFiParamNotSet'
             self.wfile.write("{}".format(wStat).encode('utf-8'))
             return
+        if self.path == '/api/Status/DeviceConfig':
+            self.send_response(200)
+            wStat = 'Full'
+            self.wfile.write("{}".format(wStat).encode('utf-8'))
+            return
 
         if self.path == '/':
             self.path = '/welcome.html' # redirect
