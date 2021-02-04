@@ -13,3 +13,14 @@ input[type="range"] {
     padding: 12px;
     border-radius: 5px;
 }
+
+.userNote {
+    background: #535146;
+    padding: 12px;
+    border-radius: 5px;
+    margin: 6px;
+}
+
+h2 {
+    padding-top: 20px;
+}

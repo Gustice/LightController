@@ -61,6 +61,8 @@ function onSubmitColor(form, SetUrl) {
     }
     console.log(JSON.stringify(jsonObject));
 
+    SetupUi.showMessage(form, "Data sent ...");
+
     var xhr = new XMLHttpRequest();
     xhr.open("POST", SetUrl, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
@@ -169,9 +171,22 @@ const SetupUi = (function () {
         http.get('/api/Status/DeviceConfig', buildGuiToConfig);
     }
 
+    function showMessage(anchor, message) {
+        const basePoint = document.getElementById(anchor.id);
+        const parent = basePoint.parentElement.parentElement;
+                
+        const messageObj = document.createElement('div');
+        messageObj.className = 'row userNote';
+        messageObj.appendChild(document.createTextNode(message));
+        
+        parent.insertBefore(messageObj, basePoint.parentElement.nextSibling);
+        setTimeout(function() {document.querySelector('.userNote').remove()}, 3000);
+    }
+    
+
     return {
         init: init,
-
+        showMessage: showMessage
     }
 })();
 
