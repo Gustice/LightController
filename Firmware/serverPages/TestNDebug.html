@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,49 +9,70 @@
     <link rel="stylesheet" href="/dark-tango-skeleton.css">
     <link rel="stylesheet" href="/CommonStyles.css">
     <script src="/CommonScripts.js"></script>
+    <script src="apiRoutes.js"></script>
     <title>Test and Debug Interface</title>
+
+    <style>
+        button {
+            width: 100%;
+            box-sizing: border-box;
+        };
+    </style>
 </head>
+
 <body>
     <div class="container darkui1">
+        <h1>Test-Cases</h1>
+        <p>All data is printed to console (hence open the browser dev-tools in order to see a thing)</p>
         <h2>Get-Handlers</h2>
         <div class="row">
-            <div class="four columns"><button class="u-full-width" type="button" onclick="test_Get_WiFiStatus()">Check WifiStatus</button></div>
+            <div class="four columns"><button type="button" onclick="test_Get_RGBIValues()">Get RGBIValues</button>
+            </div>
         </div>
         <div class="row">
-            <div class="four columns"><button class="u-full-width" type="button" onclick="test_Get_RGBIValues()">Get RGBIValues</button></div>
+            <div class="four columns"><button type="button" onclick="test_Get_RGBWValues()">Get RGBWValues</button>
+            </div>
         </div>
         <div class="row">
-            <div class="four columns"><button class="u-full-width" type="button" onclick="test_Get_RGBWValues()">Get RGBWValues</button></div>
+            <div class="four columns"><button type="button" onclick="test_Get_RGBWSingleValue()">Get
+                    RGBWSingleValue</button></div>
         </div>
         <div class="row">
-            <div class="four columns"><button class="u-full-width" type="button" onclick="test_Get_RGBWSingleValue()">Get RGBWSingleValue</button></div>
+            <div class="four columns"><button type="button" onclick="test_Get_IValues()">Get IValues</button></div>
         </div>
-        <div class="row">
-            <div class="four columns"><button class="u-full-width" type="button" onclick="test_Get_IValues()">Get IValues</button></div>
-        </div>
+
         <h2>Set-Handlers</h2>
         <div class="row">
-            <div class="four columns"><button class="u-full-width" type="button" onclick="test_Set_RGBIValues()">Set RGBIValues</button></div>
+            <div class="four columns"><button type="button" onclick="test_Set_RGBIValues()">Set RGBIValues</button>
+            </div>
         </div>
         <div class="row">
-            <div class="four columns"><button class="u-full-width" type="button" onclick="test_Set_RGBWValues()">Set RGBWValues</button></div>
+            <div class="four columns"><button type="button" onclick="test_Set_RGBWValues()">Set RGBWValues</button>
+            </div>
         </div>
         <div class="row">
-            <div class="four columns"><button class="u-full-width" type="button" onclick="test_Set_RGBWSingleValue()">Set RGBWSingleValue</button></div>
+            <div class="four columns"><button type="button" onclick="test_Set_RGBWSingleValue()">Set
+                    RGBWSingleValue</button></div>
         </div>
         <div class="row">
-            <div class="four columns"><button class="u-full-width" type="button" onclick="test_Set_IValues()">Set IValues</button></div>
+            <div class="four columns"><button type="button" onclick="test_Set_IValues()">Set IValues</button></div>
+        </div>
+
+        <h2>Other-Handlers</h2>
+        <div class="row">
+            <div class="four columns"><button type="button" onclick="test_Get_WiFiStatus()">Check WifiStatus</button>
+            </div>
         </div>
         <div class="row">
-            <div class="four columns"><button class="u-full-width" type="button" onclick="test_Set_SaveToPage()">Save to Page</button></div>
+            <div class="four columns"><button type="button" onclick="test_Set_SaveToPage()">Save to Page</button></div>
         </div>
         <div class="row">
-            <div class="four columns"><button class="u-full-width" type="button" onclick="test_Set_ResetProgram()">Reset Program</button></div>
+            <div class="four columns"><button type="button" onclick="test_Set_ResetProgram()">Reset Program</button>
+            </div>
         </div>
     </div>
-
     <script src="easyHttp.js"></script>
     <script src="DebugApp.js"></script>
 </body>
-</html>
 
+</html>

@@ -418,7 +418,7 @@ void app_main(void) {
 
     if (sw1.ReadPort() == 0) {
         ESP_LOGI(cModTag, "Reset wifi parameter");
-        // ResetWiFiConfig();
+        ResetWiFiConfig();
     }
     SetupSoftAccessPoint(&apConfig);
 

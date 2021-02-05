@@ -13,7 +13,7 @@ class MockServer(BaseHTTPRequestHandler):
         return content.encode("utf8")  # NOTE: must return a bytes object!
 
     def do_GET(self):
-        if self.path == '/api/Status/WiFiStatus':
+        if self.path == '/api/GetStatus/WiFiStatus':
             self.send_response(200)
             wStat = 'WiFiParamNotSet'
             self.wfile.write("{}".format(wStat).encode('utf-8'))

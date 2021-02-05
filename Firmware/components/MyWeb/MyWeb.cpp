@@ -168,13 +168,13 @@ esp_err_t ResetWifiConfig(const char *messange) {
  *
  */
 static const httpd_postUri_def postUriHandlers[]{
-    {"/api/Port/RGBISync", ProcessRgbiPost},
-    {"/api/Port/RGBWAsync", ProcessRgbwPost},
-    {"/api/Port/RGBWSingle", ProcessRgbwSinglePost},
-    {"/api/Port/IValues", ProcessGrayValuesPost},
+    {"/api/SetPort/RGBISync", ProcessRgbiPost},
+    {"/api/SetPort/RGBWAsync", ProcessRgbwPost},
+    {"/api/SetPort/RGBWSingle", ProcessRgbwSinglePost},
+    {"/api/SetPort/IValues", ProcessGrayValuesPost},
     {"/api/SaveToPage", ProcessSaveToPage},
     {"/api/ResetProgram", ProcessResetPages},
-    {"/api/SetDevice/ResetWiFiConnect", ResetWifiConfig}
+    {"/api/SetDevice/ResetWiFiConnect", ResetWifiConfig},
     {nullptr, nullptr},
 };
 
@@ -253,24 +253,34 @@ esp_err_t ProcessWiFiStatusGet(char *message, char **output) {
     if (*output != nullptr)
         return ESP_FAIL;
 
+    char * buffer = new char[256];
     WifiConfig_t config; // Is actually ignored
-    *output = "WiFiParamNotSet";
+    *output = "{wifiStatus: \"WiFiParamNotSet\"}";
     if (LoadWiFiConfig(&config) == ESP_OK)
-        *output = "WiFiParamSet";
+        *output = "{wifiStatus: \"WiFiParamSet\"}";
     return ESP_OK;
 }
 
+esp_err_t ProcessGetDeviceConfig(char *message, char **output) {
+    if (*output != nullptr)
+        return ESP_FAIL;
+    
+    char * buffer = new char[2048];
+    *output = buffer;
+
+    return Fs_ReadEntry("DeviceSetup.json", buffer, sizeof(buffer));
+}
 /**
  * @brief Get-Handlers for Get-Data-Requests
  *
  */
 static const httpd_getUri_t getValueHandlers[]{
-    {"/api/Values/RGBISync", ProcessRgbiGet},
-    {"/api/Values/RGBWAsync", ProcessRgbwGet},
-    {"/api/Values/RGBWSingle", ProcessRgbwSingleGet},
-    {"/api/Values/IValues", ProcessGrayValuesGet},
-    {"/api/Status/WiFiStatus", ProcessWiFiStatusGet},
-    {"/api/Status/DeviceConfig", ProcessGetDeviceConfig},
+    {"/api/GetPort/RGBISync", ProcessRgbiGet},
+    {"/api/GetPort/RGBWAsync", ProcessRgbwGet},
+    {"/api/GetPort/RGBWSingle", ProcessRgbwSingleGet},
+    {"/api/GetPort/IValues", ProcessGrayValuesGet},
+    {"/api/GetStatus/WiFiStatus", ProcessWiFiStatusGet},
+    {"/api/GetStatus/DeviceConfig", ProcessGetDeviceConfig},
     {nullptr, nullptr},
 };
 
@@ -315,10 +325,23 @@ static esp_err_t data_get_handler(httpd_req_t *req) {
     ESP_LOGI(cModTag, "Raw: %s", buf);
     ESP_LOGI(cModTag, "====================================");
 
-    char *output = nullptr;
+    char * output = nullptr;
     pProcessGet pFunc = (pProcessGet)part->pFunc;
     if ((pFunc(buf, &output) == ESP_OK) && (output != nullptr)) {
-        httpd_resp_send(req, output, strlen(output));
+        httpd_resp_set_type(req, "application/json");
+        httpd_resp_sendstr(req, output);
+
+// static esp_err_t temperature_data_get_handler(httpd_req_t *req)
+// {
+//     httpd_resp_set_type(req, "application/json");
+//     cJSON *root = cJSON_CreateObject();
+//     cJSON_AddNumberToObject(root, "raw", esp_random() % 20);
+//     const char *sys_info = cJSON_Print(root);
+//     httpd_resp_sendstr(req, sys_info);
+//     free((void *)sys_info);
+//     cJSON_Delete(root);
+//     return ESP_OK;
+// }
 
         ESP_LOGI(cModTag, "=========== Sending DATA ==========");
         ESP_LOGI(cModTag, "Raw: %s", output);
@@ -328,7 +351,9 @@ static esp_err_t data_get_handler(httpd_req_t *req) {
         httpd_resp_send_err(
             req, HTTPD_500_INTERNAL_SERVER_ERROR, "Something went wrong during processing");
     }
-
+    
+    if (output == nullptr) { 
+        delete[] output; }
     return ESP_OK;
 }
 

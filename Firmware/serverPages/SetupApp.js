@@ -168,7 +168,7 @@ const SetupUi = (function () {
     }
 
     function init() {
-        http.get('/api/Status/DeviceConfig', buildGuiToConfig);
+        http.get(ApiGetStatus_DeviceConfig, buildGuiToConfig);
     }
 
     function showMessage(anchor, message) {

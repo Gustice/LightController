@@ -3,6 +3,8 @@ const http = new easyHttp();
 
 const PwdUi = (function () {
     const container = document.getElementById('WiFiSetup');
+    const devConfigSpace = document.getElementById('showDeviceConfiguration');
+
 
     function display(err, response) {
         if (err) {
@@ -23,29 +25,50 @@ const PwdUi = (function () {
             }
         }
     }
+    function evalDeviceConfig(err, response) {
+        if (err) {
+            console.log(err);
+        } else {
+            console.log(response);
+            devConfigSpace.innerHTML = `<p>Content will be set accordingly</p>`
+        }
+    }
 
     function init() {
-        http.get('/api/Status/WiFiStatus', evalWifiStatus);
+        http.get(ApiGetStatus_WiFiStatus, evalWifiStatus);
+        http.get(ApiGetStatus_DeviceConfig, evalDeviceConfig);
     }
     function showWifiOptions() {
         container.innerHTML = queryWiFiContent;
     }
+    function showMessage(message) {
+        const basePoint = container;
+        const parent = basePoint.parentElement;
+                
+        const messageObj = document.createElement('div');
+        messageObj.className = 'row userNote';
+        messageObj.appendChild(document.createTextNode(message));
+        
+        parent.insertBefore(messageObj, basePoint.nextSibling);
+        setTimeout(function() {document.querySelector('.userNote').remove()}, 3000);
+    }
 
     return {
         init: init,
-        showWifiOptions: showWifiOptions
+        showWifiOptions: showWifiOptions,
+        showMessage: showMessage
     }
 })();
 
 PwdUi.init();
 
 function resetWifiConfig() {
-    http.post('api/SetDevice/ResetWiFiConnect');
+    http.post(ApiSetDevice_ResetWiFi);
     PwdUi.init();
 }
 
 function setWifiConfig(form) {
-    http.post('api/SetDevice/SetWiFiConnect');
+    // http.post(ApiSetDevice_SetWiFi);
     const formData = new FormData(form).entries();
     let jsonObject = {};
 
@@ -53,18 +76,14 @@ function setWifiConfig(form) {
         jsonObject[key] = value;
     }
     console.log(JSON.stringify(jsonObject));
+    PwdUi.showMessage("WiFi Config sent");
 
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", SetUrl, true);
+    xhr.open("POST", ApiSetDevice_SetWiFi, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.send(JSON.stringify(jsonObject));
     return false; //don't submit
 }
-
-
-
-
-
 
 const initWifiContent = `
 <div class="row">
@@ -78,7 +97,7 @@ const initWifiContent = `
 </div>
 <div class="row">
     <div class="four columns"><button class="button-primary u-full-width" type="button"
-            onclick="window.location.href='/RgbSetupFull.html'">Setup Lights</button></div>
+            onclick="window.location.href='${Route_SetupFull}'">Setup Lights</button></div>
 </div>
 `;
 const queryWiFiContent = `
@@ -105,7 +124,7 @@ const queryWiFiContent = `
                 <div class="row">
                     <div class="six columns"><input class="button-primary u-full-width" type="submit" value="Submit"></div>
                     <div class="six columns"><button class="u-full-width" type="button"
-                            onclick="window.location='/RgbSetupFull.html'">Skip</button></div>
+                            onclick="window.location='${Route_SetupFull}'">Skip</button></div>
                 </div>
             </form>
         </div>
@@ -118,7 +137,7 @@ const configuredWiFiContent = `
 <p> The station is already set to your wifi access point. You can either proceed to setup the Lights, or reset the wifi configuration </p>
 <div class="row">
     <div class="four columns"><button class="button-primary u-full-width" type="button"
-            onclick="window.location='/RgbSetupFull.html'">Setup Lights</button></div>
+            onclick="window.location='${Route_SetupFull}'">Setup Lights</button></div>
 </div>
 <div class="row">
     <div class="four columns"><button class="u-full-width" type="button"

@@ -129,21 +129,17 @@ esp_err_t ProcessGrayValuesPost(const char *message) {
 }
 
 esp_err_t ProcessRgbiGet(char *message, char ** output) { 
-    *output = "";
     return ESP_OK; 
     }
 
 esp_err_t ProcessRgbwGet(char *message, char ** output) { 
-    *output = "";
     return ESP_OK; 
     }
 esp_err_t ProcessRgbwSingleGet(char *message, char ** output) { 
-    *output = "";
     return ESP_OK; 
     }
 
 esp_err_t ProcessGrayValuesGet(char *message, char ** output) { 
-    *output = "";
     return ESP_OK; 
     }
 
