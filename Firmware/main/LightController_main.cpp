@@ -357,6 +357,13 @@ static void vRefreshLed(void *pvParameters) {
 QuadDecoder *Encoder;
 static void IRAM_ATTR gpio_isr_handler(void *arg) { Encoder->EvalStepSync(); }
 
+static esp_err_t GetChannelSettings(ReqColorIdx_t channel, uint8_t * data, size_t length)
+{
+    ESP_LOGI(cModTag, "Requesting Channel data");
+    
+    return ESP_OK;
+}
+
 /**
  * @brief Enter function for underlying OS
  *
@@ -370,7 +377,6 @@ void app_main(void) {
         ret = nvs_flash_init();
     }
     ESP_ERROR_CHECK(ret);
-
 
     // ESP_ERROR_CHECK(nvs_flash_init());
     // ESP_ERROR_CHECK(esp_netif_init());
@@ -392,7 +398,6 @@ void app_main(void) {
 
     static InputPort sw1(Sw1Pin);
     static InputPort sw2(Sw2Pin);
-    static InputPort sdCard(SdDetect);
 
     static SpiPort spi(SpiPort::SpiPorts::HSpi, SyncDataOutPin, gpio_num_t::GPIO_NUM_NC,
         SyncClockOutPin, spi_mode_t::mode3);
@@ -422,7 +427,6 @@ void app_main(void) {
     }
     SetupSoftAccessPoint(&apConfig);
 
-
     DacPort dac1(dac_channel_t::DAC_CHANNEL_1);
     DacPort dac2(dac_channel_t::DAC_CHANNEL_2);
     AdcPort adc1(adc1_channel_t::ADC1_CHANNEL_6);
@@ -444,7 +448,7 @@ void app_main(void) {
 
     if (xNewWebCommand != NULL && xColorQueue != NULL && xGrayQueue != NULL) {
         static uint8_t taskParam; // Can pass arguments to Task here
-        SetupMyWeb(xColorQueue, xGrayQueue, xNewWebCommand);
+        SetupMyWeb(xColorQueue, xGrayQueue, xNewWebCommand, GetChannelSettings);
         xTaskCreate(vRefreshLed, "RefreshLed", 4096, (void *)taskParam, tskIDLE_PRIORITY, NULL);
     } else {
         ESP_LOGE(cModTag,

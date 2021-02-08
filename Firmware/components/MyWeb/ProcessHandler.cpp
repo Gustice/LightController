@@ -6,7 +6,7 @@
 #include <esp_log.h>
 #include <sstream>
 #include <string.h>
-
+#include "WebUtils.h"
 
 static const char *cModTag = "Web-ReqPcs";
 
@@ -43,10 +43,12 @@ void ParseJson(const char *buf, const char **labels, int *values, int length) {
 
 static QueueHandle_t xColorQueue;
 static QueueHandle_t xGrayQueue;
+static esp_err_t (*GetChannelSettings)(ReqColorIdx_t channel, uint8_t * data, size_t length);
 
-void SetQueueHandlesForPostH(QueueHandle_t colorQ, QueueHandle_t grayQ) {
+void SetQueueHandlesForPostH(QueueHandle_t colorQ, QueueHandle_t grayQ, pChannelGetCallback getCbk) {
     xColorQueue = colorQ;
     xGrayQueue = grayQ;
+    GetChannelSettings = getCbk;
 }
 
 ColorMsg_t SetColorObj(int r, int g, int b, int w, int i) {
@@ -154,7 +156,13 @@ esp_err_t ProcessGrayValuesPost(const char *message) {
     return ESP_OK;
 }
 
-esp_err_t ProcessRgbiGet(char *message, char **output) { return ESP_OK; }
+esp_err_t ProcessRgbiGet(char *message, char **output) { 
+    ReqColorIdx_t req;
+    uint8_t buffer[sizeof(ColorMsg_t)];
+    esp_err_t ret =  GetChannelSettings(req, buffer, sizeof(buffer));
+
+    return ESP_OK; 
+}
 
 esp_err_t ProcessRgbwGet(char *message, char **output) { return ESP_OK; }
 esp_err_t ProcessRgbwSingleGet(char *message, char **output) { return ESP_OK; }

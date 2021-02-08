@@ -48,7 +48,7 @@ typedef struct httpd_getUri_def {
         return scriptsSource;                                                                      \
     }
 
-FILESource(RgbSetupFull_html, "text/html", "page") // expands to: FileSource_RgbSetupFull_html_html
+// FILESource(RgbSetupFull_html, "text/html", "page") // expands to: FileSource_RgbSetupFull_html_html
 //< const FileContext_t FileSource_MyPage_html(void) {
 //<    extern const unsigned char MyWeb_start[] asm("_binary_MyPage_html_start");
 //<    extern const unsigned char MyWeb_end[]   asm("_binary_MyPage_html_end");
@@ -60,13 +60,3 @@ FILESource(RgbSetupFull_html, "text/html", "page") // expands to: FileSource_Rgb
 //<     };
 //<     return scriptsSource;
 //< }
-
-FILESource(index_html, "text/html", "page")
-FILESource(CommonScripts_js, "text/html", "scripts")
-FILESource(favicon_ico, "image/x-icon", "styles")
-FILESource(CommonStyles_css, "text/css", "styles")
-FILESource(RgbiControl_html, "text/html", "control")
-FILESource(RgbwControl_html, "text/html", "control")
-FILESource(RgbSingleControl_html, "text/html", "control")
-FILESource(GrayControl_html, "text/html", "control")
-FILESource(WiFiConnectInput_html, "text/html", "page")
