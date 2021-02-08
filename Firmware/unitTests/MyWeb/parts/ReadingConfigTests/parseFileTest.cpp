@@ -15,17 +15,23 @@ void appendExtension( char * filepath)
 
 TEST_CASE("Check if missing line endign is correctly recognized", "[strings]")
 {
-    const char * woExt = "SomeRoute";
-    const char * wExt = "SomeFile.txt";
-
     char buffer[32];
-    strcpy(buffer, woExt);
-    appendExtension(buffer);
-    CHECK(stringIsEqual(buffer, "SomeRoute.html"));
 
-    strcpy(buffer, wExt);
-    appendExtension(buffer);
-    CHECK(stringIsEqual(buffer, "SomeFile.txt"));
+    SECTION( "Without file extension" ) {
+        strcpy(buffer, "SomeRoute");
+        appendExtension(buffer);
+        CHECK(stringIsEqual(buffer, "SomeRoute.html"));
+    }
+    SECTION( "File extension" ) {
+        strcpy(buffer, "SomeFile.txt");
+        appendExtension(buffer);
+        CHECK(stringIsEqual(buffer, "SomeFile.txt"));
+    }
+    SECTION( "FilePath in folder" ) {
+        strcpy(buffer, "/server/SomeFile.txt");
+        appendExtension(buffer);
+        CHECK(stringIsEqual(buffer, "/server/SomeFile.txt"));
+    }
 }
 
 TEST_CASE("Validating Test with linked cJSON in Module", "[cJson]") 

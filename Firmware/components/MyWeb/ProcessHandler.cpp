@@ -206,10 +206,11 @@ esp_err_t ProcessGetDeviceConfig(char *message, char **output) {
     if (*output != nullptr)
         return ESP_FAIL;
 
-    char *buffer = new char[2048];
+    const size_t length = 2048;
+    char *buffer = new char[length];
     *output = buffer;
 
-    return Fs_ReadEntry("DeviceSetup.json", buffer, sizeof(buffer));
+    return Fs_ReadEntry("DeviceSetup.json", buffer, length);
 }
 
 

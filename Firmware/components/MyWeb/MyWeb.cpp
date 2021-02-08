@@ -48,16 +48,15 @@ static esp_err_t pagePart_GetHandler(httpd_req_t *req) {
     rest_server_context_t *rest_context = (rest_server_context_t *)req->user_ctx;
     strlcpy(filepath, rest_context->base_path, sizeof(filepath));
 
-    // Check if Rout misses .html-Ending -> Append .html
-    if (strchr(filepath, '.') == NULL)
-        strcpy(&filepath[strlen(filepath)], ".html"); 
-
     if (req->uri[strlen(req->uri) - 1] == '/') {
         strlcat(filepath, "/welcome.html", sizeof(filepath));
     } else {
         strlcat(filepath, req->uri, sizeof(filepath));
     }
-    // todo expand path without .html to html
+
+    // Check if Rout misses .html-Ending -> Append .html
+    if (strchr(filepath, '.') == NULL)
+        strcpy(&filepath[strlen(filepath)], ".html"); 
 
     int fd = open(filepath, O_RDONLY, 0);
     if (fd == -1) {

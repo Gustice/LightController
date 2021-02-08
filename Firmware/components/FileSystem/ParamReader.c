@@ -123,8 +123,20 @@ esp_err_t Fs_ReadEntry(const char *file, void *stream, size_t length)
         return ESP_FAIL;
     }
 
+      // obtain file size:
+    fseek(f , 0 , SEEK_END);
+    size_t lSize = ftell(f);
+    rewind(f);
+
+    if ( lSize > length )
+    {
+        ESP_LOGE(TAG, "Provided buffer too small for file %s size", fName);
+        return ESP_FAIL;
+    }
+    
     ESP_LOGI(TAG, "Read stream from %s", fName);
     fread(stream, 1, length, f);
+    ((uint8_t *) stream)[lSize] = 0; // terminate output
     fclose(f);
     return ESP_OK;
 }
