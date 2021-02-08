@@ -1,5 +1,5 @@
 /// HTML Routes
-const Route_SetupFull = '/RgbSetupFull.html';
+const Route_SetupFull = '/RgbSetupFull';
 
 /// API Routes
 const ApiGetPort_RGBISync = "/api/GetPort/RGBISync";

@@ -1,2 +1,4 @@
 tbuild/*
 !tbuild/.keep
+*.dll
+*.a

@@ -3,15 +3,15 @@
     // for the documentation about the tasks.json format
     "version": "2.0.0",
     "tasks": [
-        // { /// This is better invoked by Command CMake: Create Configuration
-        //     "label": "CMake: Create Configuration",
-        //     "type": "shell",
-        //     "options": { 
-        //         "cwd": "${workspaceFolder}/build"
-        //     },
-        //     "command": "CMake ..",
-        //     "problemMatcher": "$gcc", // Otherwise its annoys you with warnings
-        // },
+        {
+            "label": "CMake: Create Configuration",
+            "type": "shell",
+            "options": { 
+                "cwd": "${workspaceFolder}/build"
+            },
+            "command": "CMake ..",
+            "problemMatcher": "$gcc", // Otherwise its annoys you with warnings
+        },
         {
             "label": "CMake: Build Project",
             "type": "shell",

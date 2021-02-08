@@ -1,36 +1,43 @@
 {
     "StartupMode": "RunDemo",
-    "SyncLedCh": {
-        "Strip": {
-            "LedCount": 6,
-            "Intens": 16,
-            "Channel": "RGB"
+    "DisplayMode": "ExpertView",
+    "Outputs": [
+        {
+            "Type": "SyncLedCh",
+            "Strip": {
+                "LedCount": 6,
+                "Intens": 16,
+                "Channel": "RGB"
+            },
+            "Color": [0,0,0,0]
         },
-        "Color": [0,0,0,0]
-    },
-    "AsyncLedCh": {
-        "Strip": {
-            "LedCount": 24,
-            "Intens": 16,
-            "Channel": "RGBW"
+        {
+            "Type": "AsyncLedCh",
+            "Strip": {
+                "LedCount": 24,
+                "Intens": 16,
+                "Channel": "RGBW"
+            },
+            "Color": [0,0,0,0]
         },
-        "Color": [0,0,0,0]
-    },
-    "RgbStrip": {
-        "Strip": {
-            "LedCount": 6,
-            "Intens": 1024,
-            "Channel": "RGBW"
+        {   
+            "Type": "RgbStrip",
+            "Strip": {
+                "LedCount": 6,
+                "Intens": 1024,
+                "Channel": "RGBW"
+            },
+            "Color": [0,0,0,0]
         },
-        "Color": [0,0,0,0]
-    },
-    "I2cExpander": {
-        "Devive": {
-            "LedCount": 3,
-            "Intens": 1024,
-            "Channel": "Grey"
-        },
-        "Address": 1,
-        "GrayValues": [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]
-    }
+        {
+            "Type": "I2cExpander",
+            "Device": {
+                "LedCount": 3,
+                "Intens": 1024,
+                "Channel": "Grey"
+            },
+            "Address": 1,
+            "GrayValues": [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]
+        }
+    ]
 }
