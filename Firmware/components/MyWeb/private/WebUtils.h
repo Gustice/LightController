@@ -29,7 +29,6 @@ typedef struct httpd_getUri_def {
     pProcessGet pFunc;
 } httpd_getUri_t;
 
-#define CHECK_FILE_EXTENSION(filename, ext) (strcasecmp(&filename[strlen(filename) - strlen(ext)], ext) == 0)
 
 /**
  * @brief Call-Construct to integrated included text ressources by assembler.
