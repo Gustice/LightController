@@ -15,7 +15,28 @@ input[type="range"] {
 }
 
 .userNote {
-    background: #535146;
+    background: #465053;
+    padding: 12px;
+    border-radius: 5px;
+    margin: 6px;
+}
+
+.userWarning {
+    background: #535346;
+    padding: 12px;
+    border-radius: 5px;
+    margin: 6px;
+}
+
+.userError {
+    background: #534946;
+    padding: 12px;
+    border-radius: 5px;
+    margin: 6px;
+}
+
+.userSuccess {
+    background: #465346;
     padding: 12px;
     border-radius: 5px;
     margin: 6px;

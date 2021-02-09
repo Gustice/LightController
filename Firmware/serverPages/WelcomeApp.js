@@ -1,58 +1,62 @@
 
-const http = new easyHttp();
+const http = new EasyHttp();
 
 const PwdUi = (function () {
     const container = document.getElementById('WiFiSetup');
     const devConfigSpace = document.getElementById('showDeviceConfiguration');
 
-
-    function display(err, response) {
-        if (err) {
-            console.log(err);
+    function evalWifiStatus(response) {
+        console.log(response);
+        if (response.wifiStatus === 'WiFiParamIsSet') {
+            container.innerHTML = configuredWiFiContent;
         } else {
-            console.log(response);
+            container.innerHTML = initWifiContent;
         }
     }
-    function evalWifiStatus(err, response) {
-        if (err) {
-            console.log(err);
-        } else {
-            console.log(response);
-            if (response === 'WiFiParamSet') {
-                container.innerHTML = configuredWiFiContent;
-            } else {
-                container.innerHTML = initWifiContent;
-            }
-        }
-    }
-    function evalDeviceConfig(err, response) {
-        if (err) {
-            console.log(err);
-        } else {
-            console.log(response);
-            devConfigSpace.innerHTML = `<p>Content will be set accordingly</p>`
-        }
+    function evalDeviceConfig(response) {
+        const caption = document.createElement('h3');
+        caption.appendChild(document.createTextNode('This Device includes following ports'));
+        const list = document.createElement('ul');
+        
+        ports = response.Outputs;
+        ports.forEach(function(element) {
+            const item = document.createElement('li');
+            item.appendChild(document.createTextNode(element.Description));
+            list.appendChild(item);
+        })
+        devConfigSpace.appendChild(caption);
+        devConfigSpace.appendChild(list);
     }
 
-    function init() {
-        http.get(ApiGetStatus_WiFiStatus, evalWifiStatus);
-        http.get(ApiGetStatus_DeviceConfig, evalDeviceConfig);
+    async function init() {
+        await http.get(ApiGetStatus_DeviceConfig)
+            .then(data => evalDeviceConfig(data))
+            .catch(err => console.log(err)); 
+    
+        await http.get(ApiGetStatus_WiFiStatus)
+        .then(data => evalWifiStatus(data))
+        .catch(err => console.log(err));
     }
     function showWifiOptions() {
         container.innerHTML = queryWiFiContent;
     }
-    function showMessage(message) {
+    
+    // type may be  emphasis ,userNote ,userWarning ,userError ,userSuccess ,
+    function showMessage(type, message) {
         const basePoint = container;
         const parent = basePoint.parentElement;
-                
+        const now = new Date();
+
         const messageObj = document.createElement('div');
-        messageObj.className = 'row userNote';
+        messageObj.className = 'row ' + type;
+        let stamp = 'VolatileNote' + now.getTime();
+        messageObj.id = stamp;
         messageObj.appendChild(document.createTextNode(message));
         
         parent.insertBefore(messageObj, basePoint.nextSibling);
-        setTimeout(function() {document.querySelector('.userNote').remove()}, 3000);
+        setTimeout(function() {document.getElementById(stamp).remove()}, 3000);
     }
-
+    
     return {
         init: init,
         showWifiOptions: showWifiOptions,
@@ -64,11 +68,13 @@ PwdUi.init();
 
 function resetWifiConfig() {
     http.post(ApiSetDevice_ResetWiFi);
-    PwdUi.init();
+    PwdUi.init()
+        .then(() => console.log("Init Successful"))
+        .catch(() => alert("Gui init failed - Navigate to " + Route_SetupFull));
 }
 
 function setWifiConfig(form) {
-    // http.post(ApiSetDevice_SetWiFi);
+    http.post(ApiSetDevice_SetWiFi);
     const formData = new FormData(form).entries();
     let jsonObject = {};
 
@@ -87,7 +93,7 @@ function setWifiConfig(form) {
 
 const initWifiContent = `
 <div class="row">
-<h2>Options</h2>
+<h2>WiFi Connect</h2>
 <p> You can directly proceed to setup the Lights on your device or first Setup your local
     WiFi-configuration to make the configuration more convenient. </p>
 </div>
@@ -133,7 +139,7 @@ const queryWiFiContent = `
 `;
 const configuredWiFiContent = `
 <div class="row">
-<h2>Options </h2>
+<h2>WiFi Connect </h2>
 <p> The station is already set to your wifi access point. You can either proceed to setup the Lights, or reset the wifi configuration </p>
 <div class="row">
     <div class="four columns"><button class="button-primary u-full-width" type="button"

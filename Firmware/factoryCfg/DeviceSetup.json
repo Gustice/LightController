@@ -4,6 +4,7 @@
     "Outputs": [
         {
             "Type": "SyncLedCh",
+            "Description": "Synchronous serial LED port", 
             "Strip": {
                 "LedCount": 6,
                 "Intens": 16,
@@ -13,6 +14,7 @@
         },
         {
             "Type": "AsyncLedCh",
+            "Description": "Asynchronous serial LED port", 
             "Strip": {
                 "LedCount": 24,
                 "Intens": 16,
@@ -22,6 +24,7 @@
         },
         {   
             "Type": "RgbStrip",
+            "Description": "Rgb-Strip LED port",
             "Strip": {
                 "LedCount": 6,
                 "Intens": 1024,
@@ -31,6 +34,7 @@
         },
         {
             "Type": "I2cExpander",
+            "Description": "I2C-Expander port",
             "Device": {
                 "LedCount": 3,
                 "Intens": 1024,
