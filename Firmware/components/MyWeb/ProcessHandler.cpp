@@ -195,7 +195,7 @@ esp_err_t ProcessWiFiStatusGet(char *message, char **output) {
     WifiConfig_t config; // Is actually ignored
     *output = "{\"wifiStatus\": \"WiFiParamNotSet\"}";
     if (LoadWiFiConfig(&config) == ESP_OK)
-        *output = "{\"wifiStatus\": \"WiFiParamSet\"}";
+        *output = "{\"wifiStatus\": \"WiFiParamIsSet\"}";
     return ESP_OK;
 }
 

@@ -34,7 +34,7 @@ TEST_CASE("Check if missing line endign is correctly recognized", "[strings]")
     }
 }
 
-TEST_CASE("Validating Test with linked cJSON in Module", "[cJson]") 
+TEST_CASE("Simple cJSON test in Module", "[cJson]") 
 {
     cJSON *root = cJSON_CreateObject();
     cJSON_AddNumberToObject(root, "raw", 42);
@@ -43,6 +43,20 @@ TEST_CASE("Validating Test with linked cJSON in Module", "[cJson]")
     free((void *)sys_info);
     cJSON_Delete(root);
 }
+
+TEST_CASE("Structured cJSON test in Module", "[cJson]")
+{
+    const char * input = "{ \"StartupMode\": \"RunDemo\", \"DisplayMode\": \"ExpertView\", \"Outputs\": [ \
+        { \"Type\": \"SyncLedCh\", \"Strip\": { \"LedCount\": 6, \"Intens\": 16, \"Channel\": \"RGB\" }, \"Color\": [0,0,0,0] }, \
+        { \"Type\": \"AsyncLedCh\", \"Strip\": { \"LedCount\": 24, \"Intens\": 16, \"Channel\": \"RGBW\" }, \"Color\": [0,0,0,0] } ] }";
+
+
+    cJSON *root = cJSON_Parse(input);
+    const char *startup = cJSON_GetObjectItem(root, "StartupMode")->valuestring;
+    const char *display = cJSON_GetObjectItem(root, "DisplayMode")->valuestring;
+    const char *output = cJSON_GetObjectItem(root, "Outputs");
+}
+
 
 static bool stringIsEqual(const char * expected, const char * actual)
 {

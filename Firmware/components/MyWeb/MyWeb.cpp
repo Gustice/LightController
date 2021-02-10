@@ -263,7 +263,6 @@ static httpd_handle_t start_webserver(void) {
         ESP_LOGI(cModTag, "Registering URI handlers");
         httpd_register_uri_handler(server, &setPortReq);
         httpd_register_uri_handler(server, &getPortReq);
-        // httpd_register_uri_handler(server, &pagePart); // Most generic Page
         return server;
     }
 
