@@ -14,6 +14,7 @@
 #include "SoftAp.h"
 #include "Utils.h"
 #include <string.h>
+#include "ParamReader.h"
 
 static const char *TAG = "wifi";
 const char *wifiCode = "wifi";
@@ -29,7 +30,7 @@ static void wifiAp_event_handler(void *arg, esp_event_base_t event_base, int32_t
     }
 }
 
-void wifi_init_softap(wifiApConfig_t *config) {
+void wifi_init_softap(WifiConfig_t *config) {
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
     esp_netif_create_default_wifi_ap();
@@ -42,9 +43,9 @@ void wifi_init_softap(wifiApConfig_t *config) {
 
     wifi_config_t wifi_config;
     memset(&wifi_config, 0, sizeof(wifi_config_t));
-    memcpy(wifi_config.ap.ssid, config->ssid, member_size(wifiApConfig_t, ssid));
+    memcpy(wifi_config.ap.ssid, config->ssid, member_size(WifiConfig_t, ssid));
     wifi_config.ap.ssid_len = (uint8_t)strlen((char *)config->ssid);
-    memcpy(wifi_config.ap.password, config->password, member_size(wifiApConfig_t, password));
+    memcpy(wifi_config.ap.password, config->password, member_size(WifiConfig_t, password));
     wifi_config.ap.max_connection = config->max_connection;
     wifi_config.ap.authmode = WIFI_AUTH_WPA_WPA2_PSK;
 
@@ -90,7 +91,7 @@ static void wifiSta_event_handler(void *arg, esp_event_base_t event_base, int32_
     }
 }
 
-void wifi_init_sta(wifiApConfig_t *config) {
+void wifi_init_sta(WifiConfig_t *config) {
     s_wifi_event_group = xEventGroupCreate();
 
     ESP_ERROR_CHECK(esp_netif_init());
@@ -110,8 +111,8 @@ void wifi_init_sta(wifiApConfig_t *config) {
 
     wifi_config_t wifi_config;
     memset(&wifi_config, 0, sizeof(wifi_config_t));
-    memcpy(wifi_config.sta.ssid, config->ssid, member_size(wifiApConfig_t, ssid));
-    memcpy(wifi_config.sta.password, config->password, member_size(wifiApConfig_t, password));
+    memcpy(wifi_config.sta.ssid, config->ssid, member_size(WifiConfig_t, ssid));
+    memcpy(wifi_config.sta.password, config->password, member_size(WifiConfig_t, password));
 
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
     ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config));
@@ -142,33 +143,26 @@ void wifi_init_sta(wifiApConfig_t *config) {
     vEventGroupDelete(s_wifi_event_group);
 }
 
-void SetupSoftAccessPoint(wifiApConfig_t *config) {
-    // Initialize NVS
-    esp_err_t ret = nvs_flash_init();
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-        ESP_ERROR_CHECK(nvs_flash_erase());
-        ret = nvs_flash_init();
-    }
-    ESP_ERROR_CHECK(ret);
-
-    wifiApConfig_t savedConfig;
+void SetupSoftAccessPoint(WifiConfig_t *config) {
+    WifiConfig_t savedConfig;
     if (LoadWiFiConfig(&savedConfig) == ESP_OK) {
         ESP_LOGI(TAG, "WiFi-Config loaded, connecting to WiFi Access Point");
         wifi_init_sta(&savedConfig);
     } else {
-        ESP_LOGI(TAG, "No WiFi-Config available, starting own WiFi Access Point");
+        ESP_LOGI(TAG, "No WiFi-Config available, starting own WiFi Access Point with:\n\tssid: %s\n\tpwd: %s", 
+        config->ssid, config->password);
         wifi_init_softap(config);
     }
 }
 
-esp_err_t SaveWiFiConfig(wifiApConfig_t *config) {
+esp_err_t SaveWiFiConfig(WifiConfig_t *config) {
     nvs_handle_t nvsHandle;
     if (nvs_open("storage", NVS_READWRITE, &nvsHandle) != ESP_OK) { // Check init state
         ESP_LOGE(TAG, "Opening NVS failed");
         return ESP_FAIL;
     }
     esp_err_t err;
-    err = nvs_set_blob(nvsHandle, wifiCode, config, sizeof(wifiApConfig_t));
+    err = nvs_set_blob(nvsHandle, wifiCode, config, sizeof(WifiConfig_t));
     err = nvs_commit(nvsHandle);
 
     if (err == ESP_OK) {
@@ -204,14 +198,14 @@ esp_err_t ResetWiFiConfig(void) {
     return ESP_OK;
 }
 
-esp_err_t LoadWiFiConfig(wifiApConfig_t *config) {
+esp_err_t LoadWiFiConfig(WifiConfig_t *config) {
     nvs_handle_t nvsHandle;
     if (nvs_open("storage", NVS_READONLY, &nvsHandle) != ESP_OK) { // Check init state
         ESP_LOGE(TAG, "Opening NVS failed");
         return ESP_FAIL;
     }
     esp_err_t err;
-    size_t size = sizeof(wifiApConfig_t);
+    size_t size = sizeof(WifiConfig_t);
     err = nvs_get_blob(nvsHandle, wifiCode, config, &size);
 
     if (err == ESP_ERR_NVS_NOT_FOUND) {

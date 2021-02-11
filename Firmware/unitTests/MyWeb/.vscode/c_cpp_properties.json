@@ -7,6 +7,7 @@
             "includePath": [
                 "${workspaceFolder}/hwMock/**",
                 "${workspaceFolder}/include/**",
+                "${workspaceFolder}/cJson/**",
                 "${workspaceFolder}/parts/**",
                 "${workspaceFolder}/../../components/**"
             ],
@@ -26,7 +27,8 @@
                 "databaseFilename": ""
             },
             "cppStandard": "c++11",
-            "cStandard": "c99"
+            "cStandard": "c99",
+            "configurationProvider": "ms-vscode.cmake-tools"
         }
     ],
     "version": 4

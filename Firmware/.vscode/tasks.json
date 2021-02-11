@@ -1,5 +1,5 @@
 {
-    "options": {"env": { }},
+    "options": {"env": {}},
     // See https://go.microsoft.com/fwlink/?LinkId=733558 
     // for the documentation about the tasks.json format
     "version": "2.0.0",
@@ -47,10 +47,10 @@
         
         { // Flash Environment and Monitor
             "label": "Flash & Monitor",
-            // "group": {
-            //     "kind": "test",
-            //     "isDefault": true
-            // },
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
             "command": "idf.py",
             "type": "shell",
             "args": [
@@ -62,6 +62,73 @@
             "presentation": {
                 "reveal": "always",
             },
+            "problemMatcher": {
+                "owner": "cpp",
+                "fileLocation": "absolute",
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                }
+            }
+        },
+
+        { // Create Flash image
+            "label": "Generate Spiffs Image",
+            "command": "py",
+            "args": [
+                "${env:IDF_PATH}/components/spiffs/spiffsgen.py", 
+                "0xF0000", 
+                "factoryCfg",
+                "factoryCfg.fs"
+            ],
+            "problemMatcher": []
+        },
+        { // Create Flash image
+            "label": "Generate Webpage Image",
+            "command": "py",
+            "args": [
+                "${env:IDF_PATH}/components/spiffs/spiffsgen.py", 
+                "0x200000", 
+                "serverPages",
+                "serverPages.fs"
+            ],
+            "problemMatcher": []
+        },
+
+        { // Flash Data-Image
+            "label": "Flash Data-Image",
+            "dependsOn": "Generate Spiffs Image",
+            "command": "py",
+            "type": "shell",
+            "args": [
+                "${env:IDF_PATH}/components/esptool_py/esptool/esptool.py", 
+                "--port",
+                "COM${input:ComPortNum}",
+                "--baud", "115200",
+                "write_flash",
+                "-z", "0x10000", // This has to be changed when partion.csv is updated
+                "factoryCfg.fs"
+            ],
+            "problemMatcher": []
+        },
+        { // Flash Data-Image
+            "label": "Flash Web-Image",
+            "dependsOn": "Generate Webpage Image",
+            "command": "py",
+            "type": "shell",
+            "args": [
+                "${env:IDF_PATH}/components/esptool_py/esptool/esptool.py", 
+                "--port",
+                "COM${input:ComPortNum}",
+                "--baud", "115200",
+                "write_flash",
+                "-z", "0x200000", // This has to be changed when partion.csv is updated
+                "serverPages.fs"
+            ],
             "problemMatcher": []
         },
 

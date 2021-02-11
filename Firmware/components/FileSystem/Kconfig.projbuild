@@ -1,0 +1,9 @@
+menu "ConfigImage Configuration"
+    config DEVICE_CONFIGURATION_FILENAME
+        string "Device Info File"
+        default "DeviceConfig.json"
+        help
+            File on Spiffs-Partition to load Device configuration
+
+endmenu
+

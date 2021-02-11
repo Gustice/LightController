@@ -1,23 +1,31 @@
 cmake_minimum_required(VERSION 3.0)
-project(HyHalTests)
+project(MyWebTests)
 
-# The test Runner
-add_executable(TestRunner TestMain.cpp 
-                            parts/colorPostsTest.cpp 
-                            )
-target_link_libraries(TestRunner PUBLIC catch dut 
-# color
-)
 
 add_subdirectory(include)
+add_subdirectory(parts)
+# add_subdirectory(cJSON) # do not include !!! Included by DLL
+                            # 1. Compiel cJSON 
+                            # 2. Add output dll to build folder
+# searching for library file
+add_library(cJson SHARED cJSON/build/libcjson.dll)
+include_directories(cJSON)
+set_target_properties(cJson PROPERTIES LINKER_LANGUAGE C)
 
-get_filename_component(PARENT_DIR ../../components/MyWeb ABSOLUTE)
-get_filename_component(PARENT_INCLUDEDIR ../../components/LightEffect ABSOLUTE)
 project (dut)
+get_filename_component(DUT_PARENT_DIR ../../components/MyWeb ABSOLUTE)
+get_filename_component(PARENT_INCLUDEDIR ../../components/LightEffect ABSOLUTE)
 
-add_library(dut ${PARENT_DIR}/ColorPosts.cpp)
-target_include_directories(dut PUBLIC ${PARENT_DIR}/includes ${PARENT_INCLUDEDIR}/includes )
+add_library(MyLibrary_Static STATIC 
+                            $<TARGET_OBJECTS:ReadingConfigTests> 
+                            )
+add_executable(TestRunner   $<TARGET_OBJECTS:ReadingConfigTests> 
+                            TestMain.cpp 
+                            )
 
-# project (color)
-# add_library(color ${PARENT_INCLUDEDIR}/Color.cpp)
-# target_include_directories(color PUBLIC $ ${PARENT_INCLUDEDIR}/includes )
+target_link_libraries(TestRunner testUtils cJson)
+target_include_directories(TestRunner PUBLIC testUtils) 
+
+add_test(NAME DeviceTests COMMAND 
+                ReadingConfigTests 
+                )

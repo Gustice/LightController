@@ -10,17 +10,24 @@
  * @todo HAL-Port-Classes should countain debug information (some already have)
  *
  */
+#include "esp_netif.h"
 #include "esp_event.h"
 #include "esp_log.h"
 #include "esp_system.h"
 #include "esp_wifi.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "esp_vfs_fat.h"
+#include "esp_spiffs.h"
+#include "sdmmc_cmd.h"
 #include "nvs_flash.h"
+#include "esp_vfs_semihost.h"
 #include <string.h>
 
 #include "lwip/err.h"
 #include "lwip/sys.h"
+#include "mdns.h"
+#include "lwip/apps/netbiosns.h"
 
 #include "Apa102.h"
 #include "Color.h"
@@ -32,6 +39,8 @@
 #include "RotatingIndex.h"
 #include "SoftAp.h"
 #include "Ws2812.h"
+#include "ParamReader.h"
+
 
 extern "C" { // This switch allows the ROS C-implementation to find this main
 void app_main(void);
@@ -144,13 +153,15 @@ static deviceConfig_t deviceConfig = {
     },
 };
 
+factoryInfo_t factoryCfg;
+
 /**
  * @brief Configuration for wifi
  * @details Applied in Access-Point-Mode. Device provides an WiFi Access in this case.
  */
-static wifiApConfig_t apConfig = {
+static wifiConfig_def apConfig = {
     "cLight",   // ssid
-    "FiatLuxx", // password
+    "FiatLux!", // password
     4,          // max_connection
 };              // Connect: http://192.168.4.1/Setup
 
@@ -251,6 +262,26 @@ void RunLEDdemo(void) {
     ESP_LOGI(cModTag, "First Message received");
 }
 
+
+// esp_err_t start_rest_server(const char *base_path);
+
+// static void initialise_mdns(void)
+// {
+//     mdns_init();
+//     mdns_hostname_set(CONFIG_EXAMPLE_MDNS_HOST_NAME);
+//     mdns_instance_name_set(MDNS_INSTANCE);
+
+//     mdns_txt_item_t serviceTxtData[] = {
+//         {"board", "esp32"},
+//         {"path", "/"}
+//     };
+
+//     ESP_ERROR_CHECK(mdns_service_add("ESP32-WebServer", "_http", "_tcp", 80, serviceTxtData,
+//                                      sizeof(serviceTxtData) / sizeof(serviceTxtData[0])));
+// }
+
+
+
 /**
  * @brief LED-Task
  * @details Task for managing LED-Output. Receives processed Colors and applies them
@@ -326,14 +357,47 @@ static void vRefreshLed(void *pvParameters) {
 QuadDecoder *Encoder;
 static void IRAM_ATTR gpio_isr_handler(void *arg) { Encoder->EvalStepSync(); }
 
+static esp_err_t GetChannelSettings(ReqColorIdx_t channel, uint8_t * data, size_t length)
+{
+    ESP_LOGI(cModTag, "Requesting Channel data");
+    
+    return ESP_OK;
+}
+
 /**
- * @brief Enter funktion for underlying OS
+ * @brief Enter function for underlying OS
  *
  */
 void app_main(void) {
+
+    // Initialize NVS
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        ret = nvs_flash_init();
+    }
+    ESP_ERROR_CHECK(ret);
+
+    // ESP_ERROR_CHECK(nvs_flash_init());
+    // ESP_ERROR_CHECK(esp_netif_init());
+    // ESP_ERROR_CHECK(esp_event_loop_create_default());
+    // initialise_mdns();
+    // netbiosns_init();
+    // netbiosns_set_name(CONFIG_EXAMPLE_MDNS_HOST_NAME);
+
+    // ESP_ERROR_CHECK(example_connect());
+    // ESP_ERROR_CHECK(init_fs());
+    // ESP_ERROR_CHECK(start_rest_server(CONFIG_EXAMPLE_WEB_MOUNT_POINT));
+
+    Fs_SetupSpiFFs();
+    Fs_ReadFactoryConfiguration(&factoryCfg);
+    ESP_LOGI(cModTag, "Read Factory Config:\n\tSN: %s\n\tHW: %s\n\tDev: %s", 
+    factoryCfg.SerialNumber, factoryCfg.HwVersion, factoryCfg.DeviceType );
+
+    Init_WebFs();
+
     static InputPort sw1(Sw1Pin);
     static InputPort sw2(Sw2Pin);
-    static InputPort sdCard(SdDetect);
 
     static SpiPort spi(SpiPort::SpiPorts::HSpi, SyncDataOutPin, gpio_num_t::GPIO_NUM_NC,
         SyncClockOutPin, spi_mode_t::mode3);
@@ -357,11 +421,11 @@ void app_main(void) {
     LedDriver = &ledDriver;
     LedStrip = &ledStrip;
 
-    SetupSoftAccessPoint(&apConfig);
     if (sw1.ReadPort() == 0) {
+        ESP_LOGI(cModTag, "Reset wifi parameter");
         ResetWiFiConfig();
-        ESP_LOGD(cModTag, "Reset wifi parameter");
     }
+    SetupSoftAccessPoint(&apConfig);
 
     DacPort dac1(dac_channel_t::DAC_CHANNEL_1);
     DacPort dac2(dac_channel_t::DAC_CHANNEL_2);
@@ -384,7 +448,7 @@ void app_main(void) {
 
     if (xNewWebCommand != NULL && xColorQueue != NULL && xGrayQueue != NULL) {
         static uint8_t taskParam; // Can pass arguments to Task here
-        SetupMyWeb(xColorQueue, xGrayQueue, xNewWebCommand);
+        SetupMyWeb(xColorQueue, xGrayQueue, xNewWebCommand, GetChannelSettings);
         xTaskCreate(vRefreshLed, "RefreshLed", 4096, (void *)taskParam, tskIDLE_PRIORITY, NULL);
     } else {
         ESP_LOGE(cModTag,

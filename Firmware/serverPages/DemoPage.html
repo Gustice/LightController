@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="/normalize.css">
+    <link rel="stylesheet" href="/skeleton.css">
+    <link rel="stylesheet" href="/dark-tango-skeleton.css">
+    <link rel="stylesheet" href="/CommonStyles.css">
+
+    <title>Demo Page for Style evaluation</title>
+</head>
+
+<body>
+    <div class="container darkui1">
+        <div id="WiFiSetup">
+            <div class="row">
+                <h2>WiFi Connect</h2>
+                <p> You can input your WiFi access code, in order to connect your device automatically.
+                    Consider to use a guest network to prevent exposing critical access codes to your network. </p>
+                <p> Note: If you what to reset the WiFi parameter, please press the first button during startup. </p>
+            </div>
+            <div class="row">
+                <div class="eight columns">
+                    <div class="emphasis">
+                        <form onsubmit='return setWifiConfig(this)'>
+                            <div class="row">
+                                <div class="four columns"><label for="ssid">SSID</label></div>
+                                <div class="eight columns"><input class="u-full-width" type="text" id="ssid"
+                                        name="ssid"></div>
+                            </div>
+                            <div class="row">
+                                <div class="four columns"><label for="password">Password</label></div>
+                                <div class="eight columns"><input class="u-full-width" type="password" id="password"
+                                        name="password">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="six columns"><input class="button-primary u-full-width" type="submit"
+                                        value="Submit"></div>
+                                <div class="six columns"><button class="u-full-width" type="button"
+                                        onclick="window.location='${Route_SetupFull}'">Skip</button></div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="row">
+                <h2>Port 1: SyncSerial LED-Stripe</h2>
+                <p>Connects LED stripes with synchronous serial protocol (e.g. APA102 or LC8822). Each LED can be
+                    assigned with a
+                    different color. </p>
+                <form title="RGB-Setup" id="rgbiSyncForm" name="rgbiSync"
+                    onsubmit='return onSubmitColor(this, "/api/Port/RGBISync")'>
+                    <div class="row">
+                    </div>
+                    <div class="row">
+                        <div class="four columns">
+                            <label for="appTo">Apply to ...</label>
+                            <input type="text" class="u-full-width" id="appTo_1" name="appTo" value="1">
+                            <!-- <label for="rgbSelector" id="rgbSelected">Selected Color #000000</label> -->
+                            <input type="color" id="rgbSelector_1" class="u-full-width" oninput="UpdateColor(this);"
+                                style="height: 70px;"><br>
+                            <button class="u-full-width" onclick="">Get Setting</button>
+                            <input class="button-primary u-full-width" type="submit" value="Apply">
+                        </div>
+                        <div class="eight columns">
+                            <table>
+                                <tr>
+                                    <td>
+                                        <button type="button" class="u-full-width" style="background-color: darkred;"
+                                            onclick="rOut_1.value = red_1.value= 255; UpdateColor(this);">Red</button>
+                                        <input type="range" id="red_1"
+                                            oninput="rOut_1.value = this.value; UpdateColor(this);" min="0" max="255"
+                                            step="1" value="0">
+                                    </td>
+                                    <td>
+                                        <button type="button" class="u-full-width" style="background-color: darkgreen;"
+                                            onclick="gOut_1.value = green_1.value= 255; UpdateColor(this);">Green</button>
+                                        <input type="range" id="green_1"
+                                            oninput="gOut_1.value = this.value; UpdateColor(this);" min="0" max="255"
+                                            step="1" value="0">
+                                    </td>
+                                    <td>
+                                        <button type="button" class="u-full-width" style="background-color: darkblue;"
+                                            onclick="bOut_1.value = blue_1.value= 255; UpdateColor(this);">Blue</button>
+                                        <input type="range" id="blue_1"
+                                            oninput="bOut_1.value = this.value; UpdateColor(this);" min="0" max="255"
+                                            step="1" value="0">
+                                    </td>
+                                    <td>
+                                        <button type="button" class="u-full-width"
+                                            style="background-color: gray; padding-left: 10px; padding-right: 10px;"
+                                            onclick="iOut_1.value = intens_1.value= 100; UpdateColor(this);">Intensity</button>
+                                        <input type="range" id="intens_1" oninput="iOut_1.value = this.value" min="0"
+                                            max="100" step="1" value="0">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <input type="number" id="rOut_1" name="R"
+                                            oninput="red_1.value = this.value; UpdateColor(this);" class="u-full-width"
+                                            value="0" min="0" max="255">
+                                    </td>
+                                    <td>
+                                        <input type="number" id="gOut_1" name="G"
+                                            oninput="green_1.value = this.value; UpdateColor(this);"
+                                            class="u-full-width" value="0" min="0" max="255">
+                                    </td>
+                                    <td>
+                                        <input type="number" id="bOut_1" name="B"
+                                            oninput="blue_1.value = this.value; UpdateColor(this);" class="u-full-width"
+                                            value="0" min="0" max="255">
+                                    </td>
+                                    <td>
+                                        <input type="number" id="iOut_1" name="I" oninput="intens_1.value = this.value"
+                                            class="u-full-width" value="0" min="0" max="100">
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="row">
+            <h2>Implementation</h2>
+        </div>
+        <div class="row">
+            <div class="six columns">
+                <h5>This Device includes following interfaces</h5>
+                <ul>
+                    <li>SyncSerial-LED-strip with up to 50 LEDs</li>
+                    <li>AsyncSerial-LED-strip with upt to 50 LEDs </li>
+                    <li>RGBW-LED-strip with upt to 15 LEDs </li>
+                    <li>I2C-LED-expander with 16 gray-values </li>
+                </ul>
+            </div>
+            <div class="six columns">
+                <h5>Please note that the power limitation</h5>
+                <ul>
+                    <li>500 mA using the USB-plug</li>
+                    <li>2A using the power-plug </li>
+                    <li>the RGB-Port bears maximum 200 mA in 12-V-mode</li>
+                </ul>
+                <p>The power limitation of used terminal must not be exceeded</p>
+            </div>
+        </div>
+        <div class="row userNote">
+            <p>This is a Note</p>
+        </div>
+        <div class="row userWarning">
+            <p>This is a Note</p>
+        </div>
+        <div class="row userError">
+            <p>This is a Note</p>
+        </div>
+        <div class="row userSuccess">
+            <p>This is a Note</p>
+        </div>
+    </div>
+</body>
+
+</html>
