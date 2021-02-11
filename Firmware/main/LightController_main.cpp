@@ -49,53 +49,6 @@ void app_main(void);
 /// Tag for logging messages:
 const char *cModTag = "Main";
 
-typedef enum ColorChannels {
-    RGB,
-    RGBW,
-    Gray,
-};
-
-typedef enum DeviceStartMode {
-    RunDemo,
-    StartDark,
-    StartImage,
-};
-
-typedef struct stripConfig_def {
-    uint8_t LedCount;
-    uint16_t Intensity;
-    ColorChannels Channels;
-} stripConfig_t;
-
-typedef struct syncLedConfig_def {
-    stripConfig_t Strip;
-    Color_t Color;
-} syncLedConfig_t;
-
-typedef struct asyncLedConfig_def {
-    stripConfig_t Strip;
-    Color_t Color;
-} asyncLedConfig_t;
-
-typedef struct rgbwLedConfig_def {
-    stripConfig_t Strip;
-    Color_t Color;
-} rgbwLedConfig_t;
-
-typedef struct i2cExpander_def {
-    stripConfig_t Device;
-    uint8_t Address;
-    uint16_t GrayValues[16];
-} i2cExpander_t;
-
-typedef struct deviceConfig_def {
-    DeviceStartMode StartUpMode;
-    syncLedConfig_t SyncLeds;
-    asyncLedConfig_t AsyncLeds;
-    rgbwLedConfig_t RgbStrip;
-    i2cExpander_t I2cExpander;
-} deviceConfig_t;
-
 /// Configuration for
 
 static deviceConfig_t deviceConfig = {
@@ -280,7 +233,7 @@ void RunLEDdemo(void) {
 //                                      sizeof(serviceTxtData) / sizeof(serviceTxtData[0])));
 // }
 
-
+ColorMsg_t responseValue;
 
 /**
  * @brief LED-Task
@@ -360,7 +313,12 @@ static void IRAM_ATTR gpio_isr_handler(void *arg) { Encoder->EvalStepSync(); }
 static esp_err_t GetChannelSettings(ReqColorIdx_t channel, uint8_t * data, size_t length)
 {
     ESP_LOGI(cModTag, "Requesting Channel data");
-    
+    ColorMsg_t * cm = (ColorMsg_t *)data;
+    cm->red = responseValue.red;
+    cm->green = responseValue.green;
+    cm->blue = responseValue.blue;
+    cm->intensity = responseValue.intensity;
+
     return ESP_OK;
 }
 

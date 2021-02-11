@@ -20,8 +20,8 @@ typedef enum RgbChannel {
 };
 
 typedef struct ReqColorIdx_def {
-    RgbChannel channel;
-    uint16_t chIdx;
+    RgbChannel type; 
+    uint16_t chIdx; 
     uint16_t portIdx;
 } ReqColorIdx_t;
 

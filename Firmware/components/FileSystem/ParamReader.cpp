@@ -77,7 +77,7 @@ void unmountSpiFFs(void)
     ESP_LOGI(TAG, "SPIFFS unmounted");
 }
 
-static char *GetFileName(char *file)
+static char *GetFileName(const char *file)
 {
     static char fileName[128];
     sprintf(fileName, "/spiffs/%s", file);
@@ -212,4 +212,36 @@ esp_err_t Fs_ReadFactoryConfiguration(factoryInfo_t *factorySet)
     strcpy((char *)factorySet->HwVersion, HwVersion);
     strcpy((char *)factorySet->DeviceType, DeviceType);
     return ESP_OK;
+}
+
+esp_err_t Fs_ReadDeviceConfiguration(deviceConfig_t *deviceSet)
+{
+    if (!active)
+        return ESP_FAIL;
+
+    // char buf[512]; // Maximum 2 Pages // todo verify
+    // sprintf(buf, "/spiffs/%s", CONFIG_DEVICE_CONFIGURATION_FILENAME);
+    // FILE *f = fopen(buf, "r");
+    // if (f == NULL)
+    // {
+    //     ESP_LOGE(TAG, "Failed to open Factory Configuration");
+    //     return ESP_FAIL;
+    // }
+
+    // memset(buf, 0, sizeof(buf));
+    // size_t rs = fread(buf, 1, sizeof(buf), f);
+
+    // ESP_LOGD(TAG, "ReadElements %d", rs);
+    // ESP_LOGD(TAG, "Read Text %s", buf);
+
+    // cJSON *root = cJSON_Parse(buf);
+    // const char *SerialNumber = cJSON_GetObjectItem(root, "SerialNumber")->valuestring;
+    // const char *HwVersion = cJSON_GetObjectItem(root, "HwVersion")->valuestring;
+    // const char *DeviceType = cJSON_GetObjectItem(root, "DeviceType")->valuestring;
+    // fclose(f);
+
+    // strcpy((char *)deviceSet->SerialNumber, SerialNumber);
+    // strcpy((char *)deviceSet->HwVersion, HwVersion);
+    // strcpy((char *)deviceSet->DeviceType, DeviceType);
+    return ESP_FAIL;
 }

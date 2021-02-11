@@ -79,7 +79,7 @@ async function onGetChannelValue(btn, getUrl) {
     await http.get(getUrl)
         .then(data => {
             SetupUi.showMessage(parentForm, "Data requested ...", 'userSuccess');
-            console.log("Data requested" + data);
+            console.log("Data requested", data);
         })
         .catch(response => {
             console.warn(response);

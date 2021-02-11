@@ -157,11 +157,20 @@ esp_err_t ProcessGrayValuesPost(const char *message) {
 }
 
 esp_err_t ProcessRgbiGet(char *message, char **output) { 
-    ReqColorIdx_t req;
-    uint8_t buffer[sizeof(ColorMsg_t)];
-    esp_err_t ret =  GetChannelSettings(req, buffer, sizeof(buffer));
+    ReqColorIdx_t req {RgbChannel::RgbiSync, 0, 0};
+    ColorMsg_t value;
+    esp_err_t ret =  GetChannelSettings(req, (uint8_t *)&value, sizeof(ColorMsg_t));
 
-    return ESP_OK; 
+    cJSON *root;
+    root = cJSON_CreateObject();
+    cJSON_AddNumberToObject(root, "R", value.red);
+    cJSON_AddNumberToObject(root, "G", value.green);
+    cJSON_AddNumberToObject(root, "B", value.blue);
+    cJSON_AddNumberToObject(root, "I", value.intensity);
+    char *rendered = cJSON_PrintUnformatted(root); // to save pretty whitespaces cJSON_Print
+    cJSON_Delete(root);
+    *output = rendered;
+    return ESP_OK;
 }
 
 esp_err_t ProcessRgbwGet(char *message, char **output) { return ESP_OK; }
