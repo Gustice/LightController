@@ -4,11 +4,19 @@ import re
 
 versatileApiRouts = [   
     '/api/GetStatus/WiFiStatus', 
-    '/api/GetStatus/DeviceConfig'
+    '/api/GetStatus/DeviceConfig',
+    '/api/GetPort/RGBISync',
+    '/api/GetPort/RGBWAsync',
+    '/api/GetPort/RGBWSingle',
+    '/api/GetPort/IValues',
 ]
-nextApiResponse = '{"wifiStatus": "Test"}'
-stationConfig ='{ "StartupMode": "RunDemo", "DisplayMode": "ExpertView", "Outputs": [ { "Type": "SyncLedCh", "Description": "Synchronous serial LED port",  "Strip": { "LedCount": 6, "Intens": 16, "Channel": "RGB" }, "Color": [0,0,0,0] }, { "Type": "AsyncLedCh", "Description": "Asynchronous serial LED port",  "Strip": { "LedCount": 24, "Intens": 16, "Channel": "RGBW" }, "Color": [0,0,0,0] },         { "Type": "RgbStrip", "Description": "Rgb-Strip LED port", "Strip": { "LedCount": 6, "Intens": 1024, "Channel": "RGBW" }, "Color": [0,0,0,0] }, { "Type": "I2cExpander", "Description": "I2C-Expander port", "Device": { "LedCount": 3, "Intens": 1024, "Channel": "Grey" }, "Address": 1, "GrayValues": [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0] } ] }'
 
+nextApiResponse = '{"wifiStatus": "Test"}'
+stationConfig ='{ "StartupMode": "RunDemo", "DisplayMode": "ExpertView", "Outputs": [ { "Type": "SyncLedCh", "Description": "Synchronous serial LED port",  "Strip": { "LedCount": 6, "Intens": 16, "Channel": "RGB" }, "Color": [0,0,0,0] }, { "Type": "AsyncLedCh", "Description": "Asynchronous serial LED port",  "Strip": { "LedCount": 24, "Intens": 16, "Channel": "RGB" }, "Color": [0,0,0,0] },         { "Type": "RgbStrip", "Description": "Rgb-Strip LED port", "Strip": { "LedCount": 6, "Intens": 1024, "Channel": "RGBW" }, "Color": [0,0,0,0] }, { "Type": "I2cExpander", "Description": "I2C-Expander port", "Device": { "LedCount": 3, "Intens": 1024, "Channel": "Grey" }, "Address": 1, "GrayValues": [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0] } ] }'
+
+def load_binary(file):
+    with open(file, 'rb') as file:
+        return file.read()
 
 
 class MockServer(BaseHTTPRequestHandler):
@@ -43,6 +51,8 @@ class MockServer(BaseHTTPRequestHandler):
 
         if self.path == '/':
             self.path = '/welcome.html' # redirect
+        # if self.path == '/favicon.ico':
+        #     self.path = '/favicon.png'
 
         responseType = 'text/html'
         ending = ""
@@ -61,6 +71,15 @@ class MockServer(BaseHTTPRequestHandler):
             responseType = 'application/javascript'
         elif ending == 'css':
             responseType = 'text/css'
+        elif ending == 'png':
+            responseType = 'image/png'
+        elif ending == 'ico':
+            responseType = 'image/*'
+            self.send_response(200)
+            self.send_header('Content-type', responseType)
+            self.end_headers()
+            self.wfile.write(load_binary(self.path[1:]))
+            return
 
         try:
             file_to_open = open(self.path[1:]).read()

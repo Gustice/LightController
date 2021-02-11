@@ -1,4 +1,3 @@
-
 const http = new EasyHttp();
 
 const PwdUi = (function () {
@@ -42,7 +41,7 @@ const PwdUi = (function () {
     }
     
     // type may be  emphasis ,userNote ,userWarning ,userError ,userSuccess ,
-    function showMessage(type, message) {
+    function showMessage(message, type = 'userNote') {
         const basePoint = container;
         const parent = basePoint.parentElement;
         const now = new Date();

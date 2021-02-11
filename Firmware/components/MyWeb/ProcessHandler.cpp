@@ -198,7 +198,6 @@ esp_err_t ProcessWiFiStatusGet(char *message, char **output) {
         *output = "{\"wifiStatus\": \"WiFiParamIsSet\"}";
     return ESP_OK;
 }
-
 esp_err_t ResetWifiConfig(const char *messange) { return ResetWiFiConfig(); }
 
 
@@ -212,7 +211,6 @@ esp_err_t ProcessGetDeviceConfig(char *message, char **output) {
 
     return Fs_ReadEntry("DeviceSetup.json", buffer, length);
 }
-
 
 esp_err_t ProcessSaveToPage(const char *message) {
     int page = std::stoi(message);

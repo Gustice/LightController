@@ -1,5 +1,4 @@
-const http = new easyHttp();
-
+const http = new EasyHttp();
 
 function toRgb(hex) {
     var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -51,7 +50,7 @@ function UpdateColor(sender) {
     sender.preventDefault;
 }
 
-function onSubmitColor(form, SetUrl) {
+function onSubmitColor(form, setUrl) {
     const formData = new FormData(form).entries();
     let jsonObject = {};
     jsonObject["form"] = form.name;
@@ -59,17 +58,34 @@ function onSubmitColor(form, SetUrl) {
     for (const [key, value] of formData) {
         jsonObject[key] = value;
     }
-    console.log(JSON.stringify(jsonObject));
-
-    SetupUi.showMessage(form, "Data sent ...");
+    console.log(jsonObject);
 
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", SetUrl, true);
+    xhr.open("POST", setUrl, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.send(JSON.stringify(jsonObject));
-    return false; //don't submit
+    SetupUi.showMessage(form, "Data sent ...", 'userSuccess');
+    return false;
 }
 
+async function onGetChannelValue(btn, getUrl) {
+    console.log("requesting from %s", getUrl);
+
+    parentForm = btn.parentElement;
+    while (parentForm.tagName != 'FORM') {
+        parentForm = parentForm.parentElement;
+    }
+
+    await http.get(getUrl)
+        .then(data => {
+            SetupUi.showMessage(parentForm, "Data requested ...", 'userSuccess');
+            console.log("Data requested" + data);
+        })
+        .catch(response => {
+            console.warn(response);
+        }); 
+    return false;
+  }
 
 const SetupUi = (function () {
     const controllerSpace = document.getElementById('formSpace');
@@ -84,105 +100,108 @@ const SetupUi = (function () {
         frame.appendChild(grFormGenerator(definition));
         return frame;
     }
-
-    function buildGuiToConfig(err, response) {
-        if (err) {
-            console.log(err);
-        } else {
-
-            const inputParam1 = {
-                number: 1,
-                name: 'rgbiSync',
-                caption: 'SyncSerial LED-Stripe',
-                description: 'Connects LED stripes with synchronous serial protocol (e.g. APA102 or LC8822). Each LED can be assigned with a different color.',
-                channels: [
-                    createColorChannelParam('darkred', 'Red', 'red', 'rOut', 255, 'R'),
-                    createColorChannelParam('darkgreen', 'Green', 'green', 'gOut', 255, 'G'),
-                    createColorChannelParam('darkblue', 'Blue', 'blue', 'bOut', 255, 'B'),
-                    createColorChannelParam('black', 'Intensity', 'intens', 'iOut', 100, 'I')
-                ],
-                route: '/api/Port/RGBISync'
-            };
-            controllerSpace.appendChild(createRgbControl(inputParam1));
-            
-            const inputParam2 = {
-                number: 2,
-                name: 'rgbwAsync',
-                caption: 'AsyncSerial LED-Stripe',
-                description: 'Connects LED stripes with asynchronous serial RTZ-protocol (e.g. WS2812 or SK6812). Each LED can be assigned with a different color.',
-                notes: ['Note: There several Types available on the market. Some with RGBW-Channels, most with RGB-Channels.'],
-                channels: [
-                    createColorChannelParam('darkred', 'Red', 'red', 'rOut', 255, 'R'),
-                    createColorChannelParam('darkgreen', 'Green', 'green', 'gOut', 255, 'G'),
-                    createColorChannelParam('darkblue', 'Blue', 'blue', 'bOut', 255, 'B'),
-                    createColorChannelParam('gray', 'White', 'white', 'wOut', 255, 'W')
-                ],
-                route: '/api/Port/RGBWAsync'
-            };
-            controllerSpace.appendChild(createRgbControl(inputParam2));
-
-            const inputParam3 = {
-                number: 3,
-                name: 'rgbAsync',
-                caption: 'AsyncSerial LED-Stripe',
-                description: 'Connects LED stripes with asynchronous serial RTZ-protocol (e.g. WS2812 or SK6812). Each LED can be assigned with a different color.',
-                notes: ['Note: There several Types available on the market. Some with RGBW-Channels, most with RGB-Channels.'],
-                channels: [
-                    createColorChannelParam('darkred', 'Red', 'red', 'rOut', 255, 'R'),
-                    createColorChannelParam('darkgreen', 'Green', 'green', 'gOut', 255, 'G'),
-                    createColorChannelParam('darkblue', 'Blue', 'blue', 'bOut', 255, 'B'),
-                ],
-                route: '/api/Port/RGBWAsync'
-            };
-            controllerSpace.appendChild(createRgbControl(inputParam3));
-
-            const inputParam4 = {
-                number: 4,
-                name: 'rgbwStrip',
-                caption: 'RGB-LED-Stripe',
-                description: 'Connects ordinary RGB-LED stripes. Whole stripe is illuminated in one color',
-                channels: [
-                    createColorChannelParam('darkred', 'Red', 'red', 'rOut', 255, 'R'),
-                    createColorChannelParam('darkgreen', 'Green', 'green', 'gOut', 255, 'G'),
-                    createColorChannelParam('darkblue', 'Blue', 'blue', 'bOut', 255, 'B'),
-                ],
-                route: '/api/Port/RGBWAsync'
-            };
-            controllerSpace.appendChild(createRgbControl(inputParam4));
-
-
-            const inputParam5 = {
-                number: 5,
-                name: 'rgbwStrip',
-                caption: 'LED-Expander',
-                description: 'Connects LED-driver that are controlled by gray values',
-                channels: {
-                    count: 16,
-                    inLine: 8,
-                    definition: createColorChannelParam('gray', 'Out', 'chV', 'chS', 255, 'G'),
-                },
-                route: '/api/Port/IValues'
-            };
-            controllerSpace.appendChild(createGrControl(inputParam5));
-        }
+    function createRgbChannel(max) {
+        const channels = [
+            createColorChannelParam('darkred', 'Red', 'red', 'rOut', max, 'R'),
+            createColorChannelParam('darkgreen', 'Green', 'green', 'gOut', max, 'G'),
+            createColorChannelParam('darkblue', 'Blue', 'blue', 'bOut', max, 'B'),
+        ];
+        return channels;
     }
 
-    function init() {
-        http.get(ApiGetStatus_DeviceConfig, buildGuiToConfig);
+    function evalDeviceConfig(response) {
+        console.log(response);
+        let num = 1;
+        ports = response.Outputs;
+        ports.forEach(function(element) {
+            if (element.Type == 'SyncLedCh') {
+                let channels = createRgbChannel(255);
+                channels.push(createColorChannelParam('black', 'Intensity', 'intens', 'iOut', 100, 'I'));
+                const inputParam = {
+                    number: num,
+                    name: ChannelType_RGBISync,
+                    caption: element.Description, // something like: 'SyncSerial LED-Stripe',
+                    description: 'Connects LED stripes with synchronous serial protocol (e.g. APA102 or LC8822). Each LED can be assigned with a different color.',
+                    channels: channels,
+                    setRoute: ApiSetPort_RGBISync,
+                    getRoute: ApiGetPort_RGBISync
+                };
+                controllerSpace.appendChild(createRgbControl(inputParam));
+            } else if (element.Type == 'AsyncLedCh') {
+                let channels = createRgbChannel(255);
+                if (element.Strip.Channel == 'RGBW') {
+                    channels.push(createColorChannelParam('gray', 'White', 'white', 'wOut', 255, 'W'));
+                }
+                const inputParam = {
+                    number: num,
+                    name: ChannelType_RGBWAsync,
+                    caption: element.Description, // something like: 'AsyncSerial LED-Stripe',
+                    description: 'Connects LED stripes with asynchronous serial RTZ-protocol (e.g. WS2812 or SK6812). Each LED can be assigned with a different color.',
+                    notes: ['Note: There several Types available on the market. Some with RGBW-Channels, most with RGB-Channels.'],
+                    channels: channels,
+                    setRoute: ApiSetPort_RGBWAsync,
+                    getRoute: ApiGetPort_RGBWAsync
+                };
+                controllerSpace.appendChild(createRgbControl(inputParam));
+            } else if (element.Type == 'RgbStrip') {
+                let channels = createRgbChannel(255);
+                if (element.Strip.Channel == 'RGBW') {
+                    channels.push(createColorChannelParam('gray', 'White', 'white', 'wOut', 255, 'W'));
+                }
+                const inputParam = {
+                    number: num,
+                    name: ChannelType_RGBWSingle,
+                    caption: element.Description, // something like: 'RGB-LED-Stripe',
+                    description: 'Connects ordinary RGB-LED stripes. Whole stripe is illuminated in one color',
+                    channels: channels,
+                    setRoute: ApiSetPort_RGBWSingle,
+                    getRoute: ApiGetPort_RGBWSingle
+                };
+                controllerSpace.appendChild(createRgbControl(inputParam));
+            } else if (element.Type == 'I2cExpander') {
+                const inputParam = {
+                    number: num,
+                    name: ChannelType_IValues,
+                    caption: element.Description, // something like: 'LED-Expander',
+                    description: 'Connects LED-driver that are controlled by gray values',
+                    channels: {
+                        count: 16,
+                        inLine: 8,
+                        definition: createColorChannelParam('gray', 'Out', 'chV', 'chS', 1024, 'G'),
+                    },
+                    setRoute: ApiSetPort_IValues,
+                    getRoute: ApiGetPort_IValues
+                };
+                controllerSpace.appendChild(createGrControl(inputParam));    
+            }
+            num++;
+        })
     }
 
-    function showMessage(anchor, message) {
+    async function init() {
+        await http.get(ApiGetStatus_DeviceConfig)
+            .then(data => evalDeviceConfig(data))
+            .catch(response => {
+                console.warn(response);
+                alert("Couldn't load device Configuration, please contact support");
+            }); 
+    }
+
+    // type may be  emphasis ,userNote ,userWarning ,userError ,userSuccess ,
+    function showMessage(anchor, message, type = 'userNote') {
         const basePoint = document.getElementById(anchor.id);
         const parent = basePoint.parentElement.parentElement;
-                
+        const now = new Date();
+        const stamp = 'VolatileNote' + now.getTime();
+
         const messageObj = document.createElement('div');
-        messageObj.className = 'row userNote';
+        messageObj.className = 'row ' + type;
+        messageObj.id = stamp;
         messageObj.appendChild(document.createTextNode(message));
         
         parent.insertBefore(messageObj, basePoint.parentElement.nextSibling);
-        setTimeout(function() {document.querySelector('.userNote').remove()}, 3000);
+        setTimeout(function() {document.getElementById(stamp).remove()}, 3000);
     }
-    
 
     return {
         init: init,
@@ -191,10 +210,6 @@ const SetupUi = (function () {
 })();
 
 SetupUi.init();
-
-
-
-
 
 function createColorChannelParam(color, text, varName, input, max, objName) {
     sliderParam = {
@@ -221,14 +236,14 @@ function createFormFrame(id, name, action) {
 }
 
 function rgbFormGenerator(param) {
-    function createChannelControl(num){
+    function createChannelControl(num, route){
         const controlTemplate = `
         <div class="four columns">
             <label for="appTo">Apply to ...</label>
             <input type="text" class="u-full-width" id="appTo${num}" name="appTo" value="1">
             <!-- <label for="rgbSelector" id="rgbSelected">Selected Color #000000</label> -->
             <input type="color" id="rgbSelector${num}" class="u-full-width" oninput="UpdateColor(this);" style="height: 70px;"><br>
-            <button class="u-full-width" onclick="">Get Setting</button>
+            <button type="button" class="u-full-width" onclick='return onGetChannelValue(this, "${route}")'>Get Setting</button>
             <input class="button-primary u-full-width" type="submit" value="Apply">
         </div>
         `;
@@ -258,7 +273,8 @@ function rgbFormGenerator(param) {
     const description = param.description;
     const formName = param.name; 
     const formId = `rgbiSyncForm_${num}`;
-    const targetUrl = param.route;
+    const setRoute = param.setRoute;
+    const getRoute = param.getRoute;
     
     let table = document.createElement('table');
     let sliderRow = document.createElement('tr');
@@ -284,9 +300,9 @@ function rgbFormGenerator(param) {
     `;
 
     let form = createFormFrame(formId, formName, )
-    form.setAttribute('onsubmit',`return onSubmitColor(this, "${targetUrl}")`);
+    form.setAttribute('onsubmit',`return onSubmitColor(this, "${setRoute}")`);
     let control = createDivRowFrame();
-    control.innerHTML = createChannelControl(num);
+    control.innerHTML = createChannelControl(num, getRoute);
 
     let slider = document.createElement('div');
     slider.className = "eight columns";
@@ -299,11 +315,11 @@ function rgbFormGenerator(param) {
 }
 
 function grFormGenerator(param) {
-    function createChannelControl(num){
+    function createChannelControl(num, route){
         const controlTemplate = `
         <div class="row">
           <div class="four columns">
-            <button class="u-full-width" onclick="">Get Setting</button>
+            <button type="button" class="u-full-width" onclick='return onGetChannelValue(this, "${route}")'>Get Setting</button>
           </div>
           <div class="four columns">
             <input class="button-primary u-full-width" type="submit" value="Apply">
@@ -326,7 +342,8 @@ function grFormGenerator(param) {
     const description = param.description;
     const formName = param.name; 
     const formId = `rgbiSyncForm_${num}`;
-    const targetUrl = param.route;
+    const setRoute = param.setRoute;
+    const getRoute = param.getRoute;
     
     let table = document.createElement('table');
     
@@ -353,8 +370,8 @@ function grFormGenerator(param) {
     `;
 
     let form = createFormFrame(formId, formName, )
-    form.setAttribute('onsubmit',`return onSubmitColor(this, "${targetUrl}")`);
-    form.innerHTML = createChannelControl(num);
+    form.setAttribute('onsubmit',`return onSubmitColor(this, "${setRoute}")`);
+    form.innerHTML = createChannelControl(num, getRoute);
 
     let slider = document.createElement('div');
     slider.className = "eight columns";
@@ -365,35 +382,49 @@ function grFormGenerator(param) {
     return main;
 }
 
-
-
-function onSave(page) {
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", "/SaveToPage", true);
-    xhr.setRequestHeader('Content-Type', 'application/text');
-    xhr.send(page);
+async function onSave(page) {
+    const save = {Page: page};
+    await http.post(ApiSaveToPage, save)
+        .then( () => {
+            console.warn("Sent object", save);
+            //SetupUi.showMessage(parentForm, "Page saved", 'userSuccess');
+        })
+        .catch(response => {
+            console.warn(response);
+        }); 
   }
   function onResetPages() {
+
+        // await http.post(ApiResetProgram, {})
+    //     .then( () => {
+    //         SetupUi.showMessage(parentForm, "Pages cleared", 'userSuccess');
+    //     })
+    //     .catch(response => {
+    //         console.warn(response);
+    //     }); 
+
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", "/ResetProgramm", true);
+    xhr.open("POST", ApiResetProgram, true);
     xhr.setRequestHeader('Content-Type', 'application/text');
     xhr.send();
   }
 
-  function onGet(form) {
+  async function onGetAllValues(form) {
+
+    // const ApiGetPort_RGBISync
+    // const ApiGetPort_RGBWAsync
+    // const ApiGetPort_RGBWSingle
+    // const ApiGetPort_IValues
+
+    const anchor = document.getElementById('saveSpace');
+    await http.get(ApiGetPort_RGBISync)
+    .then(data => {
+        SetupUi.showMessage(anchor, "Data requested ...", 'userSuccess');
+        console.log("Data requested" + data);
+    })
+    .catch(response => {
+        console.warn(response);
+    }); 
     var SetUrl = "/GetValues/RGBValues"
     console.log("sending to %s", SetUrl);
-
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function () {
-      if (this.readyState != 4) return;
-      if (this.status == 200) {
-        //var data = JSON.parse(this.responseText);
-        console.log(this.responseText);
-      }
-      // end of state change: it can be after some time (async)
-    };
-    xhr.open("GET", SetUrl, true);
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.send();
   }

@@ -8,7 +8,7 @@
             "Strip": {
                 "LedCount": 6,
                 "Intens": 16,
-                "Channel": "RGB"
+                "Channel": "RGBI"
             },
             "Color": [0,0,0,0]
         },
@@ -28,7 +28,7 @@
             "Strip": {
                 "LedCount": 6,
                 "Intens": 1024,
-                "Channel": "RGBW"
+                "Channel": "RGB"
             },
             "Color": [0,0,0,0]
         },
