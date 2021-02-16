@@ -1,6 +1,4 @@
-// #include "Apa102.h"
 #include "TestUtils.h"
-//#include "cJSON.h"
 
 TEST_CASE("Construction of DUT", "[Generic]") {
     REQUIRE (true);
@@ -51,10 +49,10 @@ TEST_CASE("Structured cJSON test in Module", "[cJson]")
         { \"Type\": \"AsyncLedCh\", \"Strip\": { \"LedCount\": 24, \"Intens\": 16, \"Channel\": \"RGBW\" }, \"Color\": [0,0,0,0] } ] }";
 
 
-    cJSON *root = cJSON_Parse(input);
-    const char *startup = cJSON_GetObjectItem(root, "StartupMode")->valuestring;
-    const char *display = cJSON_GetObjectItem(root, "DisplayMode")->valuestring;
-    const char *output = cJSON_GetObjectItem(root, "Outputs");
+    // cJSON *root = cJSON_Parse(input);
+    // const char *startup = cJSON_GetObjectItem(root, "StartupMode")->valuestring;
+    // const char *display = cJSON_GetObjectItem(root, "DisplayMode")->valuestring;
+    // const char *output = cJSON_GetObjectItem(root, "Outputs");
 }
 
 

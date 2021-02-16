@@ -37,7 +37,8 @@
         "algorithm": "cpp",
         "sstream": "cpp",
         "esp_spiffs.h": "c",
-        "utils.h": "c"
+        "utils.h": "c",
+        "portmacro.h": "c"
     },
     "cSpell.words": [
         "attr",

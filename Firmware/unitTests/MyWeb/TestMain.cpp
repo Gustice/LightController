@@ -14,7 +14,6 @@ TEST_CASE("Validating Test with linked cJSON", "[cJson]")
     cJSON_Delete(root);
 }
 
-
 static bool stringIsEqual(const char * expected, const char * actual)
 {
     if(strcmp(expected, actual) == 0)
