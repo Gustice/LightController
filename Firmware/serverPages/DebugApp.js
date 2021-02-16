@@ -35,8 +35,6 @@ function test_Set_IValues()
 }
 
 
-
-
 function test_Get_WiFiStatus()
 {
     // http.get(ApiGetStatus_WiFiStatus, dDisplay);

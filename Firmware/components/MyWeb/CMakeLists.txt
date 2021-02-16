@@ -3,13 +3,4 @@ idf_component_register(SRCS  "MyWeb.cpp"
                        INCLUDE_DIRS "includes" "private"
                        REQUIRES spiffs nvs_flash fatfs lwip esp_http_server MyConnect LightEffect json FileSystem
                     #    EMBED_FILES "WebParts/index.html"
-                    #    "WebParts/RgbSetupFull.html" 
-                    #    "WebParts/GrayControl.html" 
-                    #    "WebParts/RgbiControl.html" 
-                    #    "WebParts/RgbwControl.html" 
-                    #    "WebParts/RgbSingleControl.html" 
-                    #    "WebParts/CommonScripts.js" 
-                    #    "WebParts/CommonStyles.css"
-                    #    "WebParts/WiFiConnectInput.html"
-                    #    "WebParts/favicon.ico"
                        )
