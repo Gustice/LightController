@@ -5,7 +5,7 @@
             "intelliSenseMode": "clang-x64",
             "compilerPath": "C:\\MinGW\\bin\\gcc.exe",
             "includePath": [
-                "${workspaceFolder}/hwMock/**",
+                "${workspaceFolder}/espMock/**",
                 "${workspaceFolder}/include/**",
                 "${workspaceFolder}/cJson/**",
                 "${workspaceFolder}/parts/**",
@@ -18,7 +18,7 @@
             ],
             "browse": {
                 "path": [
-                    "${workspaceFolder}/hwMock/**",
+                    "${workspaceFolder}/espMock/**",
                     "${workspaceFolder}/include/**",
                     "${workspaceFolder}/parts/**",
                     "${workspaceFolder}/../../components/**"

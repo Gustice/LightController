@@ -9,4 +9,9 @@ target_include_directories( ProcessHandlerTests PRIVATE
                 ${PARENT_INCLUDEDIR}/includes
                 ${READER_PARENT_DIR}/include
                 ${CONNECTOR_PARENT_DIR}/include )
-target_link_libraries(ProcessHandlerTests testUtils espMock devMock cJson)
+target_link_libraries(ProcessHandlerTests 
+    testUtils 
+    espMock 
+    devMock 
+    ${CMAKE_SOURCE_DIR}/libcjson.dll.a
+    )
