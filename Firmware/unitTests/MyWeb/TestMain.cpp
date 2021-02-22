@@ -6,7 +6,6 @@
 #include "esp_http_server.h"
 #include "freertos/FreeRTOS.h"
 
-
 static bool stringIsEqual(const char * expected, const char * actual);
 
 TEST_CASE("Validating Test with linked cJSON", "[cJson]") 
@@ -40,11 +39,6 @@ void esp_log_write(esp_log_level_t level, const char* tag, const char* format, .
     
 }
 
-esp_err_t xQueueSend( QueueHandle_t xQueue, const void * const pvItemToQueue, TickType_t xTicksToWait )
-{
-    return ESP_OK;
-}
-
 uint32_t esp_log_timestamp()
 {
     return 0;
@@ -54,4 +48,5 @@ esp_err_t httpd_resp_set_type(httpd_req_t *r, const char *type)
 {
     return ESP_OK;
 }
+
 

@@ -17,13 +17,19 @@ typedef enum RgbChannel {
     RgbwAsync,      // Only one Channel supported
     RgbwPwm,        // May be multiple channels
     I2cExpanderPwm, // May be multiple channels
-};
+} eRgbChannel_t;
 
 typedef struct ReqColorIdx_def {
     RgbChannel type; 
     uint16_t chIdx; 
     uint16_t portIdx;
 } ReqColorIdx_t;
+
+#define ApplyToTargetChannels 5
+#define ApplyToChannelWidth 32
+typedef struct ApplyIndexes_def {
+    uint32_t ApplyTo[ApplyToTargetChannels];
+} ApplyIndexes_t;
 
 typedef struct ColorMsg_def {
     RgbChannel channel;
@@ -33,6 +39,7 @@ typedef struct ColorMsg_def {
     uint8_t white;
     uint8_t intensity;
     uint8_t targetIdx;
+    ApplyIndexes_t apply;
 } ColorMsg_t;
 
 typedef struct GrayValMsg_def {

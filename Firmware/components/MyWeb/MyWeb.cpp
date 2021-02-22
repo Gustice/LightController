@@ -185,7 +185,7 @@ static const httpd_postUri_def postUriHandlers[]{
     {"/api/SaveToPage", ProcessSaveToPage},
     {"/api/ResetProgram", ProcessResetPages},
     {"/api/SetDevice/WiFiConnect",ProcessWiFiStatusSet},
-    {"/api/SetDevice/ResetWiFiConnect", ResetWifiConfig},
+    {"/api/SetDevice/ResetWiFiConnect", ProcessResetWifiConfig},
     {nullptr, nullptr},
 };
 

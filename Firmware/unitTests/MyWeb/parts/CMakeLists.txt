@@ -1,2 +1,0 @@
-add_subdirectory(ReadingConfigTests)
-add_subdirectory(ProcessHandlerTests)

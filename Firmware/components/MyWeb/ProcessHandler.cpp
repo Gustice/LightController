@@ -51,6 +51,56 @@ void SetQueueHandlesForPostH(QueueHandle_t colorQ, QueueHandle_t grayQ, pChannel
     GetChannelSettings = getCbk;
 }
 
+ApplyIndexes_t ParseApplyToString(char * applyTo) // @todo Exception handling badly needed :-/
+{
+    ApplyIndexes_t indexes;
+    memset(&indexes, 0, sizeof(ApplyIndexes_t));
+
+    if (applyTo == nullptr)
+        return indexes;
+    if (strlen(applyTo) == 0)
+        return indexes;
+
+    char * pC; // reference of Comma 
+    char * pCn; // reference to next Comma 
+    char * pD; // reference of Dot
+    int ch, pos;
+    pCn = strtok (applyTo,",");
+    while (pCn != NULL)
+    {
+        pC = pCn;
+        pCn = strtok (NULL,",");
+
+        pD = strchr(pC,'.');
+        if(pD != NULL)
+        {
+            ch = std::stoi(pC);
+            pos = std::stoi(++pD);
+
+            if ((ch <= 0) || (ch > ApplyToTargetChannels))
+                continue;
+            if ((pos <= 0) || (pos > ApplyToChannelWidth))
+                continue;
+            
+            ch -= 1;
+            pos -= 1;
+        }
+        else
+        {
+            int idx = std::stoi(pC);
+
+            if ((idx <= 0) || (idx > ApplyToTargetChannels*ApplyToChannelWidth))
+                continue;
+            idx -= 1;
+            ch = idx / ApplyToChannelWidth;
+            pos = idx % ApplyToChannelWidth;
+        }
+
+        indexes.ApplyTo[ch] |= (1 << pos);
+    }
+    return indexes;
+}
+
 ColorMsg_t SetColorObj(int r, int g, int b, int w, int i) {
     ColorMsg_t ret{
         .channel = RgbChannel::None,
@@ -156,7 +206,7 @@ esp_err_t ProcessGrayValuesPost(const char *message) {
     return ESP_OK;
 }
 
-esp_err_t ProcessRgbiGet(char *message, char **output) { 
+esp_err_t ProcessRgbiGet(char *message, const char **output) { 
     ReqColorIdx_t req {RgbChannel::RgbiSync, 0, 0};
     ColorMsg_t value;
     esp_err_t ret =  GetChannelSettings(req, (uint8_t *)&value, sizeof(ColorMsg_t));
@@ -173,10 +223,10 @@ esp_err_t ProcessRgbiGet(char *message, char **output) {
     return ESP_OK;
 }
 
-esp_err_t ProcessRgbwGet(char *message, char **output) { return ESP_OK; }
-esp_err_t ProcessRgbwSingleGet(char *message, char **output) { return ESP_OK; }
+esp_err_t ProcessRgbwGet(char *message, const char **output) { return ESP_OK; }
+esp_err_t ProcessRgbwSingleGet(char *message, const char **output) { return ESP_OK; }
 
-esp_err_t ProcessGrayValuesGet(char *message, char **output) { return ESP_OK; }
+esp_err_t ProcessGrayValuesGet(char *message, const char **output) { return ESP_OK; }
 
 
 esp_err_t ProcessWiFiStatusSet(const char *message) {
@@ -196,7 +246,7 @@ esp_err_t ProcessWiFiStatusSet(const char *message) {
     return ESP_FAIL;
 }
 
-esp_err_t ProcessWiFiStatusGet(char *message, char **output) {
+esp_err_t ProcessWiFiStatusGet(char *message, const char **output) {
     if (*output != nullptr)
         return ESP_FAIL;
 
@@ -207,10 +257,10 @@ esp_err_t ProcessWiFiStatusGet(char *message, char **output) {
         *output = "{\"wifiStatus\": \"WiFiParamIsSet\"}";
     return ESP_OK;
 }
-esp_err_t ResetWifiConfig(const char *messange) { return ResetWiFiConfig(); }
+esp_err_t ProcessResetWifiConfig(const char *messange) { return ResetWiFiConfig(); }
 
 
-esp_err_t ProcessGetDeviceConfig(char *message, char **output) {
+esp_err_t ProcessGetDeviceConfig(char *message, const char **output) {
     if (*output != nullptr)
         return ESP_FAIL;
 

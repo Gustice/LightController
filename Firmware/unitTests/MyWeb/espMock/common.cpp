@@ -22,4 +22,3 @@ int printfLine(char const *format, ...) { // This takes VarArgs
     va_end(args);
     return (retVal);
 }
-
