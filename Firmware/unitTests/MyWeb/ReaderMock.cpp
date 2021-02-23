@@ -21,8 +21,11 @@ esp_err_t ResetWiFiConfig(void)
     return ESP_OK;
 }
 
+ColorMsg_t LastMessage;
+
 esp_err_t xQueueSend( QueueHandle_t xQueue, const void * const pvItemToQueue, TickType_t xTicksToWait )
 {
+    memcpy(&LastMessage, pvItemToQueue, sizeof(ColorMsg_t));
     return ESP_OK;
 }
 

@@ -5,7 +5,6 @@ add_subdirectory(cJSON)
 add_subdirectory(include)
 add_subdirectory(espMock)
 
-
 project (dut)
 get_filename_component(DUT_PARENT_DIR ../../components/MyWeb ABSOLUTE)
 get_filename_component(READER_PARENT_DIR ../../components/FileSystem ABSOLUTE)
@@ -16,6 +15,7 @@ message( "### ALl Sources " ${sources})
 add_executable(TestRunner   "TestMain.cpp"
                             "ReaderMock.cpp"
                             ${DUT_PARENT_DIR}"/ProcessHandler.cpp"
+                            "parts/ParseApplyToStringTests.cpp"
                             "parts/SetRequestTests.cpp"
                             "parts/parseFileTest.cpp"
                             )

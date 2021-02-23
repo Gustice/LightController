@@ -33,14 +33,6 @@ esp_err_t set_content_type_from_file(httpd_req_t *req, const char *filepath) {
     return httpd_resp_set_type(req, type);
 }
 
-void ParseJson(const char *buf, const char **labels, int *values, int length) {
-    cJSON *root = cJSON_Parse(buf);
-    for (size_t i = 0; i < length; i++) {
-        values[i] = std::stoi(cJSON_GetObjectItem(root, labels[i])->valuestring);
-    }
-    cJSON_Delete(root);
-}
-
 static QueueHandle_t xColorQueue;
 static QueueHandle_t xGrayQueue;
 static esp_err_t (*GetChannelSettings)(ReqColorIdx_t channel, uint8_t * data, size_t length);
@@ -51,15 +43,12 @@ void SetQueueHandlesForPostH(QueueHandle_t colorQ, QueueHandle_t grayQ, pChannel
     GetChannelSettings = getCbk;
 }
 
-ApplyIndexes_t ParseApplyToString(char * applyTo) // @todo Exception handling badly needed :-/
+void ParseApplyToString(char * applyTo, ApplyIndexes_t * indexes) // @todo Exception handling badly needed :-/
 {
-    ApplyIndexes_t indexes;
-    memset(&indexes, 0, sizeof(ApplyIndexes_t));
-
-    if (applyTo == nullptr)
-        return indexes;
+    if (applyTo == nullptr || indexes == nullptr)
+        return;
     if (strlen(applyTo) == 0)
-        return indexes;
+        return;
 
     char * pC; // reference of Comma 
     char * pCn; // reference to next Comma 
@@ -96,22 +85,8 @@ ApplyIndexes_t ParseApplyToString(char * applyTo) // @todo Exception handling ba
             pos = idx % ApplyToChannelWidth;
         }
 
-        indexes.ApplyTo[ch] |= (1 << pos);
+        indexes->ApplyTo[ch] |= (1 << pos);
     }
-    return indexes;
-}
-
-ColorMsg_t SetColorObj(int r, int g, int b, int w, int i) {
-    ColorMsg_t ret{
-        .channel = RgbChannel::None,
-        .red = (uint8_t)r,
-        .green = (uint8_t)g,
-        .blue = (uint8_t)b,
-        .white = (uint8_t)w,
-        .intensity = (uint8_t)i,
-        .targetIdx = 0,
-    };
-    return ret;
 }
 
 void SendColorQueue(ColorMsg_t msg) {
@@ -126,61 +101,90 @@ void SendColorQueue(ColorMsg_t msg) {
     }
 }
 
-esp_err_t ProcessRgbiPost(const char *message) {
+esp_err_t ProcessRgbiPost(const char *message, const char **output) {
+    ColorMsg_t msg;
+    memset(&msg, 0, sizeof(ColorMsg_t));
+    msg.channel = RgbChannel::RgbiSync;
+    
     const int size = 4;
     const char *labels[size] = {"R", "G", "B", "I"};
-    int values[size];
-    ParseJson(message, labels, values, size);
+    uint8_t * values[size] = {&(msg.red), &(msg.green), &(msg.blue), &(msg.intensity)};
 
     cJSON *root = cJSON_Parse(message);
-    const char *apply = cJSON_GetObjectItem(root, "applyTo")->valuestring;
+    for (size_t i = 0; i < size; i++) {
+        cJSON * e = cJSON_GetObjectItem(root, labels[i]);
+        int n = std::stoi(e->valuestring);
+        *(values[i]) = (uint8_t)n;
+    }
+    char *apply = cJSON_GetObjectItem(root, "appTo")->valuestring;
+    ParseApplyToString(apply, &msg.apply);
     cJSON_Delete(root);
-
-    ColorMsg_t msg = SetColorObj(values[0], values[1], values[2], 0, values[3]);
-
-    msg.targetIdx = 0; // All
-    msg.channel = RgbChannel::RgbiSync;
 
     SendColorQueue(msg);
     return ESP_OK;
 }
 
-esp_err_t ProcessRgbwPost(const char *message) {
-    const int size = 4;
-    const char *labels[size] = {"R", "G", "B", "W"};
-    int values[size];
-    ParseJson(message, labels, values, size);
-
-    cJSON *root = cJSON_Parse(message);
-    const char *apply = cJSON_GetObjectItem(root, "applyTo")->valuestring;
-    cJSON_Delete(root);
-
-    ColorMsg_t msg = SetColorObj(values[0], values[1], values[2], values[3], 0);
+esp_err_t ProcessRgbwPost(const char *message, const char **output) {
+    ColorMsg_t msg;
+    memset(&msg, 0, sizeof(ColorMsg_t));
     msg.channel = RgbChannel::RgbwAsync;
-
-    SendColorQueue(msg);
-    return ESP_OK;
-}
-
-esp_err_t ProcessRgbwSinglePost(const char *message) {
+    
     const int size = 4;
     const char *labels[size] = {"R", "G", "B", "W"};
-    int values[size];
-    ParseJson(message, labels, values, size);
+    uint8_t * values[size] = {&(msg.red), &(msg.green), &(msg.blue), &(msg.white)};
+    
+    cJSON *root = cJSON_Parse(message);
+    for (size_t i = 0; i < size; i++) {
+        cJSON * e = cJSON_GetObjectItem(root, labels[i]);
+        int n = std::stoi(e->valuestring);
+        *(values[i]) = (uint8_t)n;
+    }
 
-    ColorMsg_t msg = SetColorObj(values[0], values[1], values[2], values[3], 0);
-    msg.channel = RgbChannel::RgbwPwm;
+    char *apply = cJSON_GetObjectItem(root, "appTo")->valuestring;
+    ParseApplyToString(apply, &msg.apply);
+    cJSON_Delete(root);
 
     SendColorQueue(msg);
     return ESP_OK;
 }
 
-esp_err_t ProcessGrayValuesPost(const char *message) {
+esp_err_t ProcessRgbwSinglePost(const char *message, const char **output) {
+    ColorMsg_t msg;
+    memset(&msg, 0, sizeof(ColorMsg_t));
+    msg.channel = RgbChannel::RgbwPwm;
+    
+    const int size = 4;
+    const char *labels[size] = {"R", "G", "B", "W"};
+    uint8_t * values[size] = {&(msg.red), &(msg.green), &(msg.blue), &(msg.white)};
+
+    cJSON *root = cJSON_Parse(message);
+    for (size_t i = 0; i < size; i++) {
+        cJSON * e = cJSON_GetObjectItem(root, labels[i]);
+        int n = std::stoi(e->valuestring);
+        *(values[i]) = (uint8_t)n;
+    }
+
+    char *apply = cJSON_GetObjectItem(root, "appTo")->valuestring;
+    ParseApplyToString(apply, &msg.apply);
+    cJSON_Delete(root);
+
+    SendColorQueue(msg);
+    return ESP_OK;
+}
+
+esp_err_t ProcessGrayValuesPost(const char *message, const char **output) {
     const int size = 16;
     const char *labels[size] = {"G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "G9", "G10", "G11",
         "G12", "G13", "G14", "G15", "G16"};
     int values[size];
-    ParseJson(message, labels, values, size);
+
+    cJSON *root = cJSON_Parse(message);
+    for (size_t i = 0; i < size; i++) {
+        cJSON * e = cJSON_GetObjectItem(root, labels[i]);
+        int n = std::stoi(e->valuestring);
+        values[i] = (uint8_t)n;
+    }
+
     GrayValMsg_t msg;
     msg.channel = RgbChannel::I2cExpanderPwm;
     for (size_t i = 0; i < size; i++) {
@@ -190,9 +194,9 @@ esp_err_t ProcessGrayValuesPost(const char *message) {
     msg.intensity = 0;
     msg.targetIdx = 0;
 
-    ESP_LOGI(cModTag, "Light control: Ch1..8 = %d, %d, %d, %d, %d, %d, %d, %d", msg.gray[0],
+    ESP_LOGD(cModTag, "Light control: Ch1..8 = %d, %d, %d, %d, %d, %d, %d, %d", msg.gray[0],
         msg.gray[1], msg.gray[2], msg.gray[3], msg.gray[4], msg.gray[5], msg.gray[6], msg.gray[7]);
-    ESP_LOGI(cModTag, "Light control: Ch9..16 = %d, %d, %d, %d, %d, %d, %d, %d", msg.gray[8],
+    ESP_LOGD(cModTag, "Light control: Ch9..16 = %d, %d, %d, %d, %d, %d, %d, %d", msg.gray[8],
         msg.gray[9], msg.gray[10], msg.gray[11], msg.gray[12], msg.gray[13], msg.gray[14],
         msg.gray[15]);
 
@@ -229,7 +233,7 @@ esp_err_t ProcessRgbwSingleGet(char *message, const char **output) { return ESP_
 esp_err_t ProcessGrayValuesGet(char *message, const char **output) { return ESP_OK; }
 
 
-esp_err_t ProcessWiFiStatusSet(const char *message) {
+esp_err_t ProcessWiFiStatusSet(const char *message, const char ** output) {
     WifiConfig_t config;
     memset(&config, 0, sizeof(WifiConfig_t));
 
@@ -257,7 +261,9 @@ esp_err_t ProcessWiFiStatusGet(char *message, const char **output) {
         *output = "{\"wifiStatus\": \"WiFiParamIsSet\"}";
     return ESP_OK;
 }
-esp_err_t ProcessResetWifiConfig(const char *messange) { return ResetWiFiConfig(); }
+esp_err_t ProcessResetWifiConfig(const char *messange, const char ** output) { 
+    return ResetWiFiConfig(); 
+}
 
 
 esp_err_t ProcessGetDeviceConfig(char *message, const char **output) {
