@@ -28,6 +28,8 @@ typedef struct ReqColorIdx_def {
 #define ApplyToTargetChannels 5
 #define ApplyToChannelWidth 32
 typedef struct ApplyIndexes_def {
+    uint16_t Items;
+    uint16_t Errors;
     uint32_t ApplyTo[ApplyToTargetChannels];
 } ApplyIndexes_t;
 

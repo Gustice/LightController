@@ -11,35 +11,41 @@ TEST_CASE("Evaluate String Functions", "[Basics]") {
     CHECK(4 == std::stoi("4 .3   "));
 }
 
-bool IndexesAreEqual(ApplyIndexes_t * expected, ApplyIndexes_t * actual);
+bool IndexesAreEqual(const ApplyIndexes_t * expected, const ApplyIndexes_t * actual);
 
 
 TEST_CASE("Parse no significant data -> Nor Errors", "[ApplyParse]") {
-    ApplyIndexes_t const zeroIdx = {{0,0,0,0,0,}};
-    ApplyIndexes_t idx = {{0,0,0,0,0,}};
+    ApplyIndexes_t const zeroIdx = {0,0, {0,0,0,0,0,}};
+    ApplyIndexes_t idx = {0,0, {0,0,0,0,0,}};
     char input[128];
 
     SECTION("Zero-Pointer") {
         ParseApplyToString(nullptr, &idx);
+        CHECK( idx.Errors == 1 );
     }
     SECTION("Parse empty string") {
         strcpy(input, "");
         ParseApplyToString(input, &idx);
+        CHECK( idx.Errors == 0 );
     }
     SECTION("only zeros or negative numbers") {
         strcpy(input, "0,-1,-2,0");
         ParseApplyToString(input, &idx);
+        CHECK( idx.Errors == 4 );
     }
     SECTION("only zeros or negative numbers with whitespaces") {
-        strcpy(input, " 0,-1 ,  -2,0  ");
+        strcpy(input, " 0,-1 , -4, -2,0  ");
         ParseApplyToString(input, &idx);
+        CHECK( idx.Errors == 5 );
     }
     SECTION("too big numbers") {
         strcpy(input, " 0,161,8000");
         ParseApplyToString(input, &idx);
+        CHECK( idx.Errors == 3 );
     }
-    int result = memcmp(&idx, &zeroIdx, sizeof(ApplyIndexes_t));
-    REQUIRE(result == 0);
+
+    CHECK( IndexesAreEqual(&zeroIdx, &idx) );
+    CHECK( idx.Items == 0 );
 }
 
 TEST_CASE("Wrong input in different format -> Exceptions", "[ApplyParse]")
@@ -64,110 +70,125 @@ TEST_CASE("Wrong input in different format -> Exceptions", "[ApplyParse]")
 
 TEST_CASE("Single Values -> Nor Error", "[ApplyParse]") {
     ApplyIndexes_t *compIdx;
-    ApplyIndexes_t idx = {{0,0,0,0,0,}};
+    ApplyIndexes_t idx = {0,0, {0,0,0,0,0,}};
     char input[128];
 
     SECTION("Single Value") {
         strcpy(input, "1");
         ParseApplyToString(input, &idx);
-        static ApplyIndexes_t comp1 = {{0x00000001, 0, 0, 0, 0}};
+        static ApplyIndexes_t comp1 = {0,0, {0x00000001, 0, 0, 0, 0}};
         compIdx = &comp1;
+        CHECK( idx.Items == 1 );
     }
     SECTION("Single Channel Value") {
         strcpy(input, "1.1");
         ParseApplyToString(input, &idx);
-        static ApplyIndexes_t comp2 = {{1, 0, 0, 0, 0}};
+        static ApplyIndexes_t comp2 = {0,0, {1, 0, 0, 0, 0}};
         compIdx = &comp2;
+        CHECK( idx.Items == 1 );
     }
     SECTION("invalid single Value") {
         strcpy(input, "-1");
         ParseApplyToString(input, &idx);
-        static ApplyIndexes_t comp2 = {{0, 0, 0, 0, 0}};
+        static ApplyIndexes_t comp2 = {0,0, {0, 0, 0, 0, 0}};
         compIdx = &comp2;
+        CHECK( idx.Errors == 1 );
     }
-    int result = memcmp(&idx, compIdx, sizeof(ApplyIndexes_t));
-    REQUIRE( IndexesAreEqual(compIdx, &idx) );
+
+    CHECK( IndexesAreEqual(&idx, compIdx) );
 }
 
 TEST_CASE("Simple Comma seperated Lists -> Nor Error", "[ApplyParse]") {
     ApplyIndexes_t *compIdx;
-    ApplyIndexes_t idx = {{0,0,0,0,0,}};
+    ApplyIndexes_t idx = {0,0, {0,0,0,0,0,}};
     char input[128];
 
     SECTION("simple list") {
         SECTION("simple list in tight definition") {
             strcpy(input, "1,2,3,32");
             ParseApplyToString(input, &idx);
+            CHECK( idx.Items == 4 );
         }
         SECTION("simple list with whitespaces") {
             strcpy(input, " 1,2 ,   3,32   ");
             ParseApplyToString(input, &idx);
+            CHECK( idx.Items == 4 );
         }
-        static ApplyIndexes_t comp1 = {{0x80000007, 0, 0, 0, 0}};
+        static ApplyIndexes_t comp1 = {0,0, {0x80000007, 0, 0, 0, 0}};
         compIdx = &comp1;
     }
     SECTION("inverted order") {
         SECTION("inverted order in tight definition") {
             strcpy(input, "31,6,5,4");
             ParseApplyToString(input, &idx);
+            CHECK( idx.Items == 4 );
         }
         SECTION("inverted order with whitespaces") {
             strcpy(input, "31 ,  6, 5  ,   4 ");
             ParseApplyToString(input, &idx);
+            CHECK( idx.Items == 4 );
         }
-        static ApplyIndexes_t comp2 = {{0x40000038, 0, 0, 0, 0}};
+        static ApplyIndexes_t comp2 = {0,0, {0x40000038, 0, 0, 0, 0}};
         compIdx = &comp2;
     }
     SECTION("First bits of channels") {
         strcpy(input, "1,33,65,97,129");
         ParseApplyToString(input, &idx);
-        static ApplyIndexes_t comp2 = {{1, 1, 1, 1, 1}};
+        static ApplyIndexes_t comp2 = {0,0, {1, 1, 1, 1, 1}};
         compIdx = &comp2;
+        CHECK( idx.Items == 5 );
     }
     SECTION("Last bits of channels") {
         strcpy(input, "32,64,96,128,160");
         ParseApplyToString(input, &idx);
-        static ApplyIndexes_t comp2 = {{0x80000000, 0x80000000, 0x80000000, 0x80000000, 0x80000000}};
+        static ApplyIndexes_t comp2 = {0,0, {0x80000000, 0x80000000, 0x80000000, 0x80000000, 0x80000000}};
         compIdx = &comp2;
+        CHECK( idx.Items == 5 );
     }
     int result = memcmp(&idx, compIdx, sizeof(ApplyIndexes_t));
     REQUIRE( IndexesAreEqual(compIdx, &idx) );
+    CHECK( idx.Errors == 0 );
 }
 
 TEST_CASE("Complex Comma seperated Lists -> Nor Error", "[ApplyParse]") {
     ApplyIndexes_t *compIdx;
-    ApplyIndexes_t idx = {{0,0,0,0,0,}};
+    ApplyIndexes_t idx = {0,0, {0,0,0,0,0,}};
     char input[128];
 
     SECTION("simple list") {
         SECTION("simple list in tight definition") {
             strcpy(input, "1.1,1.2,2.3");
             ParseApplyToString(input, &idx);
+            CHECK( idx.Items == 3 );
         }
         SECTION("simple list with whitespaces") {
             strcpy(input, " 1.1 ,1 . 2, 2 . 3 ");
             ParseApplyToString(input, &idx);
+            CHECK( idx.Items == 3 );
         }
-        static ApplyIndexes_t comp1 = {{0x00000003, 0x00000004, 0, 0, 0}};
+        static ApplyIndexes_t comp1 = {0,0, {0x00000003, 0x00000004, 0, 0, 0}};
         compIdx = &comp1;
     }
     SECTION("First bits of channels") {
         strcpy(input, "1.1,2.1,3.1,4.1,5.1");
         ParseApplyToString(input, &idx);
-        static ApplyIndexes_t comp2 = {{1, 1, 1, 1, 1}};
+        static ApplyIndexes_t comp2 = {0,0, {1, 1, 1, 1, 1}};
         compIdx = &comp2;
+        CHECK( idx.Items == 5 );
     }
     SECTION("Last bits of channels") {
         strcpy(input, "1.32,2.32,3.32,4.32,5.32");
         ParseApplyToString(input, &idx);
-        static ApplyIndexes_t comp2 = {{0x80000000, 0x80000000, 0x80000000, 0x80000000, 0x80000000}};
+        static ApplyIndexes_t comp2 = {0,0, {0x80000000, 0x80000000, 0x80000000, 0x80000000, 0x80000000}};
         compIdx = &comp2;
+        CHECK( idx.Items == 5 );
     }
     int result = memcmp(&idx, compIdx, sizeof(ApplyIndexes_t));
     REQUIRE( IndexesAreEqual(compIdx, &idx) );
+    CHECK( idx.Errors == 0 );
 }
 
-bool IndexesAreEqual(ApplyIndexes_t * expected, ApplyIndexes_t * actual)
+bool IndexesAreEqual(const ApplyIndexes_t * expected, const ApplyIndexes_t * actual)
 {
     char buffer[128];
     for (size_t i = 0; i < ApplyToTargetChannels; i++) {

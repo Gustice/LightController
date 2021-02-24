@@ -43,10 +43,20 @@ void SetQueueHandlesForPostH(QueueHandle_t colorQ, QueueHandle_t grayQ, pChannel
     GetChannelSettings = getCbk;
 }
 
+/**
+ * @brief Parse Apply-String in complex mode
+ * @details Tries to parse comma seperated numbers in format: "1,2,3" or "1.1,1.2" 
+ *      in arbitrary order or format
+ * 
+ * @param applyTo list of indexes to parse and translate to index-variable
+ * @param indexes container to place found indexes in
+ */
 void ParseApplyToString(char * applyTo, ApplyIndexes_t * indexes) // @todo Exception handling badly needed :-/
 {
-    if (applyTo == nullptr || indexes == nullptr)
+    if (applyTo == nullptr || indexes == nullptr) {
+        indexes->Errors++;
         return;
+    } 
     if (strlen(applyTo) == 0)
         return;
 
@@ -66,10 +76,14 @@ void ParseApplyToString(char * applyTo, ApplyIndexes_t * indexes) // @todo Excep
             ch = std::stoi(pC);
             pos = std::stoi(++pD);
 
-            if ((ch <= 0) || (ch > ApplyToTargetChannels))
+            if ((ch <= 0) || (ch > ApplyToTargetChannels)) {
+                indexes->Errors++;
                 continue;
-            if ((pos <= 0) || (pos > ApplyToChannelWidth))
+            }
+            if ((pos <= 0) || (pos > ApplyToChannelWidth)) {
+                indexes->Errors++;
                 continue;
+            }
             
             ch -= 1;
             pos -= 1;
@@ -78,14 +92,17 @@ void ParseApplyToString(char * applyTo, ApplyIndexes_t * indexes) // @todo Excep
         {
             int idx = std::stoi(pC);
 
-            if ((idx <= 0) || (idx > ApplyToTargetChannels*ApplyToChannelWidth))
+            if ((idx <= 0) || (idx > ApplyToTargetChannels*ApplyToChannelWidth)) {
+                indexes->Errors++;
                 continue;
+            }
             idx -= 1;
             ch = idx / ApplyToChannelWidth;
             pos = idx % ApplyToChannelWidth;
         }
 
         indexes->ApplyTo[ch] |= (1 << pos);
+        indexes->Items++;
     }
 }
 
@@ -120,6 +137,10 @@ esp_err_t ProcessRgbiPost(const char *message, const char **output) {
     ParseApplyToString(apply, &msg.apply);
     cJSON_Delete(root);
 
+    // Apply allways to first item if no items are Set and nor errors occurred
+    if (msg.apply.Items == 0 && msg.apply.Errors == 0)
+        msg.apply.ApplyTo[0] = 1;
+        
     SendColorQueue(msg);
     return ESP_OK;
 }
@@ -144,6 +165,10 @@ esp_err_t ProcessRgbwPost(const char *message, const char **output) {
     ParseApplyToString(apply, &msg.apply);
     cJSON_Delete(root);
 
+    // Apply allways to first item if no items are Set and nor errors occurred
+    if (msg.apply.Items == 0 && msg.apply.Errors == 0)
+        msg.apply.ApplyTo[0] = 1;
+
     SendColorQueue(msg);
     return ESP_OK;
 }
@@ -167,6 +192,10 @@ esp_err_t ProcessRgbwSinglePost(const char *message, const char **output) {
     char *apply = cJSON_GetObjectItem(root, "appTo")->valuestring;
     ParseApplyToString(apply, &msg.apply);
     cJSON_Delete(root);
+
+    // Apply allways to first item if no items are Set and nor errors occurred
+    if (msg.apply.Items == 0 && msg.apply.Errors == 0)
+        msg.apply.ApplyTo[0] = 1;
 
     SendColorQueue(msg);
     return ESP_OK;
