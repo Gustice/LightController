@@ -12,7 +12,7 @@ typedef struct FileContext_def {
 
 typedef const FileContext_t (*fSourceHandle)(void);
 typedef esp_err_t (*pProcessPost)(const char *, const char **);
-typedef esp_err_t (*pProcessGet)(char *, const char **);
+typedef esp_err_t (*pProcessGet)(const char *, const char **);
 
 typedef struct httpd_uriPart_def {
     /** The URI to handle */

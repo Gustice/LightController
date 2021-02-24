@@ -17,6 +17,7 @@ add_executable(TestRunner   "TestMain.cpp"
                             ${DUT_PARENT_DIR}"/ProcessHandler.cpp"
                             "parts/ParseApplyToStringTests.cpp"
                             "parts/SetRequestTests.cpp"
+                            "parts/GetRequestTests.cpp"
                             "parts/parseFileTest.cpp"
                             )
 target_include_directories(TestRunner PUBLIC testUtils cJSON

@@ -173,6 +173,7 @@ esp_err_t ProcessRgbwSinglePost(const char *message, const char **output) {
 }
 
 esp_err_t ProcessGrayValuesPost(const char *message, const char **output) {
+    GrayValMsg_t msg;
     const int size = 16;
     const char *labels[size] = {"G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "G9", "G10", "G11",
         "G12", "G13", "G14", "G15", "G16"};
@@ -182,15 +183,9 @@ esp_err_t ProcessGrayValuesPost(const char *message, const char **output) {
     for (size_t i = 0; i < size; i++) {
         cJSON * e = cJSON_GetObjectItem(root, labels[i]);
         int n = std::stoi(e->valuestring);
-        values[i] = (uint8_t)n;
+        msg.gray[i] = (uint8_t)n;
     }
-
-    GrayValMsg_t msg;
     msg.channel = RgbChannel::I2cExpanderPwm;
-    for (size_t i = 0; i < size; i++) {
-        msg.gray[i] = (uint8_t)values[i];
-    }
-
     msg.intensity = 0;
     msg.targetIdx = 0;
 
@@ -210,27 +205,77 @@ esp_err_t ProcessGrayValuesPost(const char *message, const char **output) {
     return ESP_OK;
 }
 
-esp_err_t ProcessRgbiGet(char *message, const char **output) { 
+esp_err_t ProcessRgbiGet(const char *message, const char **output) { 
     ReqColorIdx_t req {RgbChannel::RgbiSync, 0, 0};
     ColorMsg_t value;
     esp_err_t ret =  GetChannelSettings(req, (uint8_t *)&value, sizeof(ColorMsg_t));
 
     cJSON *root;
     root = cJSON_CreateObject();
-    cJSON_AddNumberToObject(root, "R", value.red);
-    cJSON_AddNumberToObject(root, "G", value.green);
-    cJSON_AddNumberToObject(root, "B", value.blue);
-    cJSON_AddNumberToObject(root, "I", value.intensity);
-    char *rendered = cJSON_PrintUnformatted(root); // to save pretty whitespaces cJSON_Print
+    const int size = 4;
+    const char *labels[size] = {"R", "G", "B", "I"};
+    uint8_t * values[size] = {&(value.red), &(value.green), &(value.blue), &(value.intensity)};
+    for (size_t i = 0; i < size; i++) {
+        cJSON_AddNumberToObject(root, labels[i], *(values[i]));
+    }
+    *output = cJSON_PrintUnformatted(root); // to save pretty whitespaces cJSON_Print
     cJSON_Delete(root);
-    *output = rendered;
     return ESP_OK;
 }
 
-esp_err_t ProcessRgbwGet(char *message, const char **output) { return ESP_OK; }
-esp_err_t ProcessRgbwSingleGet(char *message, const char **output) { return ESP_OK; }
+esp_err_t ProcessRgbwGet(const char *message, const char **output) { 
+    ReqColorIdx_t req {RgbChannel::RgbwAsync, 0, 0};
+    ColorMsg_t value;
+    esp_err_t ret =  GetChannelSettings(req, (uint8_t *)&value, sizeof(ColorMsg_t));
 
-esp_err_t ProcessGrayValuesGet(char *message, const char **output) { return ESP_OK; }
+    cJSON *root;
+    root = cJSON_CreateObject();
+    const int size = 4;
+    const char *labels[size] = {"R", "G", "B", "W"};
+    uint8_t * values[size] = {&(value.red), &(value.green), &(value.blue), &(value.white)};
+    for (size_t i = 0; i < size; i++) {
+        cJSON_AddNumberToObject(root, labels[i], *(values[i]));
+    }
+    *output = cJSON_PrintUnformatted(root); // to save pretty whitespaces cJSON_Print
+    cJSON_Delete(root);
+    return ESP_OK;
+}
+
+esp_err_t ProcessRgbwSingleGet(const char *message, const char **output) { 
+    ReqColorIdx_t req {RgbChannel::RgbwPwm, 0, 0};
+    ColorMsg_t value;
+    esp_err_t ret =  GetChannelSettings(req, (uint8_t *)&value, sizeof(ColorMsg_t));
+
+    cJSON *root;
+    root = cJSON_CreateObject();
+    const int size = 4;
+    const char *labels[size] = {"R", "G", "B", "W"};
+    uint8_t * values[size] = {&(value.red), &(value.green), &(value.blue), &(value.white)};
+    for (size_t i = 0; i < size; i++) {
+        cJSON_AddNumberToObject(root, labels[i], *(values[i]));
+    }
+    *output = cJSON_PrintUnformatted(root); // to save pretty whitespaces cJSON_Print
+    cJSON_Delete(root);
+    return ESP_OK;
+}
+
+esp_err_t ProcessGrayValuesGet(const char *message, const char **output) { 
+    ReqColorIdx_t req {RgbChannel::I2cExpanderPwm, 0, 0};
+    GrayValMsg_t value;
+    esp_err_t ret =  GetChannelSettings(req, (uint8_t *)&value, sizeof(GrayValMsg_t));
+
+    cJSON *root;
+    root = cJSON_CreateObject();
+    const int size = 16;
+    const char *labels[size] = {"G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", 
+                                "G9", "G10", "G11", "G12", "G13", "G14", "G15", "G16"};
+    for (size_t i = 0; i < size; i++) {
+        cJSON_AddNumberToObject(root, labels[i], value.gray[i]);
+    }
+    *output = cJSON_PrintUnformatted(root); // to save pretty whitespaces cJSON_Print
+    cJSON_Delete(root);
+    return ESP_OK;
+}
 
 
 esp_err_t ProcessWiFiStatusSet(const char *message, const char ** output) {
@@ -250,7 +295,7 @@ esp_err_t ProcessWiFiStatusSet(const char *message, const char ** output) {
     return ESP_FAIL;
 }
 
-esp_err_t ProcessWiFiStatusGet(char *message, const char **output) {
+esp_err_t ProcessWiFiStatusGet(const char *message, const char **output) {
     if (*output != nullptr)
         return ESP_FAIL;
 
@@ -266,7 +311,7 @@ esp_err_t ProcessResetWifiConfig(const char *messange, const char ** output) {
 }
 
 
-esp_err_t ProcessGetDeviceConfig(char *message, const char **output) {
+esp_err_t ProcessGetDeviceConfig(const char *message, const char **output) {
     if (*output != nullptr)
         return ESP_FAIL;
 
