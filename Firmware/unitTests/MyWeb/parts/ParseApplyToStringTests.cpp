@@ -15,8 +15,8 @@ bool IndexesAreEqual(const ApplyIndexes_t * expected, const ApplyIndexes_t * act
 
 
 TEST_CASE("Parse no significant data -> Nor Errors", "[ApplyParse]") {
-    ApplyIndexes_t const zeroIdx = {0,0, {0,0,0,0,0,}};
-    ApplyIndexes_t idx = {0,0, {0,0,0,0,0,}};
+    ApplyIndexes_t const zeroIdx = {0,0, {RgbChannel::None,0,0}, {0,0,0,0,0,}};
+    ApplyIndexes_t idx = {0,0, {RgbChannel::None, 0,0}, {0,0,0,0,0,}};
     char input[128];
 
     SECTION("Zero-Pointer") {
@@ -70,27 +70,27 @@ TEST_CASE("Wrong input in different format -> Exceptions", "[ApplyParse]")
 
 TEST_CASE("Single Values -> Nor Error", "[ApplyParse]") {
     ApplyIndexes_t *compIdx;
-    ApplyIndexes_t idx = {0,0, {0,0,0,0,0,}};
+    ApplyIndexes_t idx = {0,0, {RgbChannel::None, 0,0}, {0,0,0,0,0,}};
     char input[128];
 
     SECTION("Single Value") {
         strcpy(input, "1");
         ParseApplyToString(input, &idx);
-        static ApplyIndexes_t comp1 = {0,0, {0x00000001, 0, 0, 0, 0}};
+        static ApplyIndexes_t comp1 = {0,0, {RgbChannel::None, 0,0}, {0x00000001, 0, 0, 0, 0}};
         compIdx = &comp1;
         CHECK( idx.Items == 1 );
     }
     SECTION("Single Channel Value") {
         strcpy(input, "1.1");
         ParseApplyToString(input, &idx);
-        static ApplyIndexes_t comp2 = {0,0, {1, 0, 0, 0, 0}};
+        static ApplyIndexes_t comp2 = {0,0, {RgbChannel::None, 0,0}, {1, 0, 0, 0, 0}};
         compIdx = &comp2;
         CHECK( idx.Items == 1 );
     }
     SECTION("invalid single Value") {
         strcpy(input, "-1");
         ParseApplyToString(input, &idx);
-        static ApplyIndexes_t comp2 = {0,0, {0, 0, 0, 0, 0}};
+        static ApplyIndexes_t comp2 = {0,0, {RgbChannel::None, 0,0}, {0, 0, 0, 0, 0}};
         compIdx = &comp2;
         CHECK( idx.Errors == 1 );
     }
@@ -100,7 +100,7 @@ TEST_CASE("Single Values -> Nor Error", "[ApplyParse]") {
 
 TEST_CASE("Simple Comma seperated Lists -> Nor Error", "[ApplyParse]") {
     ApplyIndexes_t *compIdx;
-    ApplyIndexes_t idx = {0,0, {0,0,0,0,0,}};
+    ApplyIndexes_t idx = {0,0, {RgbChannel::None, 0,0}, {0,0,0,0,0,}};
     char input[128];
 
     SECTION("simple list") {
@@ -114,7 +114,7 @@ TEST_CASE("Simple Comma seperated Lists -> Nor Error", "[ApplyParse]") {
             ParseApplyToString(input, &idx);
             CHECK( idx.Items == 4 );
         }
-        static ApplyIndexes_t comp1 = {0,0, {0x80000007, 0, 0, 0, 0}};
+        static ApplyIndexes_t comp1 = {0,0, {RgbChannel::None, 0,0}, {0x80000007, 0, 0, 0, 0}};
         compIdx = &comp1;
     }
     SECTION("inverted order") {
@@ -128,20 +128,20 @@ TEST_CASE("Simple Comma seperated Lists -> Nor Error", "[ApplyParse]") {
             ParseApplyToString(input, &idx);
             CHECK( idx.Items == 4 );
         }
-        static ApplyIndexes_t comp2 = {0,0, {0x40000038, 0, 0, 0, 0}};
+        static ApplyIndexes_t comp2 = {0,0, {RgbChannel::None, 0,0}, {0x40000038, 0, 0, 0, 0}};
         compIdx = &comp2;
     }
     SECTION("First bits of channels") {
         strcpy(input, "1,33,65,97,129");
         ParseApplyToString(input, &idx);
-        static ApplyIndexes_t comp2 = {0,0, {1, 1, 1, 1, 1}};
+        static ApplyIndexes_t comp2 = {0,0, {RgbChannel::None, 0,0}, {1, 1, 1, 1, 1}};
         compIdx = &comp2;
         CHECK( idx.Items == 5 );
     }
     SECTION("Last bits of channels") {
         strcpy(input, "32,64,96,128,160");
         ParseApplyToString(input, &idx);
-        static ApplyIndexes_t comp2 = {0,0, {0x80000000, 0x80000000, 0x80000000, 0x80000000, 0x80000000}};
+        static ApplyIndexes_t comp2 = {0,0, {RgbChannel::None, 0,0}, {0x80000000, 0x80000000, 0x80000000, 0x80000000, 0x80000000}};
         compIdx = &comp2;
         CHECK( idx.Items == 5 );
     }
@@ -152,7 +152,7 @@ TEST_CASE("Simple Comma seperated Lists -> Nor Error", "[ApplyParse]") {
 
 TEST_CASE("Complex Comma seperated Lists -> Nor Error", "[ApplyParse]") {
     ApplyIndexes_t *compIdx;
-    ApplyIndexes_t idx = {0,0, {0,0,0,0,0,}};
+    ApplyIndexes_t idx = {0,0, {RgbChannel::None, 0,0}, {0,0,0,0,0,}};
     char input[128];
 
     SECTION("simple list") {
@@ -166,20 +166,20 @@ TEST_CASE("Complex Comma seperated Lists -> Nor Error", "[ApplyParse]") {
             ParseApplyToString(input, &idx);
             CHECK( idx.Items == 3 );
         }
-        static ApplyIndexes_t comp1 = {0,0, {0x00000003, 0x00000004, 0, 0, 0}};
+        static ApplyIndexes_t comp1 = {0,0, {RgbChannel::None, 0,0}, {0x00000003, 0x00000004, 0, 0, 0}};
         compIdx = &comp1;
     }
     SECTION("First bits of channels") {
         strcpy(input, "1.1,2.1,3.1,4.1,5.1");
         ParseApplyToString(input, &idx);
-        static ApplyIndexes_t comp2 = {0,0, {1, 1, 1, 1, 1}};
+        static ApplyIndexes_t comp2 = {0,0, {RgbChannel::None, 0,0}, {1, 1, 1, 1, 1}};
         compIdx = &comp2;
         CHECK( idx.Items == 5 );
     }
     SECTION("Last bits of channels") {
         strcpy(input, "1.32,2.32,3.32,4.32,5.32");
         ParseApplyToString(input, &idx);
-        static ApplyIndexes_t comp2 = {0,0, {0x80000000, 0x80000000, 0x80000000, 0x80000000, 0x80000000}};
+        static ApplyIndexes_t comp2 = {0,0, {RgbChannel::None, 0,0}, {0x80000000, 0x80000000, 0x80000000, 0x80000000, 0x80000000}};
         compIdx = &comp2;
         CHECK( idx.Items == 5 );
     }

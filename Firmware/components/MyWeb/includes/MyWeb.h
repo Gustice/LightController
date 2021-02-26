@@ -30,6 +30,7 @@ typedef struct ReqColorIdx_def {
 typedef struct ApplyIndexes_def {
     uint16_t Items;
     uint16_t Errors;
+    ReqColorIdx_t FirstTarget;
     uint32_t ApplyTo[ApplyToTargetChannels];
 } ApplyIndexes_t;
 
@@ -49,6 +50,7 @@ typedef struct GrayValMsg_def {
     uint8_t gray[16];
     uint8_t intensity;
     uint8_t targetIdx;
+    ApplyIndexes_t apply;
 } GrayValMsg_t;
 
 typedef esp_err_t (*pChannelGetCallback)(ReqColorIdx_t , uint8_t *, size_t);
