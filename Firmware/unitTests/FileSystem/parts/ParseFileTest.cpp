@@ -4,6 +4,17 @@ TEST_CASE("Construction of DUT", "[Generic]") {
     REQUIRE (true);
 }
 
+TEST_CASE("Structured cJSON test in Module", "[cJson]")
+{
+    const char * input = "{ \"StartupMode\": \"RunDemo\", \"DisplayMode\": \"ExpertView\", \"Outputs\": [ \
+        { \"Type\": \"SyncLedCh\", \"Strip\": { \"LedCount\": 6, \"Intens\": 16, \"Channel\": \"RGB\" }, \"Color\": [0,0,0,0] }, \
+        { \"Type\": \"AsyncLedCh\", \"Strip\": { \"LedCount\": 24, \"Intens\": 16, \"Channel\": \"RGBW\" }, \"Color\": [0,0,0,0] } ] }";
+
+    deviceConfig_t deviceSet;
+}
+
+
+
 static bool stringIsEqual(const char * expected, const char * actual);
 void appendExtension( char * filepath)
 {
