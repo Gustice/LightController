@@ -7,6 +7,10 @@ add_subdirectory(espMock)
 
 project (dut)
 get_filename_component(DUT_PARENT_DIR ../../components/FileSystem ABSOLUTE)
+get_filename_component(PARENT_INCLUDEDIR ../../components/LightEffect ABSOLUTE)
+
+add_compile_definitions(CONFIG_DEVICE_CONFIGURATION_FILENAME="TestConfig.json")
+add_compile_definitions(CONFIG_FS_ROOT="myFs")
 
 message( "### ALl Sources " ${sources})
 add_executable(TestRunner   "TestMain.cpp"
@@ -16,8 +20,9 @@ add_executable(TestRunner   "TestMain.cpp"
                             )
 target_include_directories(TestRunner PUBLIC testUtils cJSON
                             ${CMAKE_CURRENT_LIST_DIR} 
-                            ${DUT_PARENT_DIR}/includes 
+                            ${DUT_PARENT_DIR}/include 
                             ${DUT_PARENT_DIR}/private
+                            ${PARENT_INCLUDEDIR}/includes
                             )
     
 target_link_libraries(TestRunner 

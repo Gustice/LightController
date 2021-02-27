@@ -1,0 +1,35 @@
+{
+    "configurations": [
+        {
+            "name": "MinGW",
+            "intelliSenseMode": "clang-x64",
+            "compilerPath": "C:\\MinGW\\bin\\gcc.exe",
+            "includePath": [
+                "${workspaceFolder}/espMock/**",
+                "${workspaceFolder}/include/**",
+                "${workspaceFolder}/cJson/**",
+                "${workspaceFolder}/parts/**",
+                "${workspaceFolder}/../../components/**"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "browse": {
+                "path": [
+                    "${workspaceFolder}/espMock/**",
+                    "${workspaceFolder}/include/**",
+                    "${workspaceFolder}/parts/**",
+                    "${workspaceFolder}/../../components/**"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            },
+            "cppStandard": "c++11",
+            "cStandard": "c99",
+            "configurationProvider": "ms-vscode.cmake-tools"
+        }
+    ],
+    "version": 4
+}

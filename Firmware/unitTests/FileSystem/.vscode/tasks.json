@@ -1,0 +1,38 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "CMake: Create Configuration",
+            "type": "shell",
+            "options": { 
+                "cwd": "${workspaceFolder}/build"
+            },
+            "command": "CMake ..",
+            "problemMatcher": "$gcc", // Otherwise its annoys you with warnings
+        },
+        {
+            "label": "CMake: Build Project",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceFolder}/build"
+            },
+            "command": "CMake --build .",
+            "dependsOn": "CMake: Create Configuration",
+            "group": {"kind": "build", "isDefault": true},
+            "problemMatcher": "$gcc", // Otherwise its annoys you with warnings
+        },
+        {
+            "label": "CMake: Run Test Project",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "command": "build/TestRunner.exe",
+            "dependsOn": "CMake: Build Project",
+            "group": {"kind": "test", "isDefault": true},
+            "problemMatcher": "$gcc", // Otherwise its annoys you with warnings
+        },
+    ]
+}

@@ -1,25 +1,31 @@
 #include "TestUtils.h"
+#include "ParamReader.h"
 
-TEST_CASE("Construction of DUT", "[Generic]") {
-    REQUIRE (true);
+TEST_CASE("ReadingConfig yields error if module not initializes", "[cJson]")
+{
+    deviceConfig_t deviceSet;
+    REQUIRE ( (Fs_ReadDeviceConfiguration(&deviceSet) == ESP_FAIL) );
 }
 
 TEST_CASE("Structured cJSON test in Module", "[cJson]")
 {
-    const char * input = "{ \"StartupMode\": \"RunDemo\", \"DisplayMode\": \"ExpertView\", \"Outputs\": [ \
-        { \"Type\": \"SyncLedCh\", \"Strip\": { \"LedCount\": 6, \"Intens\": 16, \"Channel\": \"RGB\" }, \"Color\": [0,0,0,0] }, \
-        { \"Type\": \"AsyncLedCh\", \"Strip\": { \"LedCount\": 24, \"Intens\": 16, \"Channel\": \"RGBW\" }, \"Color\": [0,0,0,0] } ] }";
-
+    Fs_SetupSpiFFs();
     deviceConfig_t deviceSet;
+    CHECK ( Fs_ReadDeviceConfiguration(&deviceSet) );
+    
+    CHECK(deviceSet.StartUpMode == DeviceStartMode_t::RunDemo);
+    CHECK(deviceSet.SyncLeds.IsActive == true);
+    CHECK(deviceSet.SyncLeds.Strip.LedCount == 6);
+    CHECK(deviceSet.AsyncLeds.IsActive == true);
+    CHECK(deviceSet.RgbStrip.IsActive == true);
+    CHECK(deviceSet.I2cExpander.IsActive == true);
 }
-
-
 
 static bool stringIsEqual(const char * expected, const char * actual);
 void appendExtension( char * filepath)
 {
     if (strchr(filepath, '.') == NULL)
-        strcpy(&filepath[strlen(filepath)], ".html"); 
+        strcpy(&filepath[strlen(filepath)], ".html");
 }
 
 

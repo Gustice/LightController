@@ -55,21 +55,25 @@ typedef struct stripConfig_def {
 } stripConfig_t;
 
 typedef struct syncLedConfig_def {
+    bool IsActive;
     stripConfig_t Strip;
     Color_t Color;
 } syncLedConfig_t;
 
 typedef struct asyncLedConfig_def {
+    bool IsActive;
     stripConfig_t Strip;
     Color_t Color;
 } aSyncLedConfig_t;
 
 typedef struct rgbwLedConfig_def {
+    bool IsActive;
     stripConfig_t Strip;
     Color_t Color;
 } rgbwLedConfig_t;
 
 typedef struct i2cExpander_def {
+    bool IsActive;
     stripConfig_t Device;
     uint8_t Address;
     uint16_t GrayValues[16];

@@ -1,0 +1,47 @@
+{
+    "StartupMode": "RunDemo",
+    "DisplayMode": "ExpertView",
+    "Outputs": [
+        {
+            "Type": "SyncLedCh",
+            "Description": "Synchronous serial LED port", 
+            "Strip": {
+                "LedCount": 6,
+                "Intens": 16,
+                "Channel": "RGBI"
+            },
+            "Color": [0,0,0,0]
+        },
+        {
+            "Type": "AsyncLedCh",
+            "Description": "Asynchronous serial LED port", 
+            "Strip": {
+                "LedCount": 10,
+                "Intens": 16,
+                "Channel": "RGBW"
+            },
+            "Color": [0,0,0,0]
+        },
+        {   
+            "Type": "RgbStrip",
+            "Description": "Rgb-Strip LED port",
+            "Strip": {
+                "LedCount": 6,
+                "Intens": 1024,
+                "Channel": "RGB"
+            },
+            "Color": [0,0,0,0]
+        },
+        {
+            "Type": "I2cExpander",
+            "Description": "I2C-Expander port",
+            "Device": {
+                "LedCount": 3,
+                "Intens": 1024,
+                "Channel": "Grey"
+            },
+            "Address": 1,
+            "GrayValues": [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]
+        }
+    ]
+}
