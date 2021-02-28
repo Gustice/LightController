@@ -155,12 +155,16 @@ esp_err_t Fs_CheckIfExists(const char *file) {
     return ESP_FAIL;
 }
 
+#ifndef CONFIG_FS_ROOT
+#define CONFIG_FS_ROOT "/spiffs/"
+#endif
+
 esp_err_t Fs_ReadFactoryConfiguration(factoryInfo_t *factorySet) {
     if (!active)
         return ESP_FAIL;
 
     char buf[512]; // Maximum 2 Pages // todo verify
-    sprintf(buf, "/spiffs/%s", CONFIG_DEVICE_CONFIGURATION_FILENAME);
+    sprintf(buf, "%s%s", CONFIG_FS_ROOT, CONFIG_FACTORY_IMAGE_FILENAME);
     FILE *f = fopen(buf, "r");
     if (f == NULL) {
         ESP_LOGE(TAG, "Failed to open Factory Configuration");
@@ -184,10 +188,9 @@ esp_err_t Fs_ReadFactoryConfiguration(factoryInfo_t *factorySet) {
     return ESP_OK;
 }
 
-#ifndef CONFIG_FS_ROOT
-#define CONFIG_FS_ROOT "/spiffs/"
-#endif
-// Todo set Root to
+
+esp_err_t ParseStripDefinition(cJSON *chRoot, const char * tockenName, stripConfig_t *config);
+
 esp_err_t Fs_ReadDeviceConfiguration(deviceConfig_t *deviceSet) {
     if (!active)
         return ESP_FAIL;
@@ -215,15 +218,15 @@ esp_err_t Fs_ReadDeviceConfiguration(deviceConfig_t *deviceSet) {
 
     cJSON *mode = cJSON_GetObjectItem(monitor_json, "StartupMode");
     if (cJSON_IsString(mode) && (mode->valuestring != NULL)) {
-        if (strcmp("RunDemo", mode->valuestring) == 0 )
+        if (strcmp("RunDemo", mode->valuestring) == 0)
             deviceSet->StartUpMode = DeviceStartMode_t::RunDemo;
         else
             deviceSet->StartUpMode = DeviceStartMode_t::StartDark;
     }
 
     cJSON *channels = cJSON_GetObjectItem(monitor_json, "Outputs");
-    int chIdx = 0;
-    cJSON * ch; 
+    int chIdx = -1;
+    cJSON *ch;
     cJSON_ArrayForEach(ch, channels) {
         chIdx++;
         cJSON *chType = cJSON_GetObjectItem(ch, "Type");
@@ -233,48 +236,65 @@ esp_err_t Fs_ReadDeviceConfiguration(deviceConfig_t *deviceSet) {
             continue;
         }
 
-        if (strcmp("SyncLedCh", chType->valuestring) == 0 ) {
+        stripConfig_t *pStrip = nullptr;
+        if (strcmp("SyncLedCh", chType->valuestring) == 0) {
             deviceSet->SyncLeds.IsActive = true;
-            
-            cJSON * strip = cJSON_GetObjectItem(ch, "Strip");
-            if (monitor_json == NULL) {
+            pStrip = &(deviceSet->SyncLeds.Strip);
+        } else if (strcmp("AsyncLedCh", chType->valuestring) == 0) {
+            deviceSet->AsyncLeds.IsActive = true;
+            pStrip = &(deviceSet->AsyncLeds.Strip);
+        } else if (strcmp("RgbStrip", chType->valuestring) == 0) {
+            deviceSet->RgbStrip.IsActive = true;
+            pStrip = &(deviceSet->RgbStrip.Strip);
+        }
+        if (pStrip != nullptr) {
+            if (ParseStripDefinition(ch, "Strip", pStrip) != ESP_OK) {
                 ESP_LOGW(TAG, "Error Parsing Config-JSON of Channel %d: Cannot read Strip", chIdx);
                 continue;
             }
-            cJSON *count = cJSON_GetObjectItem(strip, "LedCount");
-            if (!cJSON_IsNumber(count))
-                ESP_LOGW(TAG, "Error Parsing Config-JSON of Channel %d: Cannot read LedCount", chIdx);
-            
-            deviceSet->SyncLeds.Strip.LedCount = count->valueint;
         }
-        else if (strcmp("AsyncLedCh", chType->valuestring) == 0 ) {
-            deviceSet->AsyncLeds.IsActive = true;
 
-        }
-        else if (strcmp("RgbStrip", chType->valuestring) == 0 ) {
-            deviceSet->RgbStrip.IsActive = true;
-
-        }
-        else if (strcmp("I2cExpander", chType->valuestring) == 0 ) {
+        if (strcmp("I2cExpander", chType->valuestring) == 0) {
             deviceSet->I2cExpander.IsActive = true;
-
-        }
-        else
+            if (ParseStripDefinition(ch, "Device", &(deviceSet->I2cExpander.Device)) != ESP_OK) {
+                ESP_LOGW(TAG, "Error Parsing Config-JSON of Channel %d: Cannot read Device", chIdx);
+                continue;
+            }
+        } else
             ESP_LOGE(TAG, "Error Parsing Config-JSON: Type %s not recognized", chType->valuestring);
+    }
+    cJSON_Delete(root);
+    return ESP_OK;
+}
 
-        // cJSON *height = cJSON_GetObjectItem(ch, "height");
 
-        // if (!cJSON_IsNumber(width) || !cJSON_IsNumber(height)) {
-        //     status = 0;
-        //     goto end;
-        // }
+esp_err_t ParseStripDefinition(cJSON *chRoot, const char * tockenName,  stripConfig_t *config) {
+    cJSON *strip = cJSON_GetObjectItem(chRoot, tockenName);
+    if (strip == NULL)
+        return ESP_FAIL;
 
-        // if ((width->valuedouble == 1920) && (height->valuedouble == 1080)) {
-        //     status = 1;
-        //     goto end;
-        // }
+    cJSON *count = cJSON_GetObjectItem(strip, "LedCount");
+    if (!cJSON_IsNumber(count))
+        return ESP_FAIL;
+
+    config->LedCount = count->valueint;
+
+    cJSON *channel = cJSON_GetObjectItem(strip, "Channel");
+    if (!cJSON_IsString(channel) || (channel->valuestring == NULL))
+        return ESP_FAIL;
+
+    if (strcmp("RGBI", channel->valuestring) == 0)
+        config->Channels = ColorChannels_t::RGBI;
+    else if (strcmp("RGBW", channel->valuestring) == 0)
+        config->Channels = ColorChannels_t::RGBW;
+    else if (strcmp("RGB", channel->valuestring) == 0)
+        config->Channels = ColorChannels_t::RGB;
+    else if (strcmp("Grey", channel->valuestring) == 0)
+        config->Channels = ColorChannels_t::Grey;
+    else {
+        config->Channels = ColorChannels_t::None;
+        return ESP_FAIL;
     }
 
-
-    return ESP_FAIL;
+    return ESP_OK;
 }

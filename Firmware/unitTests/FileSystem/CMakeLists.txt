@@ -9,6 +9,7 @@ project (dut)
 get_filename_component(DUT_PARENT_DIR ../../components/FileSystem ABSOLUTE)
 get_filename_component(PARENT_INCLUDEDIR ../../components/LightEffect ABSOLUTE)
 
+add_compile_definitions(CONFIG_FACTORY_IMAGE_FILENAME="Device.json")
 add_compile_definitions(CONFIG_DEVICE_CONFIGURATION_FILENAME="TestConfig.json")
 add_compile_definitions(CONFIG_FS_ROOT="myFs")
 

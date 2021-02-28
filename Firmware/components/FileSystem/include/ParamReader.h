@@ -22,9 +22,9 @@ extern const char *wifiCfgFile;
 extern const char *devCfgFile;
 extern const char *mqttCfgFile;
 
-typedef struct factoryInfo_def {
+typedef struct factoryInfo_def { // @todo the container can be easily overwritten
     char DeviceType[24];
-    char SerialNumber[8]; // Something like SN:123ABC
+    char SerialNumber[12]; // Something like SN:123ABC
     char HwVersion[16];   // V 1.00.00
     char SwVersion[12];
 } factoryInfo_t;
@@ -37,9 +37,11 @@ typedef struct wifiConfig_def {
 } WifiConfig_t;
 
 typedef enum ColorChannels {
+    None = 0,
+    RGBI,
     RGB,
     RGBW,
-    Gray,
+    Grey,
 } ColorChannels_t;
 
 typedef enum DeviceStartMode {
