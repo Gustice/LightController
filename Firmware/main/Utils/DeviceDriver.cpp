@@ -53,7 +53,7 @@ esp_err_t ApplyColor2RgbChannel(ColorMsg_t *colorMsg, Color_t *colors, size_t si
         uint32_t testIdx = 1 << i;
         if ((colorMsg->apply.ApplyTo[0] & testIdx) != 0) {
             if (i >= size)
-                continue; // Index exceeds strip-size
+                return; // Index exceeds strip-size
             colors[i].red = colorMsg->red;
             colors[i].green = colorMsg->green;
             colors[i].blue = colorMsg->blue;

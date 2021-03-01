@@ -35,9 +35,9 @@ TEST_CASE("Get RGBISync Values Handler-Tests", "[ColorGet]") {
     INFO(" Return string is: " << output);
     INFO("Compare string is: " << OutPayload);
     CHECK( (strcmp(output, OutPayload) == 0) );
-    CHECK( LastChTarget.chIdx == 1 );
-    CHECK( LastChTarget.portIdx == 1 );
-    delete[] OutPayload;
+    CHECK( (LastChTarget.chIdx == 1) );
+    CHECK( (LastChTarget.portIdx == 1) );
+    // delete[] OutPayload;
 }
 
 /** "GET /api/GetPort/RGBWAsync" */
@@ -57,8 +57,8 @@ TEST_CASE("Get RGBWAsync Values Handler-Tests", "[ColorGet]") {
     INFO(" Return string is: " << output);
     INFO("Compare string is: " << OutPayload);
     CHECK( (strcmp(output, OutPayload) == 0) );
-    CHECK( LastChTarget.chIdx == 1 );
-    CHECK( LastChTarget.portIdx == 1 );
+    CHECK( (LastChTarget.chIdx == 1) );
+    CHECK( (LastChTarget.portIdx == 1) );
     delete[] OutPayload;
 }
 
@@ -78,8 +78,8 @@ TEST_CASE("Get RGBWSingle Values Handler-Tests", "[ColorGet]") {
     INFO(" Return string is: " << output);
     INFO("Compare string is: " << OutPayload);
     CHECK( (strcmp(output, OutPayload) == 0) );
-    CHECK( LastChTarget.chIdx == 1 );
-    CHECK( LastChTarget.portIdx == 1 );
+    CHECK( (LastChTarget.chIdx == 1) );
+    CHECK( (LastChTarget.portIdx == 1) );
     delete[] OutPayload;
 }
 
@@ -98,8 +98,8 @@ TEST_CASE("Get IValues Values Handler-Tests", "[ColorGet]") {
     INFO(" Return string is: " << output);
     INFO("Compare string is: " << OutPayload);
     CHECK( (strcmp(output, OutPayload) == 0) );
-    CHECK( LastChTarget.chIdx == 1 );
-    CHECK( LastChTarget.portIdx == 1 );
+    CHECK( (LastChTarget.chIdx == 1) );
+    CHECK( (LastChTarget.portIdx == 1) );
     delete[] OutPayload;
 }
 

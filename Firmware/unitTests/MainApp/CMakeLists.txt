@@ -16,6 +16,7 @@ add_executable(TestRunner   "TestMain.cpp"
                             ${DUT_PARENT_DIR}"/Utils/DeviceDriver.cpp"
                             "parts/RotatingIndexTests.cpp"
                             "parts/ChannelIndexesTests.cpp"
+                            "parts/DeviceDriverTests.cpp"
                             )
 
 target_include_directories(TestRunner PUBLIC testUtils 

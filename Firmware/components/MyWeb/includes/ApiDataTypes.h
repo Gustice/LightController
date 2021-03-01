@@ -3,8 +3,9 @@
 #include <stdint.h>
 
 typedef enum RgbChannel {
-    None = -1,
-    RgbiSync = 0,   // Only on Channel supported
+    None_Error = -1,
+    Undefined = 0,
+    RgbiSync,   // Only on Channel supported
     RgbwAsync,      // Only one Channel supported
     RgbwPwm,        // May be multiple channels
     I2cExpanderPwm, // May be multiple channels
@@ -12,8 +13,8 @@ typedef enum RgbChannel {
 
 typedef struct ReqColorIdx_def {
     RgbChannel type; 
-    uint16_t chIdx; 
-    uint16_t portIdx;
+    int16_t chIdx; 
+    int16_t portIdx;
 } ReqColorIdx_t;
 
 #define ApplyToTargetChannels 5

@@ -1,17 +1,17 @@
 #include "ChannelIndexes.h"
 #include "TestUtils.h"
 
-Color_t color1{1, 11, 21, 31};
-Color_t color2{2, 0, 0, 0};
-Color_t color3{3, 0, 0, 0};
-Color_t color4{4, 0, 0, 0};
-Color_t color5{5, 0, 0, 0};
-Color_t color6{6, 0, 0, 0};
-Color_t color7{7, 0, 0, 0};
-Color_t color8{8, 0, 0, 0};
+static Color_t color1{1, 11, 21, 31};
+static Color_t color2{2, 0, 0, 0};
+static Color_t color3{3, 0, 0, 0};
+static Color_t color4{4, 0, 0, 0};
+static Color_t color5{5, 0, 0, 0};
+static Color_t color6{6, 0, 0, 0};
+static Color_t color7{7, 0, 0, 0};
+static Color_t color8{8, 0, 0, 0};
 
-const size_t cCount = 8;
-const Color_t *testColors[cCount]{
+static const size_t cCount = 8;
+static const Color_t *testColors[cCount]{
     &color1,
     &color2,
     &color3,
