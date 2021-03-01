@@ -9,6 +9,7 @@
  */
 
 #include <stdint.h>
+#include <string.h>
 
 #pragma once
 

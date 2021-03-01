@@ -3,6 +3,7 @@
 #include "Color.h"
 #include "RotatingIndex.h"
 #include <string.h>
+#include "esp_log.h"
 
 const int grayCnt = 16;
 const int colorsCnt = 7;

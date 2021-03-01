@@ -2,43 +2,12 @@
 
 #include "Apa102.h"
 #include "Color.h"
-#include "Encoder.h"
-#include "MyWeb.h"
+#include "ApiDataTypes.h"
 #include "ParamReader.h"
 #include "Pca9685.h"
-#include "PcbHardware.h"
 #include "RgbwStrip.h"
-#include "RotatingIndex.h"
-#include "SoftAp.h"
 #include "Ws2812.h"
-
-class ChannelIndexes {
-  public:
-    const size_t ImageSize;
-    const Color_t **colorPool;
-    Color_t *Image;
-    RotatingIndex Led;
-    RotatingIndex Color;
-
-    ChannelIndexes(size_t ledCount, const Color_t **pool, size_t colorCount)
-        : ImageSize(sizeof(Color_t) * ledCount), colorPool(pool), Led(ledCount), Color(colorCount) {
-        Image = new Color_t[ledCount];
-    };
-    ~ChannelIndexes() { delete[] Image; };
-
-    void ClearImage(void) { memset(Image, 0, ImageSize); }
-    uint16_t SetNextSlotMindOverflow() {
-        uint16_t idx = Led.GetIndex();
-        memcpy(&Image[idx], colorPool[Color.GetIndex()], sizeof(Color_t));
-
-        if (Led.PeekRevolution()) {
-            Color.GetIndexAndInkrement();
-        }
-        Led.GetIndexAndInkrement();
-
-        return idx;
-    }
-};
+#include "ChannelIndexes.h"
 
 class DeviceDriver {
   public:
