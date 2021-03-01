@@ -10,10 +10,12 @@
 
 #include <stdint.h>
 
+#pragma once
+
 class RotatingIndex {
   public:
     const uint16_t MaxIndex;
-    RotatingIndex(uint16_t max) : MaxIndex(max){ _index = 0; }
+    RotatingIndex(uint16_t max) : MaxIndex(max) { _index = 0; }
 
     uint16_t GetIndexAndInkrement(void) {
         auto retVal = _index;
@@ -28,7 +30,7 @@ class RotatingIndex {
         if (MaxIndex == 0)
             return true;
 
-        if (_index >= MaxIndex-1) {
+        if (_index >= MaxIndex - 1) {
             return true;
         }
         return false;
@@ -36,6 +38,11 @@ class RotatingIndex {
 
     uint16_t GetIndex(void) { return _index; }
     void ResetIndex(void) { _index = 0; }
+
+    RotatingIndex operator=(const RotatingIndex original) {
+        memcpy(this, &original, sizeof(RotatingIndex)); 
+        return *this;
+    }
 
   private:
     uint16_t _index;

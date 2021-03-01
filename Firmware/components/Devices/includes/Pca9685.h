@@ -9,6 +9,8 @@
  * 
  */
 
+#pragma once
+
 #include "Color.h"
 #include "I2cPort.h"
 

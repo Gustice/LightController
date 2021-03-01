@@ -149,7 +149,7 @@ static esp_err_t data_get_handler(httpd_req_t *req) {
     ESP_LOGI(cModTag, "Raw: %s", buf);
     ESP_LOGI(cModTag, "====================================");
 
-    char * output = nullptr;
+    const char * output = nullptr;
     pProcessGet pFunc = (pProcessGet)part->pFunc;
     if ((pFunc(buf, &output) == ESP_OK) && (output != nullptr)) {
         httpd_resp_set_type(req, "application/json");
@@ -235,15 +235,18 @@ static esp_err_t data_post_handler(httpd_req_t *req) {
     ESP_LOGI(cModTag, "====================================");
 
     /* Executing registered Handler-Function */
-    if (pFunc(buf) == ESP_OK) {
+    const char * output = nullptr;
+    if (pFunc(buf, &output) == ESP_OK) {
         httpd_resp_sendstr(req, "Post control value successfully");
-
         xSemaphoreGive(xNewLedWebCommand);
     } else {
         httpd_resp_send_err(
             req, HTTPD_500_INTERNAL_SERVER_ERROR, "Something went wrong during Json parsing");
     }
     httpd_resp_send_chunk(req, NULL, 0);
+        
+    if (output == nullptr) { 
+        delete[] output; }
     return ESP_OK;
 }
 

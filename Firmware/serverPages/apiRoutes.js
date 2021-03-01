@@ -15,7 +15,7 @@ const ApiSetPort_IValues = "/api/SetPort/IValues";
 const ChannelType_RGBISync = "rgbiSync";
 const ChannelType_RGBWAsync = "rgbwAsync";
 const ChannelType_RGBWSingle = "rgbwStrip";
-const ChannelType_IValues = "greyPort";
+const ChannelType_IValues = "grayPort";
 
 const ApiGetStatus_WiFiStatus = "/api/GetStatus/WiFiStatus";
 const ApiSetDevice_ResetWiFi = "/api/SetDevice/ResetWiFiConnect";

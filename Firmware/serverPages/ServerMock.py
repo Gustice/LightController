@@ -12,7 +12,7 @@ versatileApiRouts = [
 ]
 
 nextApiResponse = '{"wifiStatus": "Test"}'
-stationConfig ='{ "StartupMode": "RunDemo", "DisplayMode": "ExpertView", "Outputs": [ { "Type": "SyncLedCh", "Description": "Synchronous serial LED port",  "Strip": { "LedCount": 6, "Intens": 16, "Channel": "RGB" }, "Color": [0,0,0,0] }, { "Type": "AsyncLedCh", "Description": "Asynchronous serial LED port",  "Strip": { "LedCount": 24, "Intens": 16, "Channel": "RGB" }, "Color": [0,0,0,0] },         { "Type": "RgbStrip", "Description": "Rgb-Strip LED port", "Strip": { "LedCount": 6, "Intens": 1024, "Channel": "RGBW" }, "Color": [0,0,0,0] }, { "Type": "I2cExpander", "Description": "I2C-Expander port", "Device": { "LedCount": 3, "Intens": 1024, "Channel": "Grey" }, "Address": 1, "GrayValues": [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0] } ] }'
+stationConfig ='{ "StartupMode": "RunDemo", "DisplayMode": "ExpertView", "Outputs": [ { "Type": "SyncLedCh", "Description": "Synchronous serial LED port",  "Strip": { "LedCount": 6, "Intens": 16, "Channel": "RGB" }, "Color": [0,0,0,0] }, { "Type": "AsyncLedCh", "Description": "Asynchronous serial LED port",  "Strip": { "LedCount": 24, "Intens": 16, "Channel": "RGB" }, "Color": [0,0,0,0] },         { "Type": "RgbStrip", "Description": "Rgb-Strip LED port", "Strip": { "LedCount": 6, "Intens": 1024, "Channel": "RGBW" }, "Color": [0,0,0,0] }, { "Type": "I2cExpander", "Description": "I2C-Expander port", "Device": { "LedCount": 3, "Intens": 1024, "Channel": "Gray" }, "Address": 1, "GrayValues": [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0] } ] }'
 
 def load_binary(file):
     with open(file, 'rb') as file:

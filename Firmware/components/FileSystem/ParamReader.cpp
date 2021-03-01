@@ -246,6 +246,7 @@ esp_err_t Fs_ReadDeviceConfiguration(deviceConfig_t *deviceSet) {
         } else if (strcmp("RgbStrip", chType->valuestring) == 0) {
             deviceSet->RgbStrip.IsActive = true;
             pStrip = &(deviceSet->RgbStrip.Strip);
+            deviceSet->RgbStrip.ChannelCount = 1; // Preliminary Default
         }
         if (pStrip != nullptr) {
             if (ParseStripDefinition(ch, "Strip", pStrip) != ESP_OK) {
@@ -289,10 +290,10 @@ esp_err_t ParseStripDefinition(cJSON *chRoot, const char * tockenName,  stripCon
         config->Channels = ColorChannels_t::RGBW;
     else if (strcmp("RGB", channel->valuestring) == 0)
         config->Channels = ColorChannels_t::RGB;
-    else if (strcmp("Grey", channel->valuestring) == 0)
-        config->Channels = ColorChannels_t::Grey;
+    else if (strcmp("Gray", channel->valuestring) == 0)
+        config->Channels = ColorChannels_t::Gray;
     else {
-        config->Channels = ColorChannels_t::None;
+        config->Channels = ColorChannels_t::NoChannel;
         return ESP_FAIL;
     }
 

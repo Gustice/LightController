@@ -32,7 +32,7 @@ TEST_CASE("Reading Device configuration", "[cJson]")
 
     CHECK(deviceSet.I2cExpander.IsActive == true);
     CHECK(deviceSet.I2cExpander.Device.LedCount == 16);
-    CHECK( (deviceSet.I2cExpander.Device.Channels == ColorChannels_t::Grey) );
+    CHECK( (deviceSet.I2cExpander.Device.Channels == ColorChannels_t::Gray) );
 }
 
 static bool stringIsEqual(const char * expected, const char * actual);

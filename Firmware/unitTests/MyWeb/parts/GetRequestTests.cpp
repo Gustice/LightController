@@ -85,7 +85,7 @@ TEST_CASE("Get RGBWSingle Values Handler-Tests", "[ColorGet]") {
 
 /** "GET /api/GetPort/IValues" */
 TEST_CASE("Get IValues Values Handler-Tests", "[ColorGet]") {
-    const char *Payload = "{\"form\":\"greyPort\",\"appTo\":\"2.2\"}";
+    const char *Payload = "{\"form\":\"grayPort\",\"appTo\":\"2.2\"}";
     const char *OutPayload = "{\"G1\":21,\"G2\":22,\"G3\":23,\"G4\":24,\"G5\":25,\"G6\":26,\"G7\":27,\"G8\":28,\"G9\":29,\"G10\":30,\"G11\":31,\"G12\":32,\"G13\":33,\"G14\":34,\"G15\":35,\"G16\":36}";
 
     const char *output;

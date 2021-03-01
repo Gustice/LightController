@@ -38,7 +38,8 @@
         "sstream": "cpp",
         "esp_spiffs.h": "c",
         "utils.h": "c",
-        "portmacro.h": "c"
+        "portmacro.h": "c",
+        "streambuf": "cpp"
     },
     "cSpell.words": [
         "attr",

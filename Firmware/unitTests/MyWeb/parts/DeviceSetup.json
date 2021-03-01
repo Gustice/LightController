@@ -28,7 +28,7 @@
         "Device": {
             "LedCount": 3,
             "Intens": 1024,
-            "Channel": "Grey"
+            "Channel": "Gray"
         },
         "Address": 1,
         "GrayValues": [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]

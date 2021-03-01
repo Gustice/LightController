@@ -41,7 +41,6 @@ typedef struct ColorMsg_def {
     uint8_t blue;
     uint8_t white;
     uint8_t intensity;
-    uint8_t targetIdx;
     ApplyIndexes_t apply;
 } ColorMsg_t;
 

@@ -37,21 +37,21 @@ typedef struct wifiConfig_def {
 } WifiConfig_t;
 
 typedef enum ColorChannels {
-    None = 0,
+    NoChannel = 0,
     RGBI,
     RGB,
     RGBW,
-    Grey,
+    Gray,
 } ColorChannels_t;
 
 typedef enum DeviceStartMode {
-    RunDemo,
     StartDark,
+    RunDemo,
     StartImage,
 } DeviceStartMode_t;
 
 typedef struct stripConfig_def {
-    uint8_t LedCount;
+    uint16_t LedCount;
     uint16_t Intensity;
     ColorChannels_t Channels;
 } stripConfig_t;
@@ -71,13 +71,14 @@ typedef struct asyncLedConfig_def {
 typedef struct rgbwLedConfig_def {
     bool IsActive;
     stripConfig_t Strip;
+    uint16_t ChannelCount;
     Color_t Color;
 } rgbwLedConfig_t;
 
 typedef struct i2cExpander_def {
     bool IsActive;
     stripConfig_t Device;
-    uint8_t Address;
+    uint16_t Address;
     uint16_t GrayValues[16];
 } i2cExpander_t;
 
