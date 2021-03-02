@@ -101,9 +101,11 @@ static void vRefreshLed(void *pvParameters) {
         ESP_LOGE(ModTag, "Device not defined - Cannot drive Lights");
 
     if (deviceConfig.StartUpMode == DeviceStartMode::RunDemo) {
+        ESP_LOGI(ModTag, " ## Running Demo");
         Device->SetupDemo();
         while (xSemaphoreTake(xNewWebCommand, (TickType_t)10) != pdTRUE) {
             vTaskDelay(500 / portTICK_PERIOD_MS);
+            Device->DemoTick();
         }
         ESP_LOGI(ModTag, "First Message received");
     }
@@ -197,8 +199,13 @@ void app_main(void) {
     static PwmPort pwmW(ledc_channel_t::LEDC_CHANNEL_3, LedWhitePwmPin);
 
     if (Fs_ReadDeviceConfiguration(&deviceConfig) == ESP_OK) {
-        static Apa102 sledStrip(&spi, 32);
-        static Ws2812 aLedStrip(&rmt, 32);
+        ESP_LOGI(ModTag, " ## Found Configuration: ");
+        ESP_LOGI(ModTag, "    Sync LEDs En=%d Cnt=:%d", (int)deviceConfig.SyncLeds.IsActive, deviceConfig.SyncLeds.Strip.LedCount);
+        ESP_LOGI(ModTag, "    Async LEDs En=%d Cnt=:%d", (int)deviceConfig.AsyncLeds.IsActive, deviceConfig.AsyncLeds.Strip.LedCount);
+        ESP_LOGI(ModTag, "    RgbStrip LEDs En=%d Chn=%d Cnt=:%d", (int)deviceConfig.RgbStrip.IsActive, deviceConfig.RgbStrip.ChannelCount, deviceConfig.RgbStrip.Strip.LedCount);
+        ESP_LOGI(ModTag, "    Expander LEDs En=%d Cnt=:%d", (int)deviceConfig.I2cExpander.IsActive, deviceConfig.I2cExpander.Device.LedCount);
+        static Apa102 sledStrip(&spi, deviceConfig.SyncLeds.Strip.LedCount);
+        static Ws2812 aLedStrip(&rmt, deviceConfig.AsyncLeds.Strip.LedCount);
         static RgbwStrip ledStrip(&pwmR, &pwmG, &pwmB, &pwmW);
         static Pca9685 ledDriver(&i2c, 0x40);
 

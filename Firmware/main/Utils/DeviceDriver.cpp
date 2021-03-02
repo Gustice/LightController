@@ -39,6 +39,11 @@ DeviceDriver::DeviceDriver(
     SLedStrip->SetBrightness(0x20);
     setupOk = true;
     demoTickCount = 0;
+
+    SLedStrip->SendImage(syncPort->Image);
+    ALedStrip->SendImage(asyncPort->Image);
+    LedStrip->SetImage(rgbPort->Image);
+    LedDriver->SendImage(expander);
 }
 
 DeviceDriver::~DeviceDriver() {
@@ -53,7 +58,7 @@ esp_err_t ApplyColor2RgbChannel(ColorMsg_t *colorMsg, Color_t *colors, size_t si
         uint32_t testIdx = 1 << i;
         if ((colorMsg->apply.ApplyTo[0] & testIdx) != 0) {
             if (i >= size)
-                return; // Index exceeds strip-size
+                return ESP_OK; // Index exceeds strip-size
             colors[i].red = colorMsg->red;
             colors[i].green = colorMsg->green;
             colors[i].blue = colorMsg->blue;
@@ -69,18 +74,18 @@ esp_err_t DeviceDriver::ApplyRgbColorMessage(ColorMsg_t *colorMsg) {
 
     switch (colorMsg->channel) {
     case RgbChannel::RgbiSync:
-        ApplyColor2RgbChannel(colorMsg, sync, deviceConfig->SyncLeds.Strip.LedCount);
-        SLedStrip->SendImage(sync);
+        ApplyColor2RgbChannel(colorMsg, syncPort->Image, deviceConfig->SyncLeds.Strip.LedCount);
+        SLedStrip->SendImage(syncPort->Image);
         break;
 
     case RgbChannel::RgbwAsync:
-        ApplyColor2RgbChannel(colorMsg, async, deviceConfig->AsyncLeds.Strip.LedCount);
-        ALedStrip->SendImage(async);
+        ApplyColor2RgbChannel(colorMsg, asyncPort->Image, deviceConfig->AsyncLeds.Strip.LedCount);
+        ALedStrip->SendImage(asyncPort->Image);
         break;
 
     case RgbChannel::RgbwPwm:
-        ApplyColor2RgbChannel(colorMsg, strip, deviceConfig->RgbStrip.ChannelCount);
-        ALedStrip->SendImage(strip);
+        ApplyColor2RgbChannel(colorMsg, rgbPort->Image, deviceConfig->RgbStrip.ChannelCount);
+        ALedStrip->SendImage(rgbPort->Image);
         break;
 
     default:
@@ -110,22 +115,25 @@ esp_err_t DeviceDriver::ReadValue(ReqColorIdx_t channel, uint8_t *data, size_t l
 
     switch (channel.type) {
     case RgbChannel::RgbiSync: {
-        cm->red = sync[cm->apply.FirstTarget.portIdx].red;
-        cm->green = sync[cm->apply.FirstTarget.portIdx].green;
-        cm->blue = sync[cm->apply.FirstTarget.portIdx].blue;
+        Color_t * image = syncPort->Image;
+        cm->red = image[cm->apply.FirstTarget.portIdx].red;
+        cm->green = image[cm->apply.FirstTarget.portIdx].green;
+        cm->blue = image[cm->apply.FirstTarget.portIdx].blue;
         // cm->intensity = sync[cm->apply.FirstTarget.portIdx].intensity;
     } break;
 
     case RgbChannel::RgbwAsync: {
-        cm->red = async[cm->apply.FirstTarget.portIdx].red;
-        cm->green = async[cm->apply.FirstTarget.portIdx].green;
-        cm->blue = async[cm->apply.FirstTarget.portIdx].blue;
+        Color_t * image = asyncPort->Image;
+        cm->red = image[cm->apply.FirstTarget.portIdx].red;
+        cm->green = image[cm->apply.FirstTarget.portIdx].green;
+        cm->blue = image[cm->apply.FirstTarget.portIdx].blue;
     } break;
 
     case RgbChannel::RgbwPwm: {
-        cm->red = strip[cm->apply.FirstTarget.portIdx].red;
-        cm->green = strip[cm->apply.FirstTarget.portIdx].green;
-        cm->blue = strip[cm->apply.FirstTarget.portIdx].blue;
+        Color_t * image = rgbPort->Image;
+        cm->red = image[cm->apply.FirstTarget.portIdx].red;
+        cm->green = image[cm->apply.FirstTarget.portIdx].green;
+        cm->blue = image[cm->apply.FirstTarget.portIdx].blue;
     } break;
 
     case RgbChannel::I2cExpanderPwm: {
@@ -147,9 +155,6 @@ void DeviceDriver::SetupDemo(void) {
     if (deviceConfig == nullptr)
         return;
 
-    uint16_t grayValues[grayCnt];
-    memset(grayValues, 0, sizeof(uint16_t) * grayCnt);
-    RotatingIndex rgbColorIdx(colorsCnt);
 }
 
 void DeviceDriver::DemoTick(void) {
@@ -163,14 +168,14 @@ void DeviceDriver::DemoTick(void) {
     rgbPort->SetNextSlotMindOverflow();
 
     // todo this is shit ... implement maximum brightness
-    async[aIdx].red = async[aIdx].red >> 5;
-    async[aIdx].green = async[aIdx].green >> 5;
-    async[aIdx].blue = async[aIdx].blue >> 5;
-    async[aIdx].white = async[aIdx].white >> 5;
+    asyncPort->Image[aIdx].red = asyncPort->Image[aIdx].red >> 5;
+    asyncPort->Image[aIdx].green = asyncPort->Image[aIdx].green >> 5;
+    asyncPort->Image[aIdx].blue = asyncPort->Image[aIdx].blue >> 5;
+    asyncPort->Image[aIdx].white = asyncPort->Image[aIdx].white >> 5;
 
-    SLedStrip->SendImage(sync);
-    ALedStrip->SendImage(async);
-    LedStrip->SetImage(strip);
+    SLedStrip->SendImage(syncPort->Image);
+    ALedStrip->SendImage(asyncPort->Image);
+    LedStrip->SetImage(rgbPort->Image);
 
     uint16_t pattern = demoTickCount;
     for (size_t i = 0; i < deviceConfig->I2cExpander.Device.LedCount; i++) {

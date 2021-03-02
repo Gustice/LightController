@@ -16,7 +16,7 @@
             "Type": "AsyncLedCh",
             "Description": "Asynchronous serial LED port", 
             "Strip": {
-                "LedCount": 10,
+                "LedCount": 8,
                 "Intens": 16,
                 "Channel": "RGBW"
             },

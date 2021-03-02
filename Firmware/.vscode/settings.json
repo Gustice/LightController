@@ -39,7 +39,8 @@
         "esp_spiffs.h": "c",
         "utils.h": "c",
         "portmacro.h": "c",
-        "streambuf": "cpp"
+        "streambuf": "cpp",
+        "future": "cpp"
     },
     "cSpell.words": [
         "attr",

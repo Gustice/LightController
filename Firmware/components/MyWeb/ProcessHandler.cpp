@@ -467,7 +467,7 @@ esp_err_t ProcessGetDeviceConfig(const char *message, const char **output) {
     char *buffer = new char[length];
     *output = buffer;
 
-    return Fs_ReadEntry("DeviceSetup.json", buffer, length);
+    return Fs_ReadEntry(CONFIG_DEVICE_CONFIGURATION_FILENAME, buffer, length);
 }
 
 esp_err_t ProcessSaveToPage(const char *message, const char **output) {

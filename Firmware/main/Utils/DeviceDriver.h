@@ -32,14 +32,11 @@ class DeviceDriver {
     RgbwStrip *LedStrip;
     deviceConfig_t *deviceConfig;
 
-    Color_t *sync;
-    Color_t *async;
-    Color_t *strip;
-    uint16_t *expander;
-
     ChannelIndexes * syncPort;
     ChannelIndexes * asyncPort;
     ChannelIndexes * rgbPort;
+    uint16_t *expander;
+
     uint16_t demoTickCount;
     bool setupOk;
 };

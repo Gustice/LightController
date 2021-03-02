@@ -195,7 +195,7 @@ esp_err_t Fs_ReadDeviceConfiguration(deviceConfig_t *deviceSet) {
     if (!active)
         return ESP_FAIL;
 
-    char buf[4096]; // Maximum 16 Pages // @todo verify
+    char buf[2048]; // Maximum 16 Pages // @todo verify
     sprintf(buf, "%s%s", CONFIG_FS_ROOT, CONFIG_DEVICE_CONFIGURATION_FILENAME);
     FILE *f = fopen(buf, "r");
     if (f == NULL) {
@@ -254,8 +254,8 @@ esp_err_t Fs_ReadDeviceConfiguration(deviceConfig_t *deviceSet) {
                 continue;
             }
         }
-
-        if (strcmp("I2cExpander", chType->valuestring) == 0) {
+        else{
+            if (strcmp("I2cExpander", chType->valuestring) == 0) {
             deviceSet->I2cExpander.IsActive = true;
             if (ParseStripDefinition(ch, "Device", &(deviceSet->I2cExpander.Device)) != ESP_OK) {
                 ESP_LOGW(TAG, "Error Parsing Config-JSON of Channel %d: Cannot read Device", chIdx);
@@ -263,6 +263,7 @@ esp_err_t Fs_ReadDeviceConfiguration(deviceConfig_t *deviceSet) {
             }
         } else
             ESP_LOGE(TAG, "Error Parsing Config-JSON: Type %s not recognized", chType->valuestring);
+        }
     }
     cJSON_Delete(root);
     return ESP_OK;
