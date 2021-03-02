@@ -206,7 +206,7 @@ TEST_CASE("Span-Values -> Nor Error", "[ApplyParse]") {
         compIdx = &comp1;
         CHECK( idx.Items == 160 );
     }
-    SECTION("Single Channel Value") {
+    SECTION("Single Channel Values") {
         strcpy(input, "1, 3-6, 15, 24-16, 30-32");
         ParseApplyToString(input, &idx);
         static ApplyIndexes_t comp2 = {0,0, {RgbChannel::None_Error, 0,0}, {0xE000403D, 0, 0, 0, 0}};
@@ -214,13 +214,29 @@ TEST_CASE("Span-Values -> Nor Error", "[ApplyParse]") {
         CHECK( idx.Items == 9 );
         CHECK( idx.Errors == 1 );
     }
-    SECTION("invalid single Value") {
+    SECTION("One Range definition with Single Channel Value") {
+        strcpy(input, "3-6");
+        ParseApplyToString(input, &idx);
+        static ApplyIndexes_t comp2 = {0,0, {RgbChannel::None_Error, 0,0}, {0x0000003C, 0, 0, 0, 0}};
+        compIdx = &comp2;
+        CHECK( idx.Items == 4 );
+        CHECK( idx.Errors == 0 );
+    }
+    SECTION("Structured Channel Values") {
         strcpy(input, "1.1, 1.3-1.6, 1.15, 1.24-1.16, 1.30-32");
         ParseApplyToString(input, &idx);
         static ApplyIndexes_t comp2 = {0,0, {RgbChannel::None_Error, 0,0}, {0xE000403D, 0, 0, 0, 0}};
         compIdx = &comp2;
         CHECK( idx.Items == 9 );
         CHECK( idx.Errors == 1 );
+    }
+    SECTION("One structured Range definition with Single Channel Value") {
+        strcpy(input, "1.3-1.6");
+        ParseApplyToString(input, &idx);
+        static ApplyIndexes_t comp2 = {0,0, {RgbChannel::None_Error, 0,0}, {0x0000003C, 0, 0, 0, 0}};
+        compIdx = &comp2;
+        CHECK( idx.Items == 4 );
+        CHECK( idx.Errors == 0 );
     }
 
     CHECK( IndexesAreEqual(&idx, compIdx) );

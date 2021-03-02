@@ -135,11 +135,11 @@ void ParseApplyToString(
         pR = strchr(pC, '-');
         if (pR != NULL) {
             char *pPre = pR - 1;
-            while (pPre > pC && (*pPre < '0') && (*pPre > '9')) {
+            while (pPre >= pC && (*pPre < '0') && (*pPre > '9')) {
                 pPre--;
             }
 
-            if (pPre <= pC) // On limit no number between delimiter and minus
+            if (pPre < pC) // On limit no number between delimiter and minus
             {
                 indexes->Errors++;
                 continue;

@@ -11,7 +11,8 @@ get_filename_component(READER_PARENT_DIR ../../components/FileSystem ABSOLUTE)
 get_filename_component(CONNECTOR_PARENT_DIR ../../components/MyConnect ABSOLUTE)
 get_filename_component(PARENT_INCLUDEDIR ../../components/LightEffect ABSOLUTE)
 
-message( "### ALl Sources " ${sources})
+add_compile_definitions(CONFIG_DEVICE_CONFIGURATION_FILENAME="DeviceConfig.json")
+
 add_executable(TestRunner   "TestMain.cpp"
                             "ReaderMock.cpp"
                             ${DUT_PARENT_DIR}"/ProcessHandler.cpp"
