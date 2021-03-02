@@ -1,22 +1,27 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from io import BytesIO
 import re
+import os
+import json
 
-versatileApiRouts = [   
-    '/api/GetStatus/WiFiStatus', 
-    '/api/GetStatus/DeviceConfig',
-    '/api/GetPort/RGBISync',
-    '/api/GetPort/RGBWAsync',
-    '/api/GetPort/RGBWSingle',
-    '/api/GetPort/IValues',
-]
+scriptLocation = (os.path.dirname(__file__))
+rootDir = os.path.dirname(os.path.dirname(scriptLocation)) # ../..
+dutDir = os.path.join(rootDir, 'serverPages')
+configDir = os.path.join(rootDir, 'factoryCfg')
+print("Initial Notes for Test Routine")
+print("  Place test-data in: " + scriptLocation)
+print("  Pages are placed in: " + dutDir)
 
-nextApiResponse = '{"wifiStatus": "Test"}'
-stationConfig ='{ "StartupMode": "RunDemo", "DisplayMode": "ExpertView", "Outputs": [ { "Type": "SyncLedCh", "Description": "Synchronous serial LED port",  "Strip": { "LedCount": 6, "Intens": 16, "Channel": "RGB" }, "Color": [0,0,0,0] }, { "Type": "AsyncLedCh", "Description": "Asynchronous serial LED port",  "Strip": { "LedCount": 24, "Intens": 16, "Channel": "RGB" }, "Color": [0,0,0,0] },         { "Type": "RgbStrip", "Description": "Rgb-Strip LED port", "Strip": { "LedCount": 6, "Intens": 1024, "Channel": "RGBW" }, "Color": [0,0,0,0] }, { "Type": "I2cExpander", "Description": "I2C-Expander port", "Device": { "LedCount": 3, "Intens": 1024, "Channel": "Gray" }, "Address": 1, "GrayValues": [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0] } ] }'
+os.chdir(dutDir)
+nextApiResponse = '{"Test": "Response"}'
 
 def load_binary(file):
     with open(file, 'rb') as file:
         return file.read()
+def search_item (name, items):
+    for keyval in items:
+        if name.lower() == keyval['url'].lower():
+            return keyval['responses']
 
 
 class MockServer(BaseHTTPRequestHandler):
@@ -35,19 +40,27 @@ class MockServer(BaseHTTPRequestHandler):
         if (self.path == '/api/GetStatus/DeviceConfig'):
             print(f"        api Path for Device Config found '{self.path}'")
             self.send_response(200)
+            with open(configDir +'\IOConfiguration.json', 'r') as content_file:
+                stationConfig = content_file.read()
             wStat = stationConfig
             self.send_header('Content-type', 'text/json')
             self.end_headers()
             self.wfile.write("{}".format(wStat).encode('utf-8'))
             return
-        if any(item == self.path in item for item in versatileApiRouts):
-            print(f"        api Path found '{self.path}'")
-            self.send_response(200)
-            wStat = nextApiResponse
-            self.send_header('Content-type', 'text/json')
-            self.end_headers()
-            self.wfile.write("{}".format(wStat).encode('utf-8'))
-            return
+
+        with open(scriptLocation +'\Responses.json', 'r') as response_file:
+            responsePool = json.loads(response_file.read())
+            found = search_item(self.path, responsePool['GetResponses'])
+            if (found != None):
+                print(f"        api Path found '{self.path}'")
+                print(f"        => Responding: '{json.dumps(found[0])}'")
+
+                self.send_response(200)
+                wStat = json.dumps(found[0])
+                self.send_header('Content-type', 'text/json')
+                self.end_headers()
+                self.wfile.write("{}".format(wStat).encode('utf-8'))
+                return
 
         if self.path == '/':
             self.path = '/welcome.html' # redirect
@@ -61,7 +74,7 @@ class MockServer(BaseHTTPRequestHandler):
             ending = match.group(1)
         
         print(f"        Evaluation request path '{self.path}'")
-        print(f"        Ending recognized'{ending}'")
+        print(f"        Ending recognized '{ending}'")
         if ending == "":
             responseType = 'text/html'
             self.path = self.path + ".html"
