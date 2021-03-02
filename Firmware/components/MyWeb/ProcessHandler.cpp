@@ -215,8 +215,7 @@ esp_err_t ProcessRgbiPost(const char *message, const char **output) {
     cJSON *root = cJSON_Parse(message);
     for (size_t i = 0; i < size; i++) {
         cJSON *e = cJSON_GetObjectItem(root, labels[i]);
-        int n = std::stoi(e->valuestring);
-        *(values[i]) = (uint8_t)n;
+        *(values[i]) = (uint8_t)e->valueint;
     }
     char *apply = cJSON_GetObjectItem(root, "appTo")->valuestring;
     ParseApplyToString(apply, &msg.apply);
@@ -242,8 +241,7 @@ esp_err_t ProcessRgbwPost(const char *message, const char **output) {
     cJSON *root = cJSON_Parse(message);
     for (size_t i = 0; i < size; i++) {
         cJSON *e = cJSON_GetObjectItem(root, labels[i]);
-        int n = std::stoi(e->valuestring);
-        *(values[i]) = (uint8_t)n;
+        *(values[i]) = (uint8_t)e->valueint;
     }
 
     char *apply = cJSON_GetObjectItem(root, "appTo")->valuestring;
@@ -270,8 +268,7 @@ esp_err_t ProcessRgbwSinglePost(const char *message, const char **output) {
     cJSON *root = cJSON_Parse(message);
     for (size_t i = 0; i < size; i++) {
         cJSON *e = cJSON_GetObjectItem(root, labels[i]);
-        int n = std::stoi(e->valuestring);
-        *(values[i]) = (uint8_t)n;
+        *(values[i]) = (uint8_t)e->valueint;
     }
 
     char *apply = cJSON_GetObjectItem(root, "appTo")->valuestring;
@@ -296,8 +293,7 @@ esp_err_t ProcessGrayValuesPost(const char *message, const char **output) {
     cJSON *root = cJSON_Parse(message);
     for (size_t i = 0; i < size; i++) {
         cJSON *e = cJSON_GetObjectItem(root, labels[i]);
-        int n = std::stoi(e->valuestring);
-        msg.gray[i] = (uint8_t)n;
+        msg.gray[i]  = (uint8_t)e->valueint;
     }
     char *apply = cJSON_GetObjectItem(root, "appTo")->valuestring;
     ParseApplyToString(apply, &msg.apply);

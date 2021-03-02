@@ -56,7 +56,11 @@ function onSubmitColor(form, setUrl) {
     jsonObject["form"] = form.name;
 
     for (const [key, value] of formData) {
-        jsonObject[key] = value;
+        var formE = form.querySelector(`input[name="${key}"]`);
+        if (formE.type == "number")
+            jsonObject[key] = parseInt(value);
+        else
+            jsonObject[key] = value;
     }
     console.log(jsonObject);
 
@@ -69,7 +73,7 @@ function onSubmitColor(form, setUrl) {
 }
 
 async function onGetChannelValue(btn, getUrl) {
-    console.log("requesting from %s", getUrl);
+    console.log("requesting from '%s'", getUrl);
 
     parentForm = btn.parentElement;
     while (parentForm.tagName != 'FORM') {
@@ -80,12 +84,18 @@ async function onGetChannelValue(btn, getUrl) {
         .then(data => {
             SetupUi.showMessage(parentForm, "Data requested ...", 'userSuccess');
             console.log("Data requested", data);
+
+            for (var element in data) {
+                var formE = parentForm.querySelector(`input[name="${element}"]`);
+                if (formE.type == "number")
+                    formE.value = data[element];
+            }
         })
         .catch(response => {
             console.warn(response);
-        }); 
+        });
     return false;
-  }
+}
 
 const SetupUi = (function () {
     const controllerSpace = document.getElementById('formSpace');
@@ -113,7 +123,7 @@ const SetupUi = (function () {
         console.log(response);
         let num = 1;
         ports = response.Outputs;
-        ports.forEach(function(element) {
+        ports.forEach(function (element) {
             if (element.Type == 'SyncLedCh') {
                 let channels = createRgbChannel(255);
                 channels.push(createColorChannelParam('black', 'Intensity', 'intens', 'iOut', 100, 'I'));
@@ -172,7 +182,7 @@ const SetupUi = (function () {
                     setRoute: ApiSetPort_IValues,
                     getRoute: ApiGetPort_IValues
                 };
-                controllerSpace.appendChild(createGrControl(inputParam));    
+                controllerSpace.appendChild(createGrControl(inputParam));
             }
             num++;
         })
@@ -184,7 +194,7 @@ const SetupUi = (function () {
             .catch(response => {
                 console.warn(response);
                 alert("Couldn't load device Configuration, please contact support");
-            }); 
+            });
     }
 
     // type may be  emphasis ,userNote ,userWarning ,userError ,userSuccess ,
@@ -198,9 +208,9 @@ const SetupUi = (function () {
         messageObj.className = 'row ' + type;
         messageObj.id = stamp;
         messageObj.appendChild(document.createTextNode(message));
-        
+
         parent.insertBefore(messageObj, basePoint.parentElement.nextSibling);
-        setTimeout(function() {document.getElementById(stamp).remove()}, 3000);
+        setTimeout(function () { document.getElementById(stamp).remove() }, 3000);
     }
 
     return {
@@ -236,7 +246,7 @@ function createFormFrame(id, name, action) {
 }
 
 function rgbFormGenerator(param) {
-    function createChannelControl(num, route){
+    function createChannelControl(num, route) {
         const controlTemplate = `
         <div class="four columns">
             <label for="appTo">Apply to ...</label>
@@ -256,13 +266,13 @@ function rgbFormGenerator(param) {
             <input type="range" id="${param.varName}${num}" oninput="${param.fieldRef}${num}.value = this.value; UpdateColor(this);" min="0"
             max="${param.maxValue}" step="1" value="0">
             `;
-    
+
         const fieldTemplate = `
             <input type="number" id="${param.fieldRef}${num}" name="${param.objName}" oninput="${param.varName}${num}.value = this.value; UpdateColor(this);"
             class="u-full-width" value="0" min="0" max="${param.maxValue}">
             `;
-    
-        return { 
+
+        return {
             slider: sliderTemplate,
             field: fieldTemplate
         };
@@ -271,36 +281,36 @@ function rgbFormGenerator(param) {
     const num = param.number;
     const caption = `Port ${num}: ${param.caption}`;
     const description = param.description;
-    const formName = param.name; 
+    const formName = param.name;
     const formId = `rgbiSyncForm_${num}`;
     const setRoute = param.setRoute;
     const getRoute = param.getRoute;
-    
+
     let table = document.createElement('table');
     let sliderRow = document.createElement('tr');
     let fieldRow = document.createElement('tr');
-    param.channels.forEach(function(element){
+    param.channels.forEach(function (element) {
         const control = createColoredSlider(element, num);
 
         const r1 = document.createElement('td');
         r1.innerHTML = control.slider,
-        sliderRow.appendChild(r1);
+            sliderRow.appendChild(r1);
 
         const r2 = document.createElement('td');
         r2.innerHTML = control.field,
-        fieldRow.appendChild(r2);
+            fieldRow.appendChild(r2);
     });
     table.appendChild(sliderRow);
     table.appendChild(fieldRow);
-   
+
     let main = createDivRowFrame();
     main.innerHTML = `
     <h2>${caption}</h2>
     <p>${description}</p>
     `;
 
-    let form = createFormFrame(formId, formName, )
-    form.setAttribute('onsubmit',`return onSubmitColor(this, "${setRoute}")`);
+    let form = createFormFrame(formId, formName,)
+    form.setAttribute('onsubmit', `return onSubmitColor(this, "${setRoute}")`);
     let control = createDivRowFrame();
     control.innerHTML = createChannelControl(num, getRoute);
 
@@ -315,7 +325,7 @@ function rgbFormGenerator(param) {
 }
 
 function grFormGenerator(param) {
-    function createChannelControl(num, route){
+    function createChannelControl(num, route) {
         const controlTemplate = `
         <div class="row">
           <div class="four columns">
@@ -336,41 +346,41 @@ function grFormGenerator(param) {
             `;
         return sliderTemplate;
     }
-    
+
     const num = param.number;
     const caption = `Port ${num}: ${param.caption}`;
     const description = param.description;
-    const formName = param.name; 
+    const formName = param.name;
     const formId = `rgbiSyncForm_${num}`;
     const setRoute = param.setRoute;
     const getRoute = param.getRoute;
-    
+
     let table = document.createElement('table');
-    
+
     let toDo = param.channels.count;
     let cnt = 1;
-    while(cnt <= toDo) {
+    while (cnt <= toDo) {
         let row = param.channels.inLine;
         let sliderRow = document.createElement('tr');
 
         while ((row > 0) && (cnt <= toDo)) {
-            const control = createGraySlider(param.channels.definition , cnt, num);
+            const control = createGraySlider(param.channels.definition, cnt, num);
             const r1 = document.createElement('td');
             r1.innerHTML = control,
-            sliderRow.appendChild(r1);
+                sliderRow.appendChild(r1);
             cnt++; row--;
         }
         table.appendChild(sliderRow);
     }
-       
+
     let main = createDivRowFrame();
     main.innerHTML = `
     <h2>${caption}</h2>
     <p>${description}</p>
     `;
 
-    let form = createFormFrame(formId, formName, )
-    form.setAttribute('onsubmit',`return onSubmitColor(this, "${setRoute}")`);
+    let form = createFormFrame(formId, formName,)
+    form.setAttribute('onsubmit', `return onSubmitColor(this, "${setRoute}")`);
     form.innerHTML = createChannelControl(num, getRoute);
 
     let slider = document.createElement('div');
@@ -383,19 +393,19 @@ function grFormGenerator(param) {
 }
 
 async function onSave(page) {
-    const save = {Page: page};
+    const save = { Page: page };
     await http.post(ApiSaveToPage, save)
-        .then( () => {
+        .then(() => {
             console.warn("Sent object", save);
             //SetupUi.showMessage(parentForm, "Page saved", 'userSuccess');
         })
         .catch(response => {
             console.warn(response);
-        }); 
-  }
-  function onResetPages() {
+        });
+}
+function onResetPages() {
 
-        // await http.post(ApiResetProgram, {})
+    // await http.post(ApiResetProgram, {})
     //     .then( () => {
     //         SetupUi.showMessage(parentForm, "Pages cleared", 'userSuccess');
     //     })
@@ -407,9 +417,9 @@ async function onSave(page) {
     xhr.open("POST", ApiResetProgram, true);
     xhr.setRequestHeader('Content-Type', 'application/text');
     xhr.send();
-  }
+}
 
-  async function onGetAllValues(form) {
+async function onGetAllValues(form) {
 
     // const ApiGetPort_RGBISync
     // const ApiGetPort_RGBWAsync
@@ -418,13 +428,13 @@ async function onSave(page) {
 
     const anchor = document.getElementById('saveSpace');
     await http.get(ApiGetPort_RGBISync)
-    .then(data => {
-        SetupUi.showMessage(anchor, "Data requested ...", 'userSuccess');
-        console.log("Data requested" + data);
-    })
-    .catch(response => {
-        console.warn(response);
-    }); 
+        .then(data => {
+            SetupUi.showMessage(anchor, "Data requested ...", 'userSuccess');
+            console.log("Data requested" + data);
+        })
+        .catch(response => {
+            console.warn(response);
+        });
     var SetUrl = "/GetValues/RGBValues"
     console.log("sending to %s", SetUrl);
-  }
+}
