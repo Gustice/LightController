@@ -2,10 +2,10 @@
 const Route_SetupFull = '/SetupFull';
 
 /// API Routes GET
-const ApiGetPort_RGBISync = "/api/GetPort/RGBISync";
-const ApiGetPort_RGBWAsync = "/api/GetPort/RGBWAsync";
-const ApiGetPort_RGBWSingle = "/api/GetPort/RGBWSingle";
-const ApiGetPort_IValues = "/api/GetPort/IValues";
+const ApiGetPort_RGBISync = "/api/GetPort/RGBISync/";
+const ApiGetPort_RGBWAsync = "/api/GetPort/RGBWAsync/";
+const ApiGetPort_RGBWSingle = "/api/GetPort/RGBWSingle/";
+const ApiGetPort_IValues = "/api/GetPort/IValues/";
 /// API Routes SET
 const ApiSetPort_RGBISync = "/api/SetPort/RGBISync";
 const ApiSetPort_RGBWAsync = "/api/SetPort/RGBWAsync";

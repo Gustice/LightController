@@ -36,12 +36,14 @@ esp_err_t set_content_type_from_file(httpd_req_t *req, const char *filepath) {
 static QueueHandle_t xColorQueue;
 static QueueHandle_t xGrayQueue;
 static esp_err_t (*GetChannelSettings)(ReqColorIdx_t channel, uint8_t *data, size_t length);
+static deviceConfig_t * pStationConfig;
 
 void SetQueueHandlesForPostH(
-    QueueHandle_t colorQ, QueueHandle_t grayQ, pChannelGetCallback getCbk) {
+    QueueHandle_t colorQ, QueueHandle_t grayQ, pChannelGetCallback getCbk, deviceConfig_t * stationConfig) {
     xColorQueue = colorQ;
     xGrayQueue = grayQ;
     GetChannelSettings = getCbk;
+    pStationConfig = stationConfig;
 }
 
 ReqColorIdx_t ParseApplyToElement(char *element) {
@@ -234,12 +236,16 @@ esp_err_t ProcessRgbwPost(const char *message, const char **output) {
     memset(&msg, 0, sizeof(ColorMsg_t));
     msg.channel = RgbChannel::RgbwAsync;
 
-    const int size = 4;
-    const char *labels[size] = {"R", "G", "B", "W"};
+    int size = 4;
+    const char *labels[size] = {"R", "G", "B", /*optional*/ "W"};
     uint8_t *values[size] = {&(msg.red), &(msg.green), &(msg.blue), &(msg.white)};
+    
+    int maxStep = size;
+    if (pStationConfig->AsyncLeds.Strip.Channels != ColorChannels::RGBW)
+        maxStep = 3;
 
     cJSON *root = cJSON_Parse(message);
-    for (size_t i = 0; i < size; i++) {
+    for (size_t i = 0; i < maxStep; i++) {
         cJSON *e = cJSON_GetObjectItem(root, labels[i]);
         *(values[i]) = (uint8_t)e->valueint;
     }
@@ -262,11 +268,15 @@ esp_err_t ProcessRgbwSinglePost(const char *message, const char **output) {
     msg.channel = RgbChannel::RgbwPwm;
 
     const int size = 4;
-    const char *labels[size] = {"R", "G", "B", "W"};
+    const char *labels[size] = {"R", "G", "B", /*optional*/ "W"};
     uint8_t *values[size] = {&(msg.red), &(msg.green), &(msg.blue), &(msg.white)};
 
+    int maxStep = size;
+    if (pStationConfig->RgbStrip.Strip.Channels != ColorChannels::RGBW)
+        maxStep = 3;
+
     cJSON *root = cJSON_Parse(message);
-    for (size_t i = 0; i < size; i++) {
+    for (size_t i = 0; i < maxStep; i++) {
         cJSON *e = cJSON_GetObjectItem(root, labels[i]);
         *(values[i]) = (uint8_t)e->valueint;
     }
@@ -290,13 +300,16 @@ esp_err_t ProcessGrayValuesPost(const char *message, const char **output) {
         "G12", "G13", "G14", "G15", "G16"};
     int values[size];
 
+    int maxStep = pStationConfig->I2cExpander.Device.LedCount;
+
     cJSON *root = cJSON_Parse(message);
-    for (size_t i = 0; i < size; i++) {
+    for (size_t i = 0; i < maxStep; i++) {
         cJSON *e = cJSON_GetObjectItem(root, labels[i]);
         msg.gray[i]  = (uint8_t)e->valueint;
     }
-    char *apply = cJSON_GetObjectItem(root, "appTo")->valuestring;
-    ParseApplyToString(apply, &msg.apply);
+    // Not needed here
+    // char *apply = cJSON_GetObjectItem(root, "appTo")->valuestring;
+    // ParseApplyToString(apply, &msg.apply);
     msg.channel = RgbChannel::I2cExpanderPwm;
     msg.intensity = 0;
     msg.targetIdx = 0;
@@ -323,16 +336,15 @@ esp_err_t ProcessRgbiGet(const char *message, const char **output) {
     ColorMsg_t value;
     ApplyIndexes_t idx;
 
-    cJSON *root = cJSON_Parse(message);
-    char *apply = cJSON_GetObjectItem(root, "appTo")->valuestring;
-    ParseApplyToString(apply, &idx);
-    cJSON_Delete(root);
+    char buffer[256];
+    strcpy(buffer, message);
+    ParseApplyToString(buffer, &idx);
 
     req.chIdx = idx.FirstTarget.chIdx;
     req.portIdx = idx.FirstTarget.portIdx;
     esp_err_t ret = GetChannelSettings(req, (uint8_t *)&value, sizeof(ColorMsg_t));
 
-    root = cJSON_CreateObject();
+    cJSON * root = cJSON_CreateObject();
     const int size = 4;
     const char *labels[size] = {"R", "G", "B", "I"};
     uint8_t *values[size] = {&(value.red), &(value.green), &(value.blue), &(value.intensity)};
@@ -349,16 +361,15 @@ esp_err_t ProcessRgbwGet(const char *message, const char **output) {
     ColorMsg_t value;
     ApplyIndexes_t idx;
 
-    cJSON *root = cJSON_Parse(message);
-    char *apply = cJSON_GetObjectItem(root, "appTo")->valuestring;
-    ParseApplyToString(apply, &idx);
-    cJSON_Delete(root);
+    char buffer[256];
+    strcpy(buffer, message);
+    ParseApplyToString(buffer, &idx);
 
     req.chIdx = idx.FirstTarget.chIdx;
     req.portIdx = idx.FirstTarget.portIdx;
     esp_err_t ret = GetChannelSettings(req, (uint8_t *)&value, sizeof(ColorMsg_t));
 
-    root = cJSON_CreateObject();
+    cJSON * root = cJSON_CreateObject();
     const int size = 4;
     const char *labels[size] = {"R", "G", "B", "W"};
     uint8_t *values[size] = {&(value.red), &(value.green), &(value.blue), &(value.white)};
@@ -375,16 +386,15 @@ esp_err_t ProcessRgbwSingleGet(const char *message, const char **output) {
     ColorMsg_t value;
     ApplyIndexes_t idx;
 
-    cJSON *root = cJSON_Parse(message);
-    char *apply = cJSON_GetObjectItem(root, "appTo")->valuestring;
-    ParseApplyToString(apply, &idx);
-    cJSON_Delete(root);
+    char buffer[256];
+    strcpy(buffer, message);
+    ParseApplyToString(buffer, &idx);
 
     req.chIdx = idx.FirstTarget.chIdx;
     req.portIdx = idx.FirstTarget.portIdx;
     esp_err_t ret = GetChannelSettings(req, (uint8_t *)&value, sizeof(ColorMsg_t));
 
-    root = cJSON_CreateObject();
+    cJSON * root = cJSON_CreateObject();
     const int size = 4;
     const char *labels[size] = {"R", "G", "B", "W"};
     uint8_t *values[size] = {&(value.red), &(value.green), &(value.blue), &(value.white)};
@@ -401,20 +411,21 @@ esp_err_t ProcessGrayValuesGet(const char *message, const char **output) {
     GrayValMsg_t value;
     ApplyIndexes_t idx;
 
-    cJSON *root = cJSON_Parse(message);
-    char *apply = cJSON_GetObjectItem(root, "appTo")->valuestring;
-    ParseApplyToString(apply, &idx);
-    cJSON_Delete(root);
+    char buffer[256];
+    strcpy(buffer, message);
+    ParseApplyToString(buffer, &idx);
 
     req.chIdx = idx.FirstTarget.chIdx;
     req.portIdx = idx.FirstTarget.portIdx;
     esp_err_t ret = GetChannelSettings(req, (uint8_t *)&value, sizeof(ColorMsg_t));
 
-    root = cJSON_CreateObject();
+    cJSON * root = cJSON_CreateObject();
     const int size = 16;
     const char *labels[size] = {"G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "G9", "G10", "G11",
         "G12", "G13", "G14", "G15", "G16"};
-    for (size_t i = 0; i < size; i++) {
+
+    int maxStep = pStationConfig->I2cExpander.Device.LedCount;
+    for (size_t i = 0; i < maxStep; i++) {
         cJSON_AddNumberToObject(root, labels[i], value.gray[i]);
     }
     *output = cJSON_PrintUnformatted(root); // to save pretty whitespaces cJSON_Print
@@ -459,7 +470,7 @@ esp_err_t ProcessGetDeviceConfig(const char *message, const char **output) {
     if (*output != nullptr)
         return ESP_FAIL;
 
-    const size_t length = 2048;
+    const size_t length = 4096;
     char *buffer = new char[length];
     *output = buffer;
 

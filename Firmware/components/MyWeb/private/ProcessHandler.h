@@ -5,8 +5,9 @@
 #include "ParamReader.h"
 #include "SoftAp.h"
 #include "esp_http_server.h"
+#include "DeviceTypes.h"
 
-void SetQueueHandlesForPostH(QueueHandle_t colorQ, QueueHandle_t grayQ, pChannelGetCallback getCbk);
+void SetQueueHandlesForPostH(QueueHandle_t colorQ, QueueHandle_t grayQ, pChannelGetCallback getCbk, deviceConfig_t * stationConfig);
 
 esp_err_t set_content_type_from_file(httpd_req_t *req, const char *filepath);
 

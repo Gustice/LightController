@@ -18,11 +18,10 @@ nextApiResponse = '{"Test": "Response"}'
 def load_binary(file):
     with open(file, 'rb') as file:
         return file.read()
-def search_item (name, items):
+def search_item (url, items):
     for keyval in items:
-        if name.lower() == keyval['url'].lower():
+        if url.lower().startswith(keyval['url'].lower()):
             return keyval['responses']
-
 
 class MockServer(BaseHTTPRequestHandler):
 

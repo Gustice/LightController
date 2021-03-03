@@ -48,7 +48,7 @@ static esp_err_t pagePart_GetHandler(httpd_req_t *req) {
     rest_server_context_t *rest_context = (rest_server_context_t *)req->user_ctx;
     strlcpy(filepath, rest_context->base_path, sizeof(filepath));
 
-    if (req->uri[strlen(req->uri) - 1] == '/') {
+    if (req->uri[strlen(req->uri) - 1] == '/') { // Ends with '/'
         strlcat(filepath, "/welcome.html", sizeof(filepath));
     } else {
         strlcat(filepath, req->uri, sizeof(filepath));
@@ -57,6 +57,10 @@ static esp_err_t pagePart_GetHandler(httpd_req_t *req) {
     // Check if Rout misses .html-Ending -> Append .html
     if (strchr(filepath, '.') == NULL)
         strcpy(&filepath[strlen(filepath)], ".html"); 
+
+    // Check if icon is requested -> Change to png
+    if (strcmp(filepath, "/favicon.ico") == 0)
+        strcpy(filepath, "/favicon.png"); 
 
     int fd = open(filepath, O_RDONLY, 0);
     if (fd == -1) {
@@ -98,24 +102,27 @@ static esp_err_t pagePart_GetHandler(httpd_req_t *req) {
  * @brief Get-Handlers for Get-Data-Requests
  *
  */
-static const httpd_getUri_t getValueHandlers[]{
-    {"/api/GetPort/RGBISync", ProcessRgbiGet},
-    {"/api/GetPort/RGBWAsync", ProcessRgbwGet},
-    {"/api/GetPort/RGBWSingle", ProcessRgbwSingleGet},
-    {"/api/GetPort/IValues", ProcessGrayValuesGet},
+static const httpd_getUri_t getValueHandlers[] {
+    {"/api/GetPort/RGBISync/", ProcessRgbiGet},
+    {"/api/GetPort/RGBWAsync/", ProcessRgbwGet},
+    {"/api/GetPort/RGBWSingle/", ProcessRgbwSingleGet},
+    {"/api/GetPort/IValues/", ProcessGrayValuesGet},
     {"/api/GetStatus/WiFiStatus", ProcessWiFiStatusGet},
     {"/api/GetStatus/DeviceConfig", ProcessGetDeviceConfig},
     {nullptr, nullptr},
-};
+} ;
 
 static esp_err_t data_get_handler(httpd_req_t *req) {
     ESP_LOGI(cModTag, "Requested Uri: %s", req->uri);
 
     int idx = 0;
+    size_t start = 0;
     const httpd_getUri_t *part = &getValueHandlers[idx++];
     while (part->uri != nullptr) {
-        if (strcmp(req->uri, part->uri) == 0)
-            break;
+        if (strstr(req->uri, part->uri) != nullptr) {
+                start = strlen(part->uri);
+                break;
+            }
         part = &getValueHandlers[idx++];
     }
 
@@ -146,12 +153,12 @@ static esp_err_t data_get_handler(httpd_req_t *req) {
     buf[total_len] = '\0';
 
     ESP_LOGI(cModTag, "=========== RECEIVED DATA ==========");
-    ESP_LOGI(cModTag, "Raw: %s", buf);
+    ESP_LOGI(cModTag, "Raw: %s", &(req->uri[start]));
     ESP_LOGI(cModTag, "====================================");
 
     const char * output = nullptr;
     pProcessGet pFunc = (pProcessGet)part->pFunc;
-    if ((pFunc(buf, &output) == ESP_OK) && (output != nullptr)) {
+    if ((pFunc( &(req->uri[start]) , &output) == ESP_OK) && (output != nullptr)) {
         httpd_resp_set_type(req, "application/json");
         httpd_resp_sendstr(req, output);
 
@@ -273,7 +280,7 @@ static httpd_handle_t start_webserver(void) {
     return NULL;
 }
 
-void SetupMyWeb(QueueHandle_t colorQ, QueueHandle_t grayQ, SemaphoreHandle_t newWebCmd, pChannelGetCallback getCbk) {
+void SetupMyWeb(QueueHandle_t colorQ, QueueHandle_t grayQ, SemaphoreHandle_t newWebCmd, pChannelGetCallback getCbk, deviceConfig_t * stationConfig) {
     xNewLedWebCommand = newWebCmd;
     ESP_LOGI(cModTag, "Initialization of web interface ... ");
 
@@ -287,7 +294,7 @@ void SetupMyWeb(QueueHandle_t colorQ, QueueHandle_t grayQ, SemaphoreHandle_t new
     ESP_ERROR_CHECK(nvs_flash_init());
     ESP_ERROR_CHECK(esp_netif_init());
 
-    SetQueueHandlesForPostH(colorQ, grayQ, getCbk);
+    SetQueueHandlesForPostH(colorQ, grayQ, getCbk, stationConfig);
 
     /* Start the server for the first time */
     server = start_webserver();

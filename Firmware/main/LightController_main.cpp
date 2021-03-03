@@ -243,7 +243,7 @@ void app_main(void) {
 
     if (xNewWebCommand != NULL && xColorQueue != NULL && xGrayQueue != NULL) {
         static uint8_t taskParam;
-        SetupMyWeb(xColorQueue, xGrayQueue, xNewWebCommand, GetChannelSettings);
+        SetupMyWeb(xColorQueue, xGrayQueue, xNewWebCommand, GetChannelSettings, &deviceConfig);
         xTaskCreate(vRefreshLed, "RefreshLed", 4096, (void *)taskParam, tskIDLE_PRIORITY, NULL);
     } else {
         ESP_LOGE(ModTag,

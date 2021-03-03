@@ -11,9 +11,11 @@
 #include "freertos/task.h"
 
 #include "ApiDataTypes.h"
+#include "DeviceTypes.h"
+
 esp_err_t Init_WebFs(void);
 
 typedef esp_err_t (*pChannelGetCallback)(ReqColorIdx_t , uint8_t *, size_t);
 
 void SetupMyWeb(QueueHandle_t colorQ, QueueHandle_t grayQ, SemaphoreHandle_t newLedWebCmd,
-    pChannelGetCallback getCbk);
+    pChannelGetCallback getCbk, deviceConfig_t * stationConfig);

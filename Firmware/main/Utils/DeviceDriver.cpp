@@ -85,7 +85,7 @@ esp_err_t DeviceDriver::ApplyRgbColorMessage(ColorMsg_t *colorMsg) {
 
     case RgbChannel::RgbwPwm:
         ApplyColor2RgbChannel(colorMsg, rgbPort->Image, deviceConfig->RgbStrip.ChannelCount);
-        ALedStrip->SendImage(rgbPort->Image);
+        LedStrip->SetImage(rgbPort->Image);
         break;
 
     default:

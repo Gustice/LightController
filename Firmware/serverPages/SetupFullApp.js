@@ -80,7 +80,11 @@ async function onGetChannelValue(btn, getUrl) {
         parentForm = parentForm.parentElement;
     }
 
-    await http.get(getUrl)
+    const formE = parentForm.querySelector(`input[name="appTo"]`);
+    let appRef = 0
+    if (formE != null)
+        appRef = formE.value
+    await http.get(getUrl + appRef)
         .then(data => {
             SetupUi.showMessage(parentForm, "Data requested ...", 'userSuccess');
             console.log("Data requested", data);
