@@ -44,6 +44,12 @@ The next picture shows a web GUI page to control the LED colors. It currently on
 
 There is currently not very much useful stuff going on. But to get faster familiar with this project this could help you to read. 
 
+The device is flashed in three steps. One can use the VS-Tasks defined in the Firmware-Project for it:
+ - `Flash & Monitor`: Builds and flashes the app to target. Note that certain config files will be remain missing until also the parameter partition and webserver partition is also flashed.
+ - `Flash Data-Image`: Flashes the config files on the parameter partition (therefor the folder *factoryCfg* is packed to binary and flashed)
+ - `Flash Web-Image`: Flashes the files for the webserver to the server partition (therefor the folder *serverPages* is backed to binary and flashed)
+
+
 After powerup the device provides a WiFi-access point. 
 
 - SSID `cLight`
