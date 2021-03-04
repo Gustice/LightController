@@ -9,11 +9,22 @@
  */
 
 #include <stdint.h>
+#include <string.h>
 
+#pragma once
+
+/**
+ * @brief Index with automatic revolution back to start position
+ * 
+ * @details Useful for Buffer-Pointer, or similar tasks
+ * 
+ */
 class RotatingIndex {
   public:
+    /// Value at witch the index rotates back to beginning
     const uint16_t MaxIndex;
-    RotatingIndex(uint16_t max) : MaxIndex(max){ _index = 0; }
+    RotatingIndex(uint16_t max) : MaxIndex(max) { _index = 0; }
+
 
     uint16_t GetIndexAndInkrement(void) {
         auto retVal = _index;
@@ -28,7 +39,7 @@ class RotatingIndex {
         if (MaxIndex == 0)
             return true;
 
-        if (_index >= MaxIndex-1) {
+        if (_index >= MaxIndex - 1) {
             return true;
         }
         return false;

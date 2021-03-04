@@ -1,0 +1,47 @@
+input[type="range"] {
+    margin-top: 30px;
+    margin-bottom: 34px;
+    margin-left: -25px;
+    margin-right: -25px;
+    height: 20px;
+    width: 80px;
+    transform: rotate(270deg);
+}
+
+.emphasis {
+    background: #465053;
+    padding: 12px;
+    border-radius: 5px;
+}
+
+.userNote {
+    background: #465053;
+    padding: 12px;
+    border-radius: 5px;
+    margin: 6px;
+}
+
+.userWarning {
+    background: #535346;
+    padding: 12px;
+    border-radius: 5px;
+    margin: 6px;
+}
+
+.userError {
+    background: #534946;
+    padding: 12px;
+    border-radius: 5px;
+    margin: 6px;
+}
+
+.userSuccess {
+    background: #465346;
+    padding: 12px;
+    border-radius: 5px;
+    margin: 6px;
+}
+
+h2 {
+    padding-top: 20px;
+}

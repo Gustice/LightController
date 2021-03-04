@@ -1,23 +1,38 @@
 cmake_minimum_required(VERSION 3.0)
-project(HyHalTests)
+project(MyWebTests)
 
-# The test Runner
-add_executable(TestRunner TestMain.cpp 
-                            parts/colorPostsTest.cpp 
-                            )
-target_link_libraries(TestRunner PUBLIC catch dut 
-# color
-)
-
+add_subdirectory(cJSON)
 add_subdirectory(include)
+add_subdirectory(espMock)
 
-get_filename_component(PARENT_DIR ../../components/MyWeb ABSOLUTE)
-get_filename_component(PARENT_INCLUDEDIR ../../components/LightEffect ABSOLUTE)
 project (dut)
+get_filename_component(DUT_PARENT_DIR ../../components/MyWeb ABSOLUTE)
+get_filename_component(READER_PARENT_DIR ../../components/FileSystem ABSOLUTE)
+get_filename_component(CONNECTOR_PARENT_DIR ../../components/MyConnect ABSOLUTE)
+get_filename_component(PARENT_INCLUDEDIR ../../components/LightEffect ABSOLUTE)
 
-add_library(dut ${PARENT_DIR}/ColorPosts.cpp)
-target_include_directories(dut PUBLIC ${PARENT_DIR}/includes ${PARENT_INCLUDEDIR}/includes )
+add_compile_definitions(CONFIG_DEVICE_CONFIGURATION_FILENAME="DeviceConfig.json")
 
-# project (color)
-# add_library(color ${PARENT_INCLUDEDIR}/Color.cpp)
-# target_include_directories(color PUBLIC $ ${PARENT_INCLUDEDIR}/includes )
+add_executable(TestRunner   "TestMain.cpp"
+                            "ReaderMock.cpp"
+                            ${DUT_PARENT_DIR}"/ProcessHandler.cpp"
+                            "parts/ParseApplyToStringTests.cpp"
+                            "parts/SetRequestTests.cpp"
+                            "parts/GetRequestTests.cpp"
+                            "parts/parseFileTest.cpp"
+                            )
+target_include_directories(TestRunner PUBLIC testUtils cJSON
+                            ${CMAKE_CURRENT_LIST_DIR} 
+                            ${DUT_PARENT_DIR}/includes 
+                            ${DUT_PARENT_DIR}/private
+                            ${PARENT_INCLUDEDIR}/includes
+                            ${READER_PARENT_DIR}/include
+                            ${CONNECTOR_PARENT_DIR}/include 
+                            )
+    
+target_link_libraries(TestRunner 
+    testUtils 
+    json
+    espMock
+    )
+include_directories(cJSON)

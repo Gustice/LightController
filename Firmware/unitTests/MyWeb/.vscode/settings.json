@@ -5,8 +5,12 @@
         "regex": "cpp",
         "array": "cpp",
         "string": "cpp",
-        "new": "cpp",
-        "algorithm": "cpp",
-        "iosfwd": "cpp"
+        "bitset": "cpp",
+        "initializer_list": "cpp",
+        "utility": "cpp",
+        "sstream": "cpp",
+        "ostream": "cpp",
+        "chrono": "cpp",
+        "algorithm": "cpp"
     }
 }

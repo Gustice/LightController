@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Light-Controller-Welcome</title>
+    <!-- Mobile Specific Metas -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="/skeleton-normalize.css">
+    <link rel="stylesheet" href="/skeleton.css">
+    <link rel="stylesheet" href="/skeleton-dark-tango.css">
+    <link rel="stylesheet" href="/skeleton-custom.css">
+    <script src="apiRoutes.js"></script>
+</head>
+<header>
+    <div class="container darkui1">
+        <div class="row">
+            <h1>Light-Controller</h1>
+        </div>
+    </div>
+</header>
+
+<body>
+    <div class="container darkui1">
+        <div id="WiFiSetup">
+            <!-- Content is put in by WelcomeApp.js -->
+        </div>
+        
+        <div class="row">
+            <h2>Device Configuration</h2>
+        </div>
+        <div class="row" id="showDeviceConfiguration">
+            <!-- Content is put in by WelcomeApp.js -->
+        </div>
+        <div class="row">
+            <h2>Further notes</h2>
+        </div>
+        <div class="row">
+            <div class="six columns">
+                <h5>This Device includes following interfaces</h5>
+                <ul>
+                    <li>SyncSerial-LED-strip may contain a buttload of LEDs</li>
+                    <li>AsyncSerial-LED-strip may contain a buttload of LEDs </li>
+                    <li>RGBW-LED-strip with upt to 15 LEDs if internal Boos-converter ist used </li>
+                    <li>Each I2C-LED-expander contains 16 LEDs </li>
+                </ul>
+            </div>
+            <div class="six columns">
+                <h5>Please note that following power limitations</h5>
+                <ul>
+                    <li>Do not exceed 500 mA using the USB-plug</li>
+                    <li>Do not exceed 2A using the power-plug </li>
+                    <li>The RGB-Port bears maximum 200 mA in 12-V-mode</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script src="easyHttp.js"></script>
+    <script src="WelcomeApp.js"></script>
+</body>
+
+</html>

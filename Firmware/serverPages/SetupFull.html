@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <title>Light-Controller-Interface</title>
+  <!-- Mobile Specific Metas -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="/skeleton-normalize.css">
+  <link rel="stylesheet" href="/skeleton.css">
+  <link rel="stylesheet" href="/skeleton-dark-tango.css">
+  <link rel="stylesheet" href="/skeleton-custom.css">
+  <script src="apiRoutes.js"></script>
+</head>
+<header>
+  <div class="container darkui1">
+    <div class="row">
+      <h1>LED-Controller interface</h1>
+    </div>
+  </div>
+</header>
+
+<body>
+  <div class="container darkui1">
+    <div id="formSpace">
+      <!-- Content is filled by Script-->
+    </div>
+    <div id="saveSpace">
+      <h2>Save Image</h2>
+      <div class="row">
+        <div class="three columns"><button class="u-full-width" type="button" onclick="onSave(1)">Safe to Page 1</button></div>
+        <div class="three columns"><button class="u-full-width" type="button" onclick="onSave(2)">Safe to Page 2</button></div>
+        <div class="three columns"><button class="u-full-width" type="button" onclick="onSave(3)">Safe to Page 3</button></div>
+        <div class="three columns"><button class="u-full-width" type="button" onclick="onSave(4)">Safe to Page 4</button></div>
+      </div>
+      <div class="row">
+        <div class="four columns"><button class="button-primary u-full-width" type="button" onclick="onResetPages()">Reset Pages</button></div>
+      </div>
+    </div>
+    
+    <div id="getSpace">
+      <h2>Get Values</h2>
+      <div class="row">
+        <div class="four columns"><button class="button-primary u-full-width" type="button" onclick="onGetAllValues(this)">Get</button></div>
+      </div>
+      <div class="row">
+        <input class="u-full-width" readonly="true" type="text" name="Values" style="height: 200px;">
+      </div>
+    </div>
+  </div>
+  <script src="easyHttp.js"></script>
+  <script src="SetupFullApp.js"></script>
+  </div>
+  <div style="height: 200px;"></div>
+</body>
+</html>

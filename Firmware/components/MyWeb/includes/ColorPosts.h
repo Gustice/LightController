@@ -1,5 +1,13 @@
-#if !defined(COLORPOSTS_H)
-#define COLORPOSTS_H
+/**
+ * @file ColorPosts.h
+ * @author Gustice
+ * @brief 
+ * @version 0.1
+ * @date 2021-03-04
+ * 
+ * @copyright Copyright (c) 2021
+ */
+#pragma once
 
 #include <stdint.h>
 #include "Color.h"
@@ -30,4 +38,3 @@ public:
     uint16_t GetLength() {return _stripLen; }
 };
 
-#endif // COLORPOSTS_H

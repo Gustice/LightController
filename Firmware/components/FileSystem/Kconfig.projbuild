@@ -1,0 +1,15 @@
+menu "ConfigImage Configuration"
+    config DEVICE_CONFIGURATION_FILENAME
+        string "Device Configuration"
+        default "IOConfiguration.json"
+        help
+            File on Spiffs-Partition to load Device configuration
+
+    config FACTORY_IMAGE_FILENAME
+        string "Device Version"
+        default "Device.json"
+        help
+            File on Spiffs-Partition to load Device version
+
+endmenu
+

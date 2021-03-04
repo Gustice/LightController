@@ -3,30 +3,20 @@
     // for the documentation about the tasks.json format
     "version": "2.0.0",
     "tasks": [
-        {
-            "label": "Create OutputDir",
-            "type": "shell",
-            "options": { 
-                "cwd": "${workspaceFolder}"
-            },
-            "command": "mkdir tbuild",
-            "problemMatcher": [], // Otherwise its annoys you with warnings
-        },
-        
-        {
-            "label": "CMake: Create Configuration",
-            "type": "shell",
-            "options": { 
-                "cwd": "${workspaceFolder}/tbuild"
-            },
-            "command": "CMake ..",
-            "problemMatcher": "$gcc", // Otherwise its annoys you with warnings
-        },
+        // { /// This is better invoked by Command CMake: Create Configuration
+        //     "label": "CMake: Create Configuration",
+        //     "type": "shell",
+        //     "options": { 
+        //         "cwd": "${workspaceFolder}/build"
+        //     },
+        //     "command": "CMake ..",
+        //     "problemMatcher": "$gcc", // Otherwise its annoys you with warnings
+        // },
         {
             "label": "CMake: Build Project",
             "type": "shell",
             "options": {
-                "cwd": "${workspaceFolder}/tbuild"
+                "cwd": "${workspaceFolder}/build"
             },
             "command": "CMake --build .",
             "dependsOn": "CMake: Create Configuration",
@@ -37,9 +27,9 @@
             "label": "CMake: Run Test Project",
             "type": "shell",
             "options": {
-                "cwd": "${workspaceFolder}/tbuild"
+                "cwd": "${workspaceFolder}"
             },
-            "command": "Debug/TestRunner.exe",
+            "command": "build/TestRunner.exe",
             "dependsOn": "CMake: Build Project",
             "group": {"kind": "test", "isDefault": true},
             "problemMatcher": "$gcc", // Otherwise its annoys you with warnings

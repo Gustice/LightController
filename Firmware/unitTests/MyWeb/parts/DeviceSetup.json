@@ -1,0 +1,36 @@
+{
+    "StartupMode": "RunDemo",
+    "SyncLedCh": {
+        "Strip": {
+            "LedCount": 6,
+            "Intens": 16,
+            "Channel": "RGB"
+        },
+        "Color": [0,0,0,0]
+    },
+    "AsyncLedCh": {
+        "Strip": {
+            "LedCount": 24,
+            "Intens": 16,
+            "Channel": "RGBW"
+        },
+        "Color": [0,0,0,0]
+    },
+    "RgbStrip": {
+        "Strip": {
+            "LedCount": 6,
+            "Intens": 1024,
+            "Channel": "RGBW"
+        },
+        "Color": [0,0,0,0]
+    },
+    "I2cExpander": {
+        "Device": {
+            "LedCount": 3,
+            "Intens": 1024,
+            "Channel": "Gray"
+        },
+        "Address": 1,
+        "GrayValues": [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]
+    }
+}

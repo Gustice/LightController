@@ -1,8 +1,15 @@
+/**
+ * @file MyWeb.h
+ * @author Gustice
+ * @brief Web-API-Includes
+ * @version 0.1
+ * @date 2021-03-04
+ * 
+ * @copyright Copyright (c) 2021
+ */
 #pragma once
 
-
 #include <stdint.h>
-#include "ColorPosts.h"
 
 #include "esp_event.h"
 #include "esp_log.h"
@@ -11,30 +18,12 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-void SetupMyWeb(QueueHandle_t colorQ, QueueHandle_t grayQ, SemaphoreHandle_t ledDataSignal);
+#include "ApiDataTypes.h"
+#include "DeviceTypes.h"
 
-typedef enum RgbChannel {
-    None = -1,
-    RgbiSync = 0,
-    RgbwAsync,
-    RgbwPwm,
-    I2cExpanderPwm,
-};
+esp_err_t Init_WebFs(void);
 
-typedef struct ColorMsg_def {
-    RgbChannel channel;
-    uint8_t red;
-    uint8_t green;
-    uint8_t blue;
-    uint8_t white;
-    uint8_t intensity;
-    uint8_t targetIdx;
-}ColorMsg_t;
+typedef esp_err_t (*pChannelGetCallback)(ReqColorIdx_t , uint8_t *, size_t);
 
-typedef struct GrayValMsg_def {
-    RgbChannel channel;
-    uint8_t gray[16];
-    uint8_t intensity;
-    uint8_t targetIdx;
-}GrayValMsg_t;
-
+void SetupMyWeb(QueueHandle_t colorQ, QueueHandle_t grayQ, SemaphoreHandle_t newLedWebCmd,
+    pChannelGetCallback getCbk, deviceConfig_t * stationConfig);

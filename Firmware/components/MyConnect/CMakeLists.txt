@@ -1,5 +1,5 @@
 idf_component_register(SRCS "connect.c" "stdin_out.c" "addr_from_stdin.c"
-                            "SoftAp.c"
+                            "SoftAp.cpp"
                     INCLUDE_DIRS "include"
-                    PRIV_REQUIRES esp_netif nvs_flash Utils
+                    PRIV_REQUIRES FileSystem esp_netif nvs_flash Utils
                     )

@@ -24,6 +24,7 @@ I2cPort::I2cPort(i2c_port_t port, gpio_num_t sda, gpio_num_t scl) : PortBase("HA
     _port = port;
     int i2c_master_port = port;
     i2c_config_t conf;
+    memset(&conf, 0, sizeof(i2c_config_t));
     conf.mode = I2C_MODE_MASTER;
     conf.sda_io_num = sda;
     conf.sda_pullup_en = interfaces[port].sda_pullup_en;
@@ -41,6 +42,7 @@ I2cPort::I2cPort(i2c_port_t port) : PortBase("HAL-I2c") {
     _port = port;
     int i2c_master_port = port;
     i2c_config_t conf;
+    memset(&conf, 0, sizeof(i2c_config_t));
     conf.mode = I2C_MODE_MASTER;
     conf.sda_io_num = interfaces[port].sda_io_num;
     conf.sda_pullup_en = interfaces[port].sda_pullup_en;
