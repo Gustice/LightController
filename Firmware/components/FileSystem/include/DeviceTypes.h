@@ -1,4 +1,15 @@
+/**
+ * @file DeviceTypes.h
+ * @author Gustice
+ * @brief General parameter definitions
+ * @version 0.1
+ * @date 2021-03-04
+ * 
+ * @copyright Copyright (c) 2021
+ */
 #pragma once
+
+#include "Color.h"
 
 typedef struct factoryInfo_def { // @todo the container can be easily overwritten
     char DeviceType[24];

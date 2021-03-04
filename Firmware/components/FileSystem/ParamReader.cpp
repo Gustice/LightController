@@ -180,11 +180,13 @@ esp_err_t Fs_ReadFactoryConfiguration(factoryInfo_t *factorySet) {
     const char *SerialNumber = cJSON_GetObjectItem(root, "SerialNumber")->valuestring;
     const char *HwVersion = cJSON_GetObjectItem(root, "HwVersion")->valuestring;
     const char *DeviceType = cJSON_GetObjectItem(root, "DeviceType")->valuestring;
-    fclose(f);
 
     strcpy((char *)factorySet->SerialNumber, SerialNumber);
     strcpy((char *)factorySet->HwVersion, HwVersion);
     strcpy((char *)factorySet->DeviceType, DeviceType);
+
+    fclose(f);
+    cJSON_Delete(root);
     return ESP_OK;
 }
 

@@ -1,3 +1,13 @@
+/**
+ * @file ProcessHandler.h
+ * @author Gustice
+ * @brief API-Process-Handler
+ * @version 0.1
+ * @date 2021-03-04
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
 #pragma once
 
 #include "MyWeb.h"

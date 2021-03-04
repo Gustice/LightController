@@ -1,6 +1,14 @@
+/**
+ * @file MyWeb.h
+ * @author Gustice
+ * @brief Web-API-Includes
+ * @version 0.1
+ * @date 2021-03-04
+ * 
+ * @copyright Copyright (c) 2021
+ */
 #pragma once
 
-#include "ColorPosts.h"
 #include <stdint.h>
 
 #include "esp_event.h"

@@ -8,6 +8,8 @@
  * @copyright Copyright (c) 2020
  *
  * @todo HAL-Port-Classes should countain debug information (some already have)
+ * @todo Log-data should be also provided via web-Interface or to an IP-Socket
+ * @todo Refactor all lighting-port names. The wording is incoherent. 
  *
  */
 #include "esp_event.h"
@@ -102,7 +104,6 @@ static void vRefreshLed(void *pvParameters) {
 
     if (deviceConfig.StartUpMode == DeviceStartMode::RunDemo) {
         ESP_LOGI(ModTag, " ## Running Demo");
-        Device->SetupDemo();
         while (xSemaphoreTake(xNewWebCommand, (TickType_t)10) != pdTRUE) {
             vTaskDelay(500 / portTICK_PERIOD_MS);
             Device->DemoTick();
@@ -148,7 +149,6 @@ static esp_err_t GetChannelSettings(ReqColorIdx_t channel, uint8_t *data, size_t
         channel.chIdx, channel.portIdx);
 
     return Device->ReadValue(channel, data, length);
-    ;
 }
 
 /**
@@ -165,7 +165,6 @@ void app_main(void) {
     }
     ESP_ERROR_CHECK(ret);
 
-    // ESP_ERROR_CHECK(nvs_flash_init());
     // ESP_ERROR_CHECK(esp_netif_init());
     // ESP_ERROR_CHECK(esp_event_loop_create_default());
     // initialise_mdns();
@@ -234,6 +233,7 @@ void app_main(void) {
     static QuadDecoder encoder(encInA, encInB);
     Encoder = &encoder;
 
+    // @todo status lights have currently no use
     OutputPort RStatLed(RedStatusLedPin, GpioPort::OutputLogic::Inverted);
     OutputPort BStatLed(BlueStatusLedPin, GpioPort::OutputLogic::Inverted);
 

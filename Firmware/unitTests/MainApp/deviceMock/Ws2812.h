@@ -7,7 +7,7 @@ class Ws2812 {
   public:
     const size_t Length; 
     Ws2812(size_t len) : Length(len) {};
-    ~Ws2812();
+    ~Ws2812(){};
 
     Color_t buffer[64];
 

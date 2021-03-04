@@ -13,10 +13,18 @@
 
 #pragma once
 
+/**
+ * @brief Index with automatic revolution back to start position
+ * 
+ * @details Useful for Buffer-Pointer, or similar tasks
+ * 
+ */
 class RotatingIndex {
   public:
+    /// Value at witch the index rotates back to beginning
     const uint16_t MaxIndex;
     RotatingIndex(uint16_t max) : MaxIndex(max) { _index = 0; }
+
 
     uint16_t GetIndexAndInkrement(void) {
         auto retVal = _index;
@@ -39,11 +47,6 @@ class RotatingIndex {
 
     uint16_t GetIndex(void) { return _index; }
     void ResetIndex(void) { _index = 0; }
-
-    RotatingIndex operator=(const RotatingIndex original) {
-        memcpy(this, &original, sizeof(RotatingIndex)); 
-        return *this;
-    }
 
   private:
     uint16_t _index;

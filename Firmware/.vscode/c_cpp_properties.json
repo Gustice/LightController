@@ -15,6 +15,7 @@
                 "CONFIG_LOG_TIMESTAMP_SOURCE_RTOS",
                 "CONFIG_FREERTOS_HZ=100"
             ],
+            
             // Path to compiler perhaps has to be adjusted
             "compilerPath": "C:/espressif/tools/xtensa-esp32-elf/esp-2020r1-8.2.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-g++.exe",
             //"browse": { // Tag-Parser for Go-To-Definition-Function or tag-database. This is same as "includePath" if omitted

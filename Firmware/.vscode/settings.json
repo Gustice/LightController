@@ -40,7 +40,9 @@
         "utils.h": "c",
         "portmacro.h": "c",
         "streambuf": "cpp",
-        "future": "cpp"
+        "future": "cpp",
+        "bitset": "cpp",
+        "regex": "cpp"
     },
     "cSpell.words": [
         "attr",

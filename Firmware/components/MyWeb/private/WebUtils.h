@@ -1,3 +1,14 @@
+/**
+ * @file WebUtils.h
+ * @author Gustice
+ * @brief Internal definitions for Web-API
+ * @version 0.1
+ * @date 2021-03-04
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
+
 #pragma once
 
 #include "esp_err.h"

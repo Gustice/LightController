@@ -1,3 +1,12 @@
+/**
+ * @file ProcessHandler.cpp
+ * @author Gustice
+ * @brief Implementation fo Reqeuest-Handlers
+ * @version 0.1
+ * @date 2021-03-04
+ * 
+ * @copyright Copyright (c) 2021
+ */
 
 #include "ProcessHandler.h"
 #include "Color.h"
@@ -417,7 +426,7 @@ esp_err_t ProcessGrayValuesGet(const char *message, const char **output) {
 
     req.chIdx = idx.FirstTarget.chIdx;
     req.portIdx = idx.FirstTarget.portIdx;
-    esp_err_t ret = GetChannelSettings(req, (uint8_t *)&value, sizeof(ColorMsg_t));
+    esp_err_t ret = GetChannelSettings(req, (uint8_t *)&value, sizeof(GrayValMsg_t));
 
     cJSON * root = cJSON_CreateObject();
     const int size = 16;

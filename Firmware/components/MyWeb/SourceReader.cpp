@@ -1,3 +1,15 @@
+/**
+ * @file SourceReader.cpp
+ * @author Gustice
+ * @brief Implementation of Source-Reader
+ * @details Reads on demand requested source from data partition and provides it 
+ *  to the web-server
+ * @version 0.1
+ * @date 2021-03-04
+ * 
+ * @copyright Copyright (c) 2021
+ * 
+ */
 #include "driver/gpio.h"
 #include "esp_event.h"
 #include "esp_log.h"
@@ -6,7 +18,6 @@
 #include "esp_vfs_fat.h"
 #include "esp_vfs_semihost.h"
 #include "lwip/apps/netbiosns.h"
-// #include "mdns.h"
 #include "nvs_flash.h"
 #include "sdkconfig.h"
 #include "sdmmc_cmd.h"

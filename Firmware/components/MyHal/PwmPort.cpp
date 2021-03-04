@@ -16,7 +16,7 @@ PwmPort::PwmPort(ledc_channel_t channel, gpio_num_t output) {
     _port = output;
         
     ledc_timer_config_t ledc_timer;
-
+    memset(&ledc_timer, 0, sizeof(ledc_timer_config_t));
     ledc_timer.speed_mode       = LEDC_LOW_SPEED_MODE;
     ledc_timer.timer_num        = LEDC_TIMER_1;
     ledc_timer.duty_resolution  = LEDC_TIMER_10_BIT;
@@ -26,6 +26,7 @@ PwmPort::PwmPort(ledc_channel_t channel, gpio_num_t output) {
 
     // Prepare and then apply the LEDC PWM channel configuration
     ledc_channel_config_t ledc_channel;
+    memset(&ledc_channel, 0, sizeof(ledc_channel_config_t));
     ledc_channel.speed_mode = LEDC_LOW_SPEED_MODE;
     ledc_channel.channel    = channel;
     ledc_channel.timer_sel  = LEDC_TIMER_1;

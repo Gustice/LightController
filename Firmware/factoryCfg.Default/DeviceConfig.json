@@ -1,5 +1,0 @@
-{
-    "DeviceType": "DeviceName-Type", // Max 24 Characters
-    "SerialNumber": "########", // Max 8 Characters
-    "HwVersion": "V 0.1.0" // Max 16
-}

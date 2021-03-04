@@ -7,7 +7,7 @@ class Pca9685 {
   public:
     const size_t Length; 
     Pca9685(size_t len) : Length(len) {};
-    ~Pca9685();
+    ~Pca9685(){};
 
     uint16_t buffer[64];
 

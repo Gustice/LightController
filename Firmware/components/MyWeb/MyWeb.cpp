@@ -1,3 +1,16 @@
+/**
+ * @file MyWeb.cpp
+ * @author Gustice
+ * @brief Implementation of Web-API
+ * @details This Function initializes a web server with different API-Routes to 
+ *  - Request Files
+ *  - Request Data
+ *  - Set Data
+ * @version 0.1
+ * @date 2021-03-04
+ * 
+ * @copyright Copyright (c) 2021
+ */
 
 #include "includes/MyWeb.h"
 
@@ -20,7 +33,6 @@
 #include <sys/param.h>
 #include <sys/stat.h>
 
-#include "ColorPosts.h"
 #include "ParamReader.h"
 #include "SoftAp.h"
 #include "WebUtils.h"
@@ -31,7 +43,6 @@ static const char *webBasePath = CONFIG_WEB_MOUNT_POINT;
 #define FILE_PATH_MAX   (ESP_VFS_PATH_MAX + 128)
 #define SCRATCH_BUFSIZE (10240)
 
-RgbPost *rgbPostCh1;
 Color_t color;
 uint8_t intensity;
 SemaphoreHandle_t xNewLedWebCommand;
@@ -59,8 +70,11 @@ static esp_err_t pagePart_GetHandler(httpd_req_t *req) {
         strcpy(&filepath[strlen(filepath)], ".html"); 
 
     // Check if icon is requested -> Change to png
-    if (strcmp(filepath, "/favicon.ico") == 0)
-        strcpy(filepath, "/favicon.png"); 
+    char *iconPath = strstr(filepath, "/favicon.ico");
+    if (iconPath != nullptr)
+    {
+        strcpy(iconPath, "/favicon.png");
+    }
 
     int fd = open(filepath, O_RDONLY, 0);
     if (fd == -1) {
@@ -289,7 +303,6 @@ void SetupMyWeb(QueueHandle_t colorQ, QueueHandle_t grayQ, SemaphoreHandle_t new
     strlcpy(rest_context->base_path, webBasePath, sizeof(rest_context->base_path));
 
     static httpd_handle_t server = NULL;
-    rgbPostCh1 = new RgbPost(3); // todo change
 
     ESP_ERROR_CHECK(nvs_flash_init());
     ESP_ERROR_CHECK(esp_netif_init());
