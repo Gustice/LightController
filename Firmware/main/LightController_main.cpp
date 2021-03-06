@@ -9,7 +9,7 @@
  *
  * @todo HAL-Port-Classes should countain debug information (some already have)
  * @todo Log-data should be also provided via web-Interface or to an IP-Socket
- * @todo Refactor all lighting-port names. The wording is incoherent. 
+ * @todo Refactor all lighting-port names. The wording is incoherent.
  *
  */
 #include "esp_event.h"
@@ -151,6 +151,46 @@ static esp_err_t GetChannelSettings(ReqColorIdx_t channel, uint8_t *data, size_t
     return Device->ReadValue(channel, data, length);
 }
 
+enum LedMode {
+    Off = 0,
+    Steady,
+    Blinking,
+    Flashing,
+    DoubleFlash,
+};
+
+struct StatusLed_t {
+    OutputPort *port;
+    LedMode mode;
+};
+
+StatusLed_t WlanLed;
+StatusLed_t ErrLed;
+
+static void vManageStatusLeds(void *pvParameters) {
+    const uint16_t cStates[]{
+        0x0000, // Off
+        0xFFFF, // Steady
+        0xFF00, // Blinking
+        0xF000, // Flashing
+        0x8800, // DoubleFlash
+    };
+
+    if (WlanLed.port == nullptr || ErrLed.port == nullptr) {
+        ESP_LOGE(ModTag, "Ports for Status LEDs not initialized");
+        return;
+    }
+
+    RotatingIndex rI(16);
+    while (true) {
+        uint16_t s = rI.GetIndexAndInkrement();
+        WlanLed.port->WritePort( cStates[(int)WlanLed.mode] >> s & 1 );
+        ErrLed.port->WritePort( cStates[(int)ErrLed.mode] >> s & 1 ); 
+        vTaskDelay(80 / portTICK_PERIOD_MS);
+    }
+}
+
+
 /**
  * @brief Enter function for underlying OS
  *
@@ -199,10 +239,15 @@ void app_main(void) {
 
     if (Fs_ReadDeviceConfiguration(&deviceConfig) == ESP_OK) {
         ESP_LOGI(ModTag, " ## Found Configuration: ");
-        ESP_LOGI(ModTag, "    Sync LEDs En=%d Cnt=:%d", (int)deviceConfig.SyncLeds.IsActive, deviceConfig.SyncLeds.Strip.LedCount);
-        ESP_LOGI(ModTag, "    Async LEDs En=%d Cnt=:%d", (int)deviceConfig.AsyncLeds.IsActive, deviceConfig.AsyncLeds.Strip.LedCount);
-        ESP_LOGI(ModTag, "    RgbStrip LEDs En=%d Chn=%d Cnt=:%d", (int)deviceConfig.RgbStrip.IsActive, deviceConfig.RgbStrip.ChannelCount, deviceConfig.RgbStrip.Strip.LedCount);
-        ESP_LOGI(ModTag, "    Expander LEDs En=%d Cnt=:%d", (int)deviceConfig.I2cExpander.IsActive, deviceConfig.I2cExpander.Device.LedCount);
+        ESP_LOGI(ModTag, "    Sync LEDs En=%d Cnt=:%d", (int)deviceConfig.SyncLeds.IsActive,
+            deviceConfig.SyncLeds.Strip.LedCount);
+        ESP_LOGI(ModTag, "    Async LEDs En=%d Cnt=:%d", (int)deviceConfig.AsyncLeds.IsActive,
+            deviceConfig.AsyncLeds.Strip.LedCount);
+        ESP_LOGI(ModTag, "    RgbStrip LEDs En=%d Chn=%d Cnt=:%d",
+            (int)deviceConfig.RgbStrip.IsActive, deviceConfig.RgbStrip.ChannelCount,
+            deviceConfig.RgbStrip.Strip.LedCount);
+        ESP_LOGI(ModTag, "    Expander LEDs En=%d Cnt=:%d", (int)deviceConfig.I2cExpander.IsActive,
+            deviceConfig.I2cExpander.Device.LedCount);
         static Apa102 sledStrip(&spi, deviceConfig.SyncLeds.Strip.LedCount);
         static Ws2812 aLedStrip(&rmt, deviceConfig.AsyncLeds.Strip.LedCount);
         static RgbwStrip ledStrip(&pwmR, &pwmG, &pwmB, &pwmW);
@@ -234,8 +279,15 @@ void app_main(void) {
     Encoder = &encoder;
 
     // @todo status lights have currently no use
-    OutputPort RStatLed(RedStatusLedPin, GpioPort::OutputLogic::Inverted);
-    OutputPort BStatLed(BlueStatusLedPin, GpioPort::OutputLogic::Inverted);
+    static OutputPort RStatLed(RedStatusLedPin, GpioPort::OutputLogic::Inverted);
+    static OutputPort BStatLed(BlueStatusLedPin, GpioPort::OutputLogic::Inverted);
+
+    WlanLed.mode = LedMode::Blinking;
+    WlanLed.port = &BStatLed;
+    ErrLed.mode = LedMode::DoubleFlash;
+    ErrLed.port = &RStatLed;
+    xTaskCreate(vManageStatusLeds, "StatusLED", 1024, nullptr, tskIDLE_PRIORITY, NULL);
+
 
     xNewWebCommand = xSemaphoreCreateBinary();
     xColorQueue = xQueueCreate(3, sizeof(ColorMsg_t));
@@ -258,7 +310,7 @@ void app_main(void) {
 
     int lastEncVal = Encoder->GetValue();
     for (;;) {
-        vTaskDelay(100 / portTICK_PERIOD_MS);
+        vTaskDelay(500 / portTICK_PERIOD_MS);
 
         int encVal = Encoder->GetValue();
         if (encVal != lastEncVal)
@@ -266,8 +318,8 @@ void app_main(void) {
                 Encoder->GetErrors());
         lastEncVal = encVal;
 
-        RStatLed.WritePort(sw1.ReadPort());
-        BStatLed.WritePort(sw2.ReadPort());
+        // RStatLed.WritePort(sw1.ReadPort());
+        // BStatLed.WritePort(sw2.ReadPort());
 
         uint16_t vin1 = adc1.ReadPort();
         uint16_t vin2 = adc2.ReadPort();
@@ -275,6 +327,9 @@ void app_main(void) {
 
         int len = uart.ReceiveSync((uint8_t *)inString, 20);
         uart.TransmitSync((uint8_t *)outString, 4);
+
+        if (len != 0)
+            ESP_LOGW(ModTag, "Message received: %s", inString);
 
         //     vTaskDelay(1000 / portTICK_PERIOD_MS);
 
