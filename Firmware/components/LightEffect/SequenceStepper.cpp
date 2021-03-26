@@ -33,11 +33,11 @@ SequenceSM::SequenceSM(uint16_t const templateLength, uint8_t targetCount, uint8
 
 SequenceSM::~SequenceSM() { delete[] _outputColor; }
 
-void SequenceSM::SetEffect(const Sequence *sequence, Color::color_t const *startColor, uint8_t initialDelay) {
+void SequenceSM::SetEffect(const Sequence *sequence, Color_t const *startColor, uint8_t initialDelay) {
     SetEffect(sequence, startColor, &SMIParams.idleIntens, initialDelay);
 }
 
-void SequenceSM::SetEffect(const Sequence *sequence, Color::color_t const *startColor, const uint8_t *intens,
+void SequenceSM::SetEffect(const Sequence *sequence, Color_t const *startColor, const uint8_t *intens,
                            const uint8_t delayedStart) {
     if (startColor != noColor) {
         _curentColor.SetColor(*startColor);

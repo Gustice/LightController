@@ -18,6 +18,17 @@
 extern uint8_t const *const noWave;
 
 /**
+ * @brief Color Structure
+ * @details Defines red/green/blue and white color channel values
+ */
+typedef struct {
+    uint8_t red;
+    uint8_t green;
+    uint8_t blue;
+    uint8_t white;
+} Color_t;
+
+/**
  * @brief   Color class
  *
  * @details Defines color data and common operations with color objects
@@ -30,19 +41,8 @@ class Color {
     friend Color operator*(Color c1, uint8_t k);
 
   public:
-    /**
-     * @brief Color Structure
-     * @details Defines red/green/blue and white color channel values
-     */
-    typedef struct {
-        uint8_t red;
-        uint8_t green;
-        uint8_t blue;
-        uint8_t white;
-    } color_t;
-
   private:
-    color_t _color; ///< Color data
+    Color_t _color; ///< Color data
 
   public:
     /**
@@ -62,26 +62,26 @@ class Color {
     Color(uint8_t r, uint8_t g, uint8_t b, uint8_t w = 0) { SetColor(r, g, b, w); };
 
     /**
-     * @brief Construct a new Color object according to color_t structure
+     * @brief Construct a new Color object according to Color_t structure
      * @param color Color to set
      */
-    Color(color_t color) { memcpy(&_color, &color, sizeof(color_t)); };
+    Color(Color_t color) { memcpy(&_color, &color, sizeof(Color_t)); };
     /**
-     * @brief Construct a new Color object according to color_t structure
+     * @brief Construct a new Color object according to Color_t structure
      * @param color Color to set
      */
-    Color(color_t *color) { memcpy(&_color, color, sizeof(color_t)); };
+    Color(Color_t *color) { memcpy(&_color, color, sizeof(Color_t)); };
 
     /**
-     * @brief Set the Color object according to color_t Array
+     * @brief Set the Color object according to Color_t Array
      * @param color Color to set
      */
-    void SetColor(const color_t *color) { memcpy(&_color, color, sizeof(color_t)); }
+    void SetColor(const Color_t *color) { memcpy(&_color, color, sizeof(Color_t)); }
     /**
-     * @brief Set the Color object according to color_t Array
+     * @brief Set the Color object according to Color_t Array
      * @param color Color to set
      */
-    void SetColor(const color_t color) { memcpy(&_color, &color, sizeof(color_t)); }
+    void SetColor(const Color_t color) { memcpy(&_color, &color, sizeof(Color_t)); }
 
     /**
      * @brief Set the Color object according to rgb color-channel values
@@ -91,17 +91,17 @@ class Color {
      * @param w White channel (zero by default if not assigned)
      */
     void SetColor(uint8_t r, uint8_t g, uint8_t b, uint8_t w = 0) {
-        _color.red   = r;
+        _color.red = r;
         _color.green = g;
-        _color.blue  = b;
+        _color.blue = b;
         _color.white = w;
     }
 
     /**
-     * @brief Returns Color as color_t structure
-     * @return color_t Color
+     * @brief Returns Color as Color_t structure
+     * @return Color_t Color
      */
-    color_t GetColor(void) const { return _color; }
+    Color_t GetColor(void) const { return _color; }
 
     /**
      * @brief Scaling and overlaying with given color.
@@ -118,7 +118,7 @@ class Color {
      * @brief Writes Color as formatted bytestream to location
      * @param color
      */
-    void WriteByteStreamTo(uint8_t raw[sizeof(color_t)]) {
+    void WriteByteStreamTo(uint8_t raw[sizeof(Color_t)]) {
         raw[0] = _color.blue;
         raw[1] = _color.green;
         raw[2] = _color.red;
@@ -137,16 +137,16 @@ class Color {
      * @brief Checks if both color values are equal
      */
     bool operator==(Color const &c2) {
-        return ((_color.blue == c2._color.blue) && (_color.green == c2._color.green) && (_color.red == c2._color.red) &&
-                (_color.white == c2._color.white));
+        return ((_color.blue == c2._color.blue) && (_color.green == c2._color.green) &&
+                (_color.red == c2._color.red) && (_color.white == c2._color.white));
     }
 
     /**
      * @brief Checks if both color values are not equal
      */
     bool operator!=(Color const &c2) {
-        return ((_color.blue != c2._color.blue) || (_color.green != c2._color.green) || (_color.red != c2._color.red) ||
-                (_color.white != c2._color.white));
+        return ((_color.blue != c2._color.blue) || (_color.green != c2._color.green) ||
+                (_color.red != c2._color.red) || (_color.white != c2._color.white));
     }
 };
 
@@ -169,9 +169,9 @@ Color operator*(Color c1, uint8_t k);
 Color operator+(Color c1, Color c2);
 
 /// Pointer constant to "no color"
-extern Color::color_t const *const noColor;
+extern Color_t const *const noColor;
 /// Pointer constant to "no color"
-extern Color::color_t const *const oldColor;
+extern Color_t const *const oldColor;
 
 /// Null color object
 extern const Color &noColorObj;
@@ -179,27 +179,27 @@ extern const Color &noColorObj;
 extern const Color &oldColorObj;
 
 /// Black color structure constant
-extern const Color::color_t color_Black;
+extern const Color_t color_Black;
 /// Red color structure constant
-extern const Color::color_t color_Red;
+extern const Color_t color_Red;
 /// Green color structure constant
-extern const Color::color_t color_Green;
+extern const Color_t color_Green;
 /// Blue color structure constant
-extern const Color::color_t color_Blue;
+extern const Color_t color_Blue;
 /// Magenta color structure constant
-extern const Color::color_t color_Magenta;
+extern const Color_t color_Magenta;
 /// Cyan color structure constant
-extern const Color::color_t color_Cyan;
+extern const Color_t color_Cyan;
 /// Yellow color structure constant
-extern const Color::color_t color_Yellow;
+extern const Color_t color_Yellow;
 /// White color structure constant
-extern const Color::color_t color_White;
+extern const Color_t color_White;
 /// Warm white color structure constant (with higher red channel value)
-extern const Color::color_t color_WarmWhite;
+extern const Color_t color_WarmWhite;
 /// Black color structure constant (with higher blue channel value)
-extern const Color::color_t color_ColdWhite;
+extern const Color_t color_ColdWhite;
 /// Black color structure constant (with higher green channel value)
-extern const Color::color_t color_SpookyWhite;
+extern const Color_t color_SpookyWhite;
 
 /// Black color object constant
 extern const Color CBlack;

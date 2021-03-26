@@ -1,5 +1,5 @@
 /**
- * @file Sequecer.cpp
+ * @file Sequencer.cpp
  * @author Gustice
  * @brief Implementation of Effect-Sequencer-Class EffectSequencer.h
  * @version 0.6
@@ -19,19 +19,19 @@
 namespace Effect {
 
 EffectSequencer::EffectSequencer(uint16_t const templateLength, uint8_t targetCount, uint8_t const fadeSteps)
-    : _targetCount(targetCount), _pColor(), _pColorOld() {
+    : _pColor(), _pColorOld(), _targetCount(targetCount) {
     _EffPV = new SequenceSM(templateLength, targetCount); 
     _EffPV_old = new SequenceSM(templateLength, targetCount);
     _EffPV->SetEffect(StdDark, 0);
     _fadeSteps = fadeSteps;
 }
 
-EffectSequencer::~EffectSequencer(){
-    delete _EffPV;
-    delete _EffPV_old;
-}
+// EffectSequencer::~EffectSequencer(){
+//     delete _EffPV;
+//     delete _EffPV_old;
+// }
 
-void EffectSequencer::SetEffect(Sequence *sequence, Color::color_t const *sColor, uint8_t intens) {
+void EffectSequencer::SetEffect(Sequence *sequence, Color_t const *sColor, uint8_t intens) {
     _fadingCnt = _fadeSteps;
 
     SequenceSM * pEsm = _EffPV_old;

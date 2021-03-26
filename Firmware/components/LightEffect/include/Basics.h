@@ -51,7 +51,7 @@ typedef const struct Macro_def{
     /// Effect duration
     uint8_t duration;
     /// SubEffect color
-    const Color::color_t *pColor;
+    const Color_t *pColor;
     /// Num of Repeats
     int8_t repeats;
     /// Next SubEffect
@@ -83,7 +83,7 @@ class Sequence {
     /// Effect duration
     const uint8_t duration;
     /// SubEffect color
-    Color::color_t const *const pColor;
+    Color_t const *const pColor;
     /// Num of Repeats
     const int8_t repeats;
     /// Next SubEffect
@@ -95,7 +95,7 @@ class Sequence {
      * @brief Const-Constructor for simple effects
      */
     constexpr Sequence(uint8_t duration, uint8_t next, eEffect state = eEffect::Light_Freeze,
-                          Color::color_t const *pColor = oldColor)
+                          Color_t const *pColor = oldColor)
         : state(state), pWave(nullptr), FsIntensity(gu8_fullIntensity), duration(duration), pColor(pColor), repeats(0),
           next(next), pProcessor(nullptr){}; // @todo try to use noWave for pWave-init
 
@@ -103,7 +103,7 @@ class Sequence {
      * @brief Const-Constructor for waveform effects
      */
     constexpr Sequence(uint8_t duration, uint8_t next, uint8_t const *pWave, eEffect state,
-                          Color::color_t const *pColor = oldColor, uint8_t repeat = 0)
+                          Color_t const *pColor = oldColor, uint8_t repeat = 0)
         : state(state), pWave(pWave), FsIntensity(gu8_fullIntensity), duration(duration), pColor(pColor),
           repeats(repeat), next(next), pProcessor(nullptr){};
 
@@ -111,7 +111,7 @@ class Sequence {
      * @brief Const-Constructor for elaborated effects with custom algorithm
      */
     constexpr Sequence(uint8_t duration, uint8_t next, pEffPrc pProcessor, uint8_t const *pWave,
-                          Color::color_t const *pColor = oldColor, uint8_t repeat = 0)
+                          Color_t const *pColor = oldColor, uint8_t repeat = 0)
         : state(eEffect::LightCustom), pWave(pWave), FsIntensity(gu8_fullIntensity), duration(duration), pColor(pColor),
           repeats(repeat), next(next), pProcessor(pProcessor){};
 

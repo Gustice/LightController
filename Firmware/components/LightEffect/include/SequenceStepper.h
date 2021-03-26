@@ -54,7 +54,7 @@ class SequenceSM {
      * @param startColor Start color. Use noColor to start with default color
      * @param initialDelay Number of steps that are waited before effect is started
      */
-    void SetEffect(const Sequence *sequence, Color::color_t const *startColor = noColor, uint8_t initialDelay = 0);
+    void SetEffect(const Sequence *sequence, Color_t const *startColor = noColor, uint8_t initialDelay = 0);
 
     /**
      * @brief Set the Effect object
@@ -64,7 +64,7 @@ class SequenceSM {
      * @param intens Idle intensity for effect. Use NULL to start with default intensity
      * @param delayedStart Number of steps that are waited before effect is started
      */
-    void SetEffect(const Sequence *sequence, Color::color_t const *startColor, const uint8_t *intens,
+    void SetEffect(const Sequence *sequence, Color_t const *startColor, const uint8_t *intens,
                    const uint8_t delayedStart);
 
     /**
@@ -107,7 +107,7 @@ class SequenceSM {
      * @details The index is calculated with a higher accuracy in the background.
      * @return const uint8_t index to waveform position.
      */
-    const uint8_t GetWaveIdx(void) { return ((SMPValues.waveIdx & 0xFF00u) >> 8); };
+    uint8_t GetWaveIdx(void) { return ((SMPValues.waveIdx & 0xFF00u) >> 8); };
 
     /**
      * @brief Get current color
@@ -121,7 +121,7 @@ class SequenceSM {
      * @return const uint8_t intensity
      */
     /// @todo delete?
-    const uint8_t GetIntensity(void) { return SMIParams.idleIntens; };
+    uint8_t GetIntensity(void) { return SMIParams.idleIntens; };
 
     /**
      * @brief Get index to current macro in sequence

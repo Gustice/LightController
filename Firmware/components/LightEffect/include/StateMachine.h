@@ -58,7 +58,7 @@ class EffectSM {
      * @param startColor Start color. Use noColor to invoke with default color
      * @param initialDelay Number of steps that are waited before effect is started
      */
-    void SetEffect(Macro_t *sequence, Color::color_t const *startColor = noColor, uint8_t initialDelay = 0);
+    void SetEffect(Macro_t *sequence, Color_t const *startColor = noColor, uint8_t initialDelay = 0);
 
     /**
      * @brief Sets the effect state machine to process given effect macro
@@ -67,7 +67,7 @@ class EffectSM {
      * @param intens Idle intensity for effect. Use nullptr to start with default intensity
      * @param delayedStart Number of steps that are waited before effect is started
      */
-    void SetEffect(Macro_t *sequence, Color::color_t const *startColor, const uint8_t *intens,
+    void SetEffect(Macro_t *sequence, Color_t const *startColor, const uint8_t *intens,
                    const uint8_t delayedStart);
 
     /**
@@ -101,7 +101,7 @@ class EffectSM {
      * @details The index is calculated with a higher accuracy in the background.
      * @return const uint8_t index to waveform position.
      */
-    const uint8_t GetWaveIdx(void) { return ((SMPValues.waveIdx & 0xFF00u) >> 8); };
+    uint8_t GetWaveIdx(void) { return ((SMPValues.waveIdx & 0xFF00u) >> 8); };
 
     /**
      * @brief Get current color
@@ -115,13 +115,13 @@ class EffectSM {
      * @return const uint8_t intensity
      */
     /// @todo delete?
-    const uint8_t GetIntensity(void) { return SMIParams.idleIntens; };
+    uint8_t GetIntensity(void) { return SMIParams.idleIntens; };
 
     /**
      * @brief Get index to current macro in sequence
      * @return EffMacro_type const* const
      */
-    Macro_t const *const GetStep(void) { return _p_effMac; };
+    Macro_t *const GetStep(void) { return _p_effMac; };
 
     /**
      * @brief Get Process values of state machen

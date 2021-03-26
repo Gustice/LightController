@@ -45,7 +45,7 @@ class EffectProcessor {
      * @param sColor Start color. Use noColor to start with default color
      * @param intens Idle intensity for effect. Use NULL to start with default intensity
      */
-    void SetEffect(Macro_t *sequence, Color::color_t const *sColor = noColor, uint8_t intens = gu8_idleIntensity);
+    void SetEffect(Macro_t *sequence, Color_t const *sColor = noColor, uint8_t intens = gu8_idleIntensity);
 
     /**
      * @brief Execute step of effect processor
