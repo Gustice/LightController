@@ -89,8 +89,20 @@
         "xxxx",
         "xxxx lltt"
     ],
-
-    
+    "json.schemas": [
+        { // Relativ Path
+            "fileMatch": [
+                "IOConfiguration.json"
+            ],
+            "url": "./.vscode/IOConfigurationSchema.json"
+        },
+        { // Relativ Path
+            "fileMatch": [
+                "Device.json"
+            ],
+            "url": "./.vscode/DeviceSchema.json"
+        }
+    ],
     "cmake.configureOnOpen": false,
     "clang.cxxflags": [
         "-Wno-pragma-once-outside-header",
@@ -102,7 +114,7 @@
         "-I/${env.IDF_PATH}/components/",
         "-I/${workspaceRoot}/build/config/",
         "-I/E:/Software/Espressif/tools/xtensa-esp32-elf/esp-2020r1-8.2.0/xtensa-esp32-elf/xtensa-esp32-elf/include"
-],
+    ],
     "clang.cflags": [
         "-Wno-pragma-once-outside-header",
         "-std=c99",
@@ -113,6 +125,5 @@
         "-I/${env.IDF_PATH}/components/",
         "-I/${workspaceRoot}/build/config/",
         "-I/E:/Software/Espressif/tools/xtensa-esp32-elf/esp-2020r1-8.2.0/xtensa-esp32-elf/xtensa-esp32-elf/include"
-],
-    
+    ],
 }
