@@ -1,0 +1,39 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "title": "IOConfiguration",
+    "description": "Schema to define a device configuration",
+    "type": "object",
+    "properties": {
+        "StartupMode": {
+            "description": "Defines the devices behavior from start up",
+            "type": "string",
+            "enum": ["RunDemo", "StartImage", "StartDark"]
+        },
+        "Outputs": {
+            "description": "Defines the configuration fo the physical interfaces",
+            "type": "array",
+            "items": {
+                "description": "Defines the physical channel configuration",
+                "type": "object",
+                "properties": {
+                    "Type": {
+                        "description": "Names channel type",
+                        "type": "string",
+                        "enum": ["SyncLedCh", "AsyncLedCh","RgbStrip","I2cExpander"]
+                    },
+                    "Title": {
+                        "description": "Channel title that will be displayed at the web GUI",
+                        "type": "string",
+                        "maxLength": 32
+                    },
+                    "Description": {
+                        "description": "Channel description that will be displayed as paragraph below the title",
+                        "type": "string"
+                    }
+                },
+                "required": ["Type", "Title"]
+            }
+        }
+    },
+    "required": ["StartupMode", "Outputs"]
+}

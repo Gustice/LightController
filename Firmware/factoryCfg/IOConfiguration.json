@@ -1,10 +1,9 @@
 {
     "StartupMode": "RunDemo",
-    "DisplayMode": "ExpertView",
     "Outputs": [
         {
             "Type": "SyncLedCh",
-            "Description": "Synchronous serial LED port", 
+            "Title": "Synchronous serial LED port", 
             "Strip": {
                 "LedCount": 6,
                 "Intens": 16,
@@ -14,7 +13,7 @@
         },
         {
             "Type": "AsyncLedCh",
-            "Description": "Asynchronous serial LED port", 
+            "Title": "Asynchronous serial LED port", 
             "Strip": {
                 "LedCount": 8,
                 "Intens": 16,
@@ -24,7 +23,7 @@
         },
         {   
             "Type": "RgbStrip",
-            "Description": "Rgb-Strip LED port",
+            "Title": "Rgb-Strip LED port",
             "Strip": {
                 "LedCount": 12,
                 "Intens": 1024,
@@ -34,7 +33,7 @@
         },
         {
             "Type": "I2cExpander",
-            "Description": "I2C-Expander port",
+            "Title": "I2C-Expander port",
             "Device": {
                 "LedCount": 16,
                 "Intens": 1024,
