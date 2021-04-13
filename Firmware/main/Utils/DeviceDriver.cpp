@@ -4,7 +4,7 @@
  * @brief Implementation of Driver
  * @version 0.1
  * @date 2021-03-04
- * 
+ *
  * @copyright Copyright (c) 2021
  */
 
@@ -12,12 +12,12 @@
 #include "DeviceDriver.h"
 #include "Color.h"
 #include "RotatingIndex.h"
-#include <string.h>
 #include "esp_log.h"
+#include <string.h>
 
 const int grayCnt = 16;
 const int colorsCnt = 7;
-/// Color pool for demo 
+/// Color pool for demo
 const Color_t *colors[colorsCnt]{
     &color_Red,
     &color_Green,
@@ -103,6 +103,30 @@ esp_err_t DeviceDriver::ApplyRgbColorMessage(ColorMsg_t *colorMsg) {
     return ESP_OK;
 }
 
+esp_err_t DeviceDriver::ApplyColorToWholeChannel(Color_t color, RgbChannel channel) {
+    switch (channel) {
+    case RgbChannel::RgbiSync:
+        syncPort->SetImage(&color);
+        SLedStrip->SendImage(syncPort->Image);
+        break;
+
+    case RgbChannel::RgbwAsync:
+        asyncPort->SetImage(&color);
+        ALedStrip->SendImage(asyncPort->Image);
+        break;
+
+    case RgbChannel::RgbwPwm:
+        asyncPort->SetImage(&color);
+        LedStrip->SetImage(rgbPort->Image);
+        break;
+
+    default:
+        break;
+        return ESP_FAIL;
+    }
+    return ESP_OK;
+}
+
 esp_err_t DeviceDriver::ApplyGrayValueMessage(GrayValMsg_t *GrayMsg) {
     for (size_t i = 0; i < expLedCount; i++) {
         expander[i] = (uint16_t)GrayMsg->gray[i] << 4;
@@ -116,7 +140,7 @@ esp_err_t DeviceDriver::ReadValue(ReqColorIdx_t channel, uint8_t *data, size_t l
 
     switch (channel.type) {
     case RgbChannel::RgbiSync: {
-        Color_t * image = syncPort->Image;
+        Color_t *image = syncPort->Image;
         cm->red = image[cm->apply.FirstTarget.portIdx].red;
         cm->green = image[cm->apply.FirstTarget.portIdx].green;
         cm->blue = image[cm->apply.FirstTarget.portIdx].blue;
@@ -124,14 +148,14 @@ esp_err_t DeviceDriver::ReadValue(ReqColorIdx_t channel, uint8_t *data, size_t l
     } break;
 
     case RgbChannel::RgbwAsync: {
-        Color_t * image = asyncPort->Image;
+        Color_t *image = asyncPort->Image;
         cm->red = image[cm->apply.FirstTarget.portIdx].red;
         cm->green = image[cm->apply.FirstTarget.portIdx].green;
         cm->blue = image[cm->apply.FirstTarget.portIdx].blue;
     } break;
 
     case RgbChannel::RgbwPwm: {
-        Color_t * image = rgbPort->Image;
+        Color_t *image = rgbPort->Image;
         cm->red = image[cm->apply.FirstTarget.portIdx].red;
         cm->green = image[cm->apply.FirstTarget.portIdx].green;
         cm->blue = image[cm->apply.FirstTarget.portIdx].blue;

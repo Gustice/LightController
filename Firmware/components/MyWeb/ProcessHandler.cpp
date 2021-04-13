@@ -307,7 +307,7 @@ esp_err_t ProcessGrayValuesPost(const char *message, const char **output) {
     const int size = 16;
     const char *labels[size] = {"G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "G9", "G10", "G11",
         "G12", "G13", "G14", "G15", "G16"};
-    int values[size];
+    // int values[size];
 
     int maxStep = pStationConfig->I2cExpander.Device.LedCount;
 

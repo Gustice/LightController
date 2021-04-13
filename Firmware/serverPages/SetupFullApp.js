@@ -92,7 +92,10 @@ async function onGetChannelValue(btn, getUrl) {
             for (var element in data) {
                 var formE = parentForm.querySelector(`input[name="${element}"]`);
                 if (formE.type == "number")
+                {
                     formE.value = data[element];
+                    simulateEvent(formE.id, 'input');
+                }
             }
         })
         .catch(response => {
@@ -441,4 +444,18 @@ async function onGetAllValues(form) {
         });
     var SetUrl = "/GetValues/RGBValues"
     console.log("sending to %s", SetUrl);
+}
+
+function simulateEvent (id, event) {//js trigger event -- event constructor
+    var evt = document.createEvent("Event");
+    evt.initEvent(event, true, true);
+    var cb = document.getElementById(id);
+    var canceled = !cb.dispatchEvent(evt);
+    if (canceled) {
+        // A handler called preventDefault
+        // console.log("canceled");
+    } else {
+        // None of the handlers called preventDefault
+        // console.log("not canceled");
+    }
 }

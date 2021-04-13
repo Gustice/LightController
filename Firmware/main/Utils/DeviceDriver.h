@@ -43,6 +43,8 @@ class DeviceDriver {
 
     void DemoTick(void);
 
+    esp_err_t ApplyColorToWholeChannel(Color_t color, RgbChannel channel);
+
   private:
     const char *modTag;
     Apa102 *SLedStrip;

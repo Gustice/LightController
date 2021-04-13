@@ -191,7 +191,7 @@ esp_err_t Fs_ReadFactoryConfiguration(factoryInfo_t *factorySet) {
 }
 
 
-esp_err_t ParseStripDefinition(cJSON *chRoot, const char * tockenName, stripConfig_t *config);
+esp_err_t ParseStripDefinition(cJSON *chRoot, const char *tockenName, stripConfig_t *config);
 
 esp_err_t Fs_ReadDeviceConfiguration(deviceConfig_t *deviceSet) {
     if (!active)
@@ -222,6 +222,8 @@ esp_err_t Fs_ReadDeviceConfiguration(deviceConfig_t *deviceSet) {
     if (cJSON_IsString(mode) && (mode->valuestring != NULL)) {
         if (strcmp("RunDemo", mode->valuestring) == 0)
             deviceSet->StartUpMode = DeviceStartMode_t::RunDemo;
+        else if (strcmp("StartImage", mode->valuestring) == 0)
+            deviceSet->StartUpMode = DeviceStartMode_t::StartImage;
         else
             deviceSet->StartUpMode = DeviceStartMode_t::StartDark;
     }
@@ -238,33 +240,65 @@ esp_err_t Fs_ReadDeviceConfiguration(deviceConfig_t *deviceSet) {
             continue;
         }
 
+        cJSON *pDelay = cJSON_GetObjectItem(ch, "InitDelay");
+        int delay = 0;
+        if (cJSON_IsNumber(pDelay)) {
+            delay = pDelay->valueint;
+        }
+
         stripConfig_t *pStrip = nullptr;
+        Color_t *pColor = nullptr;
         if (strcmp("SyncLedCh", chType->valuestring) == 0) {
             deviceSet->SyncLeds.IsActive = true;
             pStrip = &(deviceSet->SyncLeds.Strip);
+            pColor = &(deviceSet->SyncLeds.Color);
+            deviceSet->SyncLeds.Delay = (uint16_t)delay;
         } else if (strcmp("AsyncLedCh", chType->valuestring) == 0) {
             deviceSet->AsyncLeds.IsActive = true;
             pStrip = &(deviceSet->AsyncLeds.Strip);
+            pColor = &(deviceSet->AsyncLeds.Color);
+            deviceSet->AsyncLeds.Delay = (uint16_t)delay;
         } else if (strcmp("RgbStrip", chType->valuestring) == 0) {
             deviceSet->RgbStrip.IsActive = true;
             pStrip = &(deviceSet->RgbStrip.Strip);
+            pColor = &(deviceSet->RgbStrip.Color);
             deviceSet->RgbStrip.ChannelCount = 1; // Preliminary Default
+            deviceSet->RgbStrip.Delay = (uint16_t)delay;
         }
         if (pStrip != nullptr) {
             if (ParseStripDefinition(ch, "Strip", pStrip) != ESP_OK) {
-                ESP_LOGW(TAG, "Error Parsing Config-JSON of Channel %d: Cannot read Strip", chIdx);
+                ESP_LOGW(TAG, "Error Parsing Config-JSON of channel %d: Cannot read Strip", chIdx);
                 continue;
             }
-        }
-        else{
+
+            cJSON *color = cJSON_GetObjectItem(ch, "Color");
+            if (!cJSON_IsArray(color) || cJSON_GetArraySize(color) != 4) {
+                ESP_LOGW(TAG, "Error Parsing Config-JSON of Color in channel %d", chIdx);
+                continue;
+            }
+            cJSON *pV;
+            int pVIdx = 0;
+            uint8_t cArr[4];
+
+            cJSON_ArrayForEach(pV, color) { cArr[pVIdx++] = pV->valueint; }
+            if (pColor != nullptr) {
+                pColor->red = cArr[0];
+                pColor->green = cArr[1];
+                pColor->blue = cArr[2];
+                pColor->white = cArr[3];
+            }
+        } else {
             if (strcmp("I2cExpander", chType->valuestring) == 0) {
-            deviceSet->I2cExpander.IsActive = true;
-            if (ParseStripDefinition(ch, "Device", &(deviceSet->I2cExpander.Device)) != ESP_OK) {
-                ESP_LOGW(TAG, "Error Parsing Config-JSON of Channel %d: Cannot read Device", chIdx);
-                continue;
-            }
-        } else
-            ESP_LOGE(TAG, "Error Parsing Config-JSON: Type %s not recognized", chType->valuestring);
+                deviceSet->I2cExpander.IsActive = true;
+                if (ParseStripDefinition(ch, "Device", &(deviceSet->I2cExpander.Device)) !=
+                    ESP_OK) {
+                    ESP_LOGW(
+                        TAG, "Error Parsing Config-JSON of Channel %d: Cannot read Device", chIdx);
+                    continue;
+                }
+            } else
+                ESP_LOGE(
+                    TAG, "Error Parsing Config-JSON: Type %s not recognized", chType->valuestring);
         }
     }
     cJSON_Delete(root);
@@ -272,7 +306,7 @@ esp_err_t Fs_ReadDeviceConfiguration(deviceConfig_t *deviceSet) {
 }
 
 
-esp_err_t ParseStripDefinition(cJSON *chRoot, const char * tockenName,  stripConfig_t *config) {
+esp_err_t ParseStripDefinition(cJSON *chRoot, const char *tockenName, stripConfig_t *config) {
     cJSON *strip = cJSON_GetObjectItem(chRoot, tockenName);
     if (strip == NULL)
         return ESP_FAIL;

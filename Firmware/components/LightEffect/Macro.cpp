@@ -19,13 +19,19 @@ Macro_t macDark[] = {
     {Light_Blank    , (uint8_t *)0, 0, 32, &color_Black, 0, 0},
 };
 
-Macro_t macStartIdle[] = {
-    {Light_Wave, gau8_initSlope, 0xFF, 16, &color_ColdWhite, 0, 1},
+Macro_t macIdle[] = {
+    {Light_Idle, (uint8_t *)0, 0xFF, 32, noColor, 0, 1},
     {Light_Idle, (uint8_t *)0, 0xFF, 32, oldColor, 0, 1},
 };
 
-Macro_t macIdle[] = {
-    {Light_Idle, (uint8_t *)0, 0xFF, 32, noColor, 0, 0},
+Macro_t macStartIdle[] = {
+    {Light_Wave, gau8_initSlope, 0xFF, 24, &color_ColdWhite, 0, 1},
+    {Light_Idle, (uint8_t *)0, 0xFF, 32, oldColor, 0, 1},
+};
+
+Macro_t macStartFull[] = {
+    {Light_Wave, gau8_fullSlope, 0xFF, 24, &color_ColdWhite, 0, 1},
+    {Light_Idle, (uint8_t *)0, 0xFF, 32, oldColor, 0, 1},
 };
 
 Macro_t macStdPulse[] = {
@@ -35,9 +41,9 @@ Macro_t macStdPulse[] = {
 };
 
 Macro_t macNervousPulse[] = {
-    {Light_Idle, (uint8_t *)0, 0, 4, noColor, 0, 1},
-    {Light_Wave, gau8_offsetPulse, 0xFF, 8, oldColor, 0, 2},
-    {Light_Idle, (uint8_t *)0, 0, 4, oldColor, 0, 0},
+    {Light_Idle, (uint8_t *)0, 0, 8, noColor, 0, 1},
+    {Light_Wave, gau8_offsetPulse, 0xFF, 16, oldColor, 0, 2},
+    {Light_Idle, (uint8_t *)0, 0, 8, oldColor, 0, 0},
 };
 
 Macro_t macStdWipe[] = {

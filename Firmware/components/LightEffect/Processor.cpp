@@ -26,10 +26,10 @@ EffectProcessor::EffectProcessor(uint16_t const templateLength, uint8_t const fa
     _fadeSteps = fadeSteps;
 }
 
-// EffectProcessor::~EffectProcessor(){
+EffectProcessor::~EffectProcessor(){
 //     delete _EffPV;
 //     delete _EffPV_old;
-// }
+}
 
 void EffectProcessor::SetEffect(Macro_t *sequence, Color_t const *sColor, uint8_t intens) {
     _fadingCnt = _fadeSteps;

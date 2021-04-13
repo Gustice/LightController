@@ -49,12 +49,14 @@ typedef struct syncLedConfig_def {
     bool IsActive;
     stripConfig_t Strip;
     Color_t Color;
+    uint16_t Delay;
 } syncLedConfig_t;
 
 typedef struct asyncLedConfig_def {
     bool IsActive;
     stripConfig_t Strip;
     Color_t Color;
+    uint16_t Delay;
 } aSyncLedConfig_t;
 
 typedef struct rgbwLedConfig_def {
@@ -62,6 +64,7 @@ typedef struct rgbwLedConfig_def {
     stripConfig_t Strip;
     uint16_t ChannelCount;
     Color_t Color;
+    uint16_t Delay;
 } rgbwLedConfig_t;
 
 typedef struct i2cExpander_def {

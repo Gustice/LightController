@@ -1,5 +1,5 @@
 {
-    "StartupMode": "RunDemo",
+    "StartupMode": "StartImage",
     "Outputs": [
         {
             "Type": "SyncLedCh",
@@ -9,7 +9,8 @@
                 "Intens": 16,
                 "Channel": "RGBI"
             },
-            "Color": [0,0,0,0]
+            "Color": [0,0,0,0],
+            "InitDelay": 0
         },
         {
             "Type": "AsyncLedCh",
@@ -19,7 +20,8 @@
                 "Intens": 16,
                 "Channel": "RGB"
             },
-            "Color": [0,0,0,0]
+            "Color": [0,0,0,0],
+            "InitDelay": 0
         },
         {   
             "Type": "RgbStrip",
@@ -29,7 +31,8 @@
                 "Intens": 1024,
                 "Channel": "RGBW"
             },
-            "Color": [0,0,0,0]
+            "Color": [0,0,0,0],
+            "InitDelay": 0
         },
         {
             "Type": "I2cExpander",
@@ -40,7 +43,8 @@
                 "Channel": "Gray"
             },
             "Address": 1,
-            "GrayValues": [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]
+            "GrayValues": [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+            "InitDelay": 0
         }
     ]
 }

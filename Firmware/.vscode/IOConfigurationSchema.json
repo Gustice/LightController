@@ -29,7 +29,13 @@
                     "Description": {
                         "description": "Channel description that will be displayed as paragraph below the title",
                         "type": "string"
-                    }
+                    },
+                   "Color": {
+                        "description": "Start color of channel coded as RGBx-values. x can be white, intensity or don't-care depending on the Channel type",
+                        "type": "array",
+                        "maxItems": 4,
+                        "minItems": 4
+                   }
                 },
                 "required": ["Type", "Title"]
             }

@@ -19,10 +19,12 @@ namespace Effect {
 
 /// Dark - Nothing to see here
 extern Macro_t macDark[];
-/// Smooth turn on and then remaining idle
-extern Macro_t macStartIdle[];
 /// Continuous idle 
 extern Macro_t macIdle[];
+/// Smooth turn on and then remaining idle
+extern Macro_t macStartIdle[];
+/// Smooth turn on to full color
+extern Macro_t macStartFull[];
 /// Slow pulse starting from idle intensity. Appears like breathing 
 extern Macro_t macStdPulse[];
 /// Short pulses starting from idle intensity. Appears nervousely.

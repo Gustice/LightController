@@ -10,7 +10,8 @@
                 "Intens": 16,
                 "Channel": "RGBI"
             },
-            "Color": [0,0,0,0]
+            "Color": [1,2,3,4],
+            "InitDelay": 5
         },
         {
             "Type": "AsyncLedCh",
@@ -20,7 +21,8 @@
                 "Intens": 16,
                 "Channel": "RGBW"
             },
-            "Color": [0,0,0,0]
+            "Color": [11,12,13,14],
+            "InitDelay": 15
         },
         {   
             "Type": "RgbStrip",
@@ -30,7 +32,8 @@
                 "Intens": 1024,
                 "Channel": "RGB"
             },
-            "Color": [0,0,0,0]
+            "Color": [21,22,23,24],
+            "InitDelay": 25
         },
         {
             "Type": "I2cExpander",
@@ -41,7 +44,7 @@
                 "Channel": "Gray"
             },
             "Address": 1,
-            "GrayValues": [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]
+            "GrayValues": [31,32,33,34, 35,36,37,38, 39,40,41,42, 43,44,45,46]
         }
     ]
 }

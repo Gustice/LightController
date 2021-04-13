@@ -42,9 +42,13 @@
 #include "RotatingIndex.h"
 #include "SoftAp.h"
 #include "Ws2812.h"
+#include "Processor.h"
+#include "Waveforms.h"
+#include "Macro.h"
 
 #include "DeviceDriver.h"
 #include "Utils.h"
+
 
 extern "C" { // This switch allows the ROS C-implementation to find this main
 void app_main(void);
@@ -92,6 +96,10 @@ QueueHandle_t xGrayQueue;
 //                                      sizeof(serviceTxtData) / sizeof(serviceTxtData[0])));
 // }
 
+Effect::EffectProcessor * SyncPcs;
+Effect::EffectProcessor * AsyncPcs;
+Effect::EffectProcessor * RgbPcs;
+
 /**
  * @brief LED-Task
  * @details Task for managing LED-Output. Receives processed Colors and applies them
@@ -107,6 +115,18 @@ static void vRefreshLed(void *pvParameters) {
         while (xSemaphoreTake(xNewWebCommand, (TickType_t)10) != pdTRUE) {
             vTaskDelay(500 / portTICK_PERIOD_MS);
             Device->DemoTick();
+        }
+        ESP_LOGI(ModTag, "First Message received");
+    } else if (deviceConfig.StartUpMode == DeviceStartMode::StartImage) {
+        ESP_LOGI(ModTag, " ## Starting Default Image");
+        while (xSemaphoreTake(xNewWebCommand, (TickType_t)10) != pdTRUE)
+        {
+            const Color * c1 = SyncPcs->Tick();
+            Device->ApplyColorToWholeChannel(c1->GetColor(), RgbChannel::RgbiSync);
+            const Color * c2 = AsyncPcs->Tick();
+            Device->ApplyColorToWholeChannel(c2->GetColor(), RgbChannel::RgbwAsync);
+            const Color * c3 = RgbPcs->Tick();
+            Device->ApplyColorToWholeChannel(c3->GetColor(), RgbChannel::RgbwPwm);
         }
         ESP_LOGI(ModTag, "First Message received");
     }
@@ -252,6 +272,18 @@ void app_main(void) {
         static Ws2812 aLedStrip(&rmt, deviceConfig.AsyncLeds.Strip.LedCount);
         static RgbwStrip ledStrip(&pwmR, &pwmG, &pwmB, &pwmW);
         static Pca9685 ledDriver(&i2c, 0x40);
+
+        static Effect::EffectProcessor syncPcs(Effect::cu16_TemplateLength, 8);
+        static Effect::EffectProcessor asyncPcs(Effect::cu16_TemplateLength, 8);
+        static Effect::EffectProcessor rgbPcs(Effect::cu16_TemplateLength, 8);
+        
+        syncPcs.SetEffect(Effect::macStartFull, &deviceConfig.SyncLeds.Color, Effect::gu8_fullIntensity);;
+        asyncPcs.SetEffect(Effect::macStartFull, &deviceConfig.AsyncLeds.Color, Effect::gu8_fullIntensity);;
+        rgbPcs.SetEffect(Effect::macStartFull, &deviceConfig.RgbStrip.Color, Effect::gu8_fullIntensity);;
+
+        SyncPcs = &syncPcs;
+        AsyncPcs = &asyncPcs;
+        RgbPcs = &rgbPcs;
 
         static DeviceDriver device(&sledStrip, &aLedStrip, &ledStrip, &ledDriver, &deviceConfig);
         Device = &device;
