@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+
+
+<head>
+    <title>Light-Controller-Interface</title>
+    <!-- Mobile Specific Metas -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="/skeleton-normalize.css">
+    <link rel="stylesheet" href="/skeleton.css">
+    <link rel="stylesheet" href="/skeleton-dark-tango.css">
+    <link rel="stylesheet" href="/skeleton-custom.css">
+    <script src="apiRoutes.js"></script>
+</head>
+<header>
+    <div class="container darkui1">
+        <div class="row">
+            <h1>LED-Controller Service-Page</h1>
+        </div>
+    </div>
+</header>
+
+<body>
+    <div class="container darkui1">
+        <div id="device">
+            <h2>Device Info</h2>
+            <table>
+                <tr> <td>Device Type</td> <td id="DeviceTypeText">--Type--</td></tr>
+                <tr> <td>Serial Number</td> <td id="DeviceSnText">--Serial--</td></tr>
+            </table>
+        </div>
+        <div id="localFiles">
+            <table>
+                <tr> </tr>
+            </table>
+            <div class="row">
+                <h2>Stored files</h2>
+            </div>
+            <div class="row">
+                <table id="localFilesTable">
+                    <tr> <td id="ConfigFileBtn"></td> <td><button onclick="Download(FileConfigFile)">Download</button></td> <td><button onclick="Replace(FileConfigFile)">Replace</button></td></tr>
+                    <tr> <td id="DeviceFileBtn"></td> <td><button onclick="Download(FileConfigFile)">Download</button></td> <td><button onclick="Replace(FileConfigFile)">Replace</button></td></tr>
+                    <tr> <td>Setup 1</td> <td><button onclick="Download('Setup1')">Download</button></td> <td></td></tr>
+                    <tr> <td>Setup 2</td> <td><button onclick="Download('Setup2')">Download</button></td> <td></td></tr>
+                    <tr> <td>Setup 3</td> <td><button onclick="Download('Setup3')">Download</button></td> <td></td></tr>
+                    <tr> <td>Setup 4</td> <td><button onclick="Download('Setup4')">Download</button></td> <td></td></tr>
+                </table>
+            </div>
+
+            <!-- Content is filled by Script-->
+        </div>
+        <!-- <div class="row">
+            <div class="two columns">
+                <button type="button" onclick="selectFileControl.click()" >Select file</button>
+            </div>
+            <div class="two columns">
+                <input id="selectFileControl" onchange="filepath.value = this.value" type="file" style="display: none"></input>
+            </div>
+            <div class="four columns">
+                <input class="u-full-width" id="filepath" type="text">
+            </div>
+            <div class="two columns">
+                <button  type="button" id="uploadButton" onclick="UploadFile()">Upload</button>
+            </div>
+        </div> -->
+        <div id="SysFunction">
+            <h2>System Function</h2>
+            <div class="row">
+                <button class="four columns">Reset Setups</button>
+            </div>
+            <div class="row">
+                <button class="four columns">Reset WiFi Config</button>
+            </div>
+            <div class="row">
+                <button class="four columns">Restart Device</button>
+            </div>
+            <div class="row">
+                <button class="four columns">Start Update</button>
+            </div>
+        </div>
+
+        <script src="easyHttp.js"></script>
+        <script src="ServicePageApp.js"></script>
+    </div>
+    <div style="height: 200px;"></div>
+</body>
+
+</html>

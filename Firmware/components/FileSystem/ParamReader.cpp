@@ -24,7 +24,7 @@ const char *wifiCfgFile = "wifiConfigFile.bin";
 const char *devCfgFile = "deviceConfigFile.bin";
 
 static const char *TAG = "SpiFFs";
-static esp_vfs_spiffs_conf_t conf = {.base_path = "/spiffs",
+static esp_vfs_spiffs_conf_t conf = {.base_path = "/spiffs", // todo change to partition label
     .partition_label = NULL,
     .max_files = 5,
     .format_if_mount_failed = true};

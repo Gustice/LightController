@@ -41,6 +41,7 @@ esp_err_t ProcessResetPages(const char *messange, const char **output);
 
 esp_err_t ProcessWiFiStatusGet(const char *message, const char **output);
 esp_err_t ProcessGetDeviceConfig(const char *message, const char **output);
+esp_err_t ProcessGetDeviceType(const char *message, const char **output);
 
 esp_err_t ProcessWiFiStatusSet(const char *message, const char ** output);
 esp_err_t ProcessResetWifiConfig(const char *messange, const char ** output);

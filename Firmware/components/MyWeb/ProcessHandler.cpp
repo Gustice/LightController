@@ -20,7 +20,7 @@
 static const char *cModTag = "Web-ReqPcs";
 
 #define CHECK_FILE_EXTENSION(filename, ext)                                                        \
-    (strcasecmp(&filename[strlen(filename) - strlen(ext)], ext) == 0)
+    (strcmp(&filename[strlen(filename) - strlen(ext)], ext) == 0)
 
 /* Set HTTP response content type according to file extension */
 esp_err_t set_content_type_from_file(httpd_req_t *req, const char *filepath) {
@@ -470,10 +470,10 @@ esp_err_t ProcessWiFiStatusGet(const char *message, const char **output) {
         *output = "{\"wifiStatus\": \"WiFiParamIsSet\"}";
     return ESP_OK;
 }
+
 esp_err_t ProcessResetWifiConfig(const char *messange, const char **output) {
     return ResetWiFiConfig();
 }
-
 
 esp_err_t ProcessGetDeviceConfig(const char *message, const char **output) {
     if (*output != nullptr)
@@ -485,6 +485,18 @@ esp_err_t ProcessGetDeviceConfig(const char *message, const char **output) {
 
     return Fs_ReadEntry(CONFIG_DEVICE_CONFIGURATION_FILENAME, buffer, length);
 }
+
+esp_err_t ProcessGetDeviceType(const char *message, const char **output) {
+    if (*output != nullptr)
+        return ESP_FAIL;
+
+    const size_t length = 1024;
+    char *buffer = new char[length];
+    *output = buffer;
+
+    return Fs_ReadEntry(CONFIG_FACTORY_IMAGE_FILENAME, buffer, length);
+}
+
 
 esp_err_t ProcessSaveToPage(const char *message, const char **output) {
     cJSON *root = cJSON_Parse(message);

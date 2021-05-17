@@ -42,7 +42,9 @@
         "streambuf": "cpp",
         "future": "cpp",
         "bitset": "cpp",
-        "regex": "cpp"
+        "regex": "cpp",
+        "dirent.h": "c",
+        "fstream": "cpp"
     },
     "cSpell.words": [
         "attr",
