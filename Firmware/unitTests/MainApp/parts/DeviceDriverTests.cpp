@@ -27,8 +27,7 @@ static const Color_t *testColors[cCount]{
     &color8,
 };
 
-deviceConfig_t config{
-    .StartUpMode = DeviceStartMode_t::RunDemo,
+deviceConfig_t config{.StartUpMode = DeviceStartMode_t::RunDemo,
     .SyncLeds{.IsActive = true,
         .Strip{
             .LedCount = 4,
@@ -49,8 +48,7 @@ deviceConfig_t config{
         .Device{
             .LedCount = 8,
         },
-    }
-};
+    }};
 
 TEST_CASE("Instantiate Driver object without any trouble", "[DeviceDriver]") {
     DeviceDriver dut(&sync, &async, &strip, &expander, &config);
@@ -60,13 +58,15 @@ TEST_CASE("Instantiate Driver object without any trouble", "[DeviceDriver]") {
 TEST_CASE("All Driver Variables are initialized correctly", "[ChannelIndex]") {
     DeviceDriver dut(&sync, &async, &strip, &expander, &config);
 
-    ColorMsg_t col1 {
-        .channel = RgbChannel::RgbiSync,
+    ColorMsg_t col1{.channel = RgbChannel::RgbiSync,
         .red = 1,
-        .apply {
-            .ApplyTo{ 0xFFFF, 0,0,0,0, }
-        }
-    };
+        .apply{.ApplyTo{
+            0xFFFF,
+            0,
+            0,
+            0,
+            0,
+        }}};
     dut.ApplyRgbColorMessage(&col1);
 
     CHECK(sync.buffer[0].red == 1);
@@ -74,14 +74,16 @@ TEST_CASE("All Driver Variables are initialized correctly", "[ChannelIndex]") {
     CHECK(sync.buffer[2].red == 1);
     CHECK(sync.buffer[3].red == 1);
     CHECK(sync.buffer[4].red == 0);
- 
-    ColorMsg_t col2 {
-        .channel = RgbChannel::RgbwAsync,
+
+    ColorMsg_t col2{.channel = RgbChannel::RgbwAsync,
         .green = 1,
-        .apply {
-            .ApplyTo{ 0xFFFF, 0,0,0,0, }
-        }
-    };
+        .apply{.ApplyTo{
+            0xFFFF,
+            0,
+            0,
+            0,
+            0,
+        }}};
     dut.ApplyRgbColorMessage(&col2);
 
     CHECK(async.buffer[0].green == 1);
@@ -91,16 +93,58 @@ TEST_CASE("All Driver Variables are initialized correctly", "[ChannelIndex]") {
     CHECK(async.buffer[4].green == 1);
     CHECK(async.buffer[5].green == 1);
     CHECK(async.buffer[6].green == 0);
-    
-    ColorMsg_t col3 {
-        .channel = RgbChannel::RgbwPwm,
+
+    ColorMsg_t col3{.channel = RgbChannel::RgbwPwm,
         .blue = 1,
-        .apply {
-            .ApplyTo{ 0xFFFF, 0,0,0,0, }
-        }
-    };
+        .apply{.ApplyTo{
+            0xFFFF,
+            0,
+            0,
+            0,
+            0,
+        }}};
     dut.ApplyRgbColorMessage(&col3);
 
     CHECK(strip.buffer[0].blue == 1);
     CHECK(strip.buffer[1].blue == 0);
+}
+
+TEST_CASE("Demo can be triggered without any trouble", "[DeviceDriver]") {
+    DeviceDriver dut(&sync, &async, &strip, &expander, &config);
+    dut.DemoTick();
+}
+
+
+deviceConfig_t startupConfig{.StartUpMode = DeviceStartMode_t::RunDemo,
+    .SyncLeds{
+        .IsActive = true,
+        .Strip{
+            .LedCount = 4,
+        },
+        .Color{.red = 0xFF, .green = 0, .blue = 0, .white = 0},
+        .Delay = 1,
+    },
+    .AsyncLeds{
+        .IsActive = true,
+        .Strip{.LedCount = 6},
+        .Color{.red = 0, .green = 0xFF, .blue = 0, .white = 0},
+        .Delay = 2,
+    },
+    .RgbStrip{
+        .IsActive = true,
+        .Strip{
+            .LedCount = 6,
+        },
+        .ChannelCount = 1,
+    },
+    .I2cExpander{
+        .IsActive = true,
+        .Device{
+            .LedCount = 8,
+        },
+    }};
+
+TEST_CASE("Startup can be triggered without any trouble", "[DeviceDriver]") {
+    DeviceDriver dut(&sync, &async, &strip, &expander, &startupConfig);
+    dut.StartUpTick();
 }

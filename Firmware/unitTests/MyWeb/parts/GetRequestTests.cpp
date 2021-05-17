@@ -19,13 +19,36 @@ static esp_err_t GetChannelSettings(ReqColorIdx_t channel, uint8_t * data, size_
     return ESP_OK;
 }
 
+static deviceConfig_t global_config {
+    .SyncLeds {
+        .Strip {
+            .Channels = ColorChannels_t::RGBW,
+        }
+    },
+    .AsyncLeds {
+        .Strip {
+            .Channels = ColorChannels_t::RGBW,
+        }
+    },
+    .RgbStrip {
+        .Strip {
+            .Channels = ColorChannels_t::RGBW,
+        }
+    },
+    .I2cExpander {
+        .Device {
+            .LedCount = 16,
+        }
+    }
+};
+
 /** "GET /api/GetPort/RGBISync" */
 TEST_CASE("Get RGBISync Values Handler-Tests", "[ColorGet]") {
-    const char *Payload = "{\"form\":\"rgbiSync\", \"appTo\":\"2.2\"}";
+    const char *Payload = "2.2";
     const char *OutPayload = "{\"R\":11,\"G\":12,\"B\":13,\"I\":14}";
 
     const char *output;
-    SetQueueHandlesForPostH(nullptr, nullptr, GetChannelSettings);
+    SetQueueHandlesForPostH(nullptr, nullptr, GetChannelSettings, &global_config);
     NextColorObj.red = 11;
     NextColorObj.green = 12;
     NextColorObj.blue = 13;
@@ -42,11 +65,11 @@ TEST_CASE("Get RGBISync Values Handler-Tests", "[ColorGet]") {
 
 /** "GET /api/GetPort/RGBWAsync" */
 TEST_CASE("Get RGBWAsync Values Handler-Tests", "[ColorGet]") {
-    const char *Payload = "{\"form\":\"rgbwAsync\", \"appTo\":\"2.2\"}";
+    const char *Payload = "2.2";
     const char *OutPayload = "{\"R\":11,\"G\":12,\"B\":13,\"W\":15}";
     
     const char *output;
-    SetQueueHandlesForPostH(nullptr, nullptr, GetChannelSettings);
+    SetQueueHandlesForPostH(nullptr, nullptr, GetChannelSettings, &global_config);
     NextColorObj.red = 11;
     NextColorObj.green = 12;
     NextColorObj.blue = 13;
@@ -64,11 +87,11 @@ TEST_CASE("Get RGBWAsync Values Handler-Tests", "[ColorGet]") {
 
 /** "GET /api/GetPort/RGBWSingle" */
 TEST_CASE("Get RGBWSingle Values Handler-Tests", "[ColorGet]") {
-    const char *Payload = "{\"form\":\"rgbwStrip\", \"appTo\":\"2.2\"}";
+    const char *Payload = "2.2";
     const char *OutPayload = "{\"R\":11,\"G\":12,\"B\":13,\"W\":15}";
 
     const char *output;
-    SetQueueHandlesForPostH(nullptr, nullptr, GetChannelSettings);
+    SetQueueHandlesForPostH(nullptr, nullptr, GetChannelSettings, &global_config);
     NextColorObj.red = 11;
     NextColorObj.green = 12;
     NextColorObj.blue = 13;
@@ -85,11 +108,11 @@ TEST_CASE("Get RGBWSingle Values Handler-Tests", "[ColorGet]") {
 
 /** "GET /api/GetPort/IValues" */
 TEST_CASE("Get IValues Values Handler-Tests", "[ColorGet]") {
-    const char *Payload = "{\"form\":\"grayPort\",\"appTo\":\"2.2\"}";
+    const char *Payload = "2.2";
     const char *OutPayload = "{\"G1\":21,\"G2\":22,\"G3\":23,\"G4\":24,\"G5\":25,\"G6\":26,\"G7\":27,\"G8\":28,\"G9\":29,\"G10\":30,\"G11\":31,\"G12\":32,\"G13\":33,\"G14\":34,\"G15\":35,\"G16\":36}";
 
     const char *output;
-    SetQueueHandlesForPostH(nullptr, nullptr, GetChannelSettings);
+    SetQueueHandlesForPostH(nullptr, nullptr, GetChannelSettings, &global_config);
     for (size_t i = 0; i < 16; i++) {
         NextGrayValObj.gray[i] = 21 + i;
     }

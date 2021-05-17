@@ -44,7 +44,7 @@ class EffectSequencer {
      * @param sColor Start color. Use noColor to start with default color
      * @param intens Idle intensity for effect. Use NULL to start with default intensity
      */
-    void SetEffect(Sequence *sequence, Color_t const *sColor = noColor, uint8_t intens = gu8_idleIntensity);
+    void SetEffect(const Sequence *sequence, Color_t const *sColor = noColor, uint8_t intens = gu8_idleIntensity, uint8_t delay = 0);
 
     /**
      * @brief Execute step of effect sequencer

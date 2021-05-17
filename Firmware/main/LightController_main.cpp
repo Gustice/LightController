@@ -73,6 +73,8 @@ static wifiConfig_def apConfig = {
     4,          // max_connection
 };              // Connect: http://192.168.4.1/Setup
 
+
+
 DeviceDriver *Device;
 
 SemaphoreHandle_t xNewWebCommand = NULL;
@@ -119,14 +121,10 @@ static void vRefreshLed(void *pvParameters) {
         ESP_LOGI(ModTag, "First Message received");
     } else if (deviceConfig.StartUpMode == DeviceStartMode::StartImage) {
         ESP_LOGI(ModTag, " ## Starting Default Image");
-        while (xSemaphoreTake(xNewWebCommand, (TickType_t)10) != pdTRUE)
+        while (xSemaphoreTake(xNewWebCommand, (TickType_t)0) != pdTRUE)
         {
-            const Color * c1 = SyncPcs->Tick();
-            Device->ApplyColorToWholeChannel(c1->GetColor(), RgbChannel::RgbiSync);
-            const Color * c2 = AsyncPcs->Tick();
-            Device->ApplyColorToWholeChannel(c2->GetColor(), RgbChannel::RgbwAsync);
-            const Color * c3 = RgbPcs->Tick();
-            Device->ApplyColorToWholeChannel(c3->GetColor(), RgbChannel::RgbwPwm);
+            vTaskDelay(40 / portTICK_PERIOD_MS);
+            Device->StartUpTick();
         }
         ESP_LOGI(ModTag, "First Message received");
     }
@@ -362,8 +360,6 @@ void app_main(void) {
 
         if (len != 0)
             ESP_LOGW(ModTag, "Message received: %s", inString);
-
-        //     vTaskDelay(1000 / portTICK_PERIOD_MS);
 
         dac1.WritePort((uint8_t)(vin1 >> 4));
         dac2.WritePort((uint8_t)(vin2 >> 4));

@@ -35,7 +35,7 @@ class SequenceSM {
     /**
      * @brief Destroy the Effect State Machine
      */
-    ~SequenceSM();
+    virtual ~SequenceSM();
 
     /**
      * @brief Construct a new Effect State Machine object

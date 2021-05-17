@@ -31,13 +31,13 @@ EffectSequencer::EffectSequencer(uint16_t const templateLength, uint8_t targetCo
 //     delete _EffPV_old;
 // }
 
-void EffectSequencer::SetEffect(Sequence *sequence, Color_t const *sColor, uint8_t intens) {
+void EffectSequencer::SetEffect(const Sequence *sequence, Color_t const *sColor, uint8_t intens, uint8_t delay) {
     _fadingCnt = _fadeSteps;
 
     SequenceSM * pEsm = _EffPV_old;
     _EffPV_old = _EffPV;
     _EffPV = pEsm;
-    _EffPV->SetEffect(sequence, sColor, &intens, 0);
+    _EffPV->SetEffect(sequence, sColor, &intens, delay);
 }
 
 Color const * EffectSequencer::Tick(void) {

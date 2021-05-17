@@ -17,6 +17,9 @@
 #include "RgbwStrip.h"
 #include "Ws2812.h"
 #include "ChannelIndexes.h"
+#include "Sequencer.h"
+
+using namespace Effect;
 
 /**
  * @brief Accumulated device-function regarding the lighting.
@@ -42,15 +45,18 @@ class DeviceDriver {
     esp_err_t ReadValue(ReqColorIdx_t channel, uint8_t *data, size_t length);
 
     void DemoTick(void);
+    void StartUpTick(void);
 
     esp_err_t ApplyColorToWholeChannel(Color_t color, RgbChannel channel);
 
+    const size_t EffectCount;
   private:
     const char *modTag;
     Apa102 *SLedStrip;
     Ws2812 *ALedStrip;
     Pca9685 *LedDriver;
     RgbwStrip *LedStrip;
+    EffectSequencer ** Sequencers;
 
     ChannelIndexes * syncPort;
     ChannelIndexes * asyncPort;
@@ -59,4 +65,5 @@ class DeviceDriver {
     uint16_t expLedCount;
 
     uint16_t demoTickCount;
+   
 };
