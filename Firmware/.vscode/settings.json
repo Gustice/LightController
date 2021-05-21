@@ -44,7 +44,8 @@
         "bitset": "cpp",
         "regex": "cpp",
         "dirent.h": "c",
-        "fstream": "cpp"
+        "fstream": "cpp",
+        "variant": "cpp"
     },
     "cSpell.words": [
         "attr",

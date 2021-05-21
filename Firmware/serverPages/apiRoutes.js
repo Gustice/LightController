@@ -19,19 +19,23 @@ const ChannelType_RGBWAsync = "rgbwAsync";
 const ChannelType_RGBWSingle = "rgbwStrip";
 const ChannelType_IValues = "grayPort";
 
+
 const ApiGetStatus_WiFiStatus = "/api/GetStatus/WiFiStatus";
 const ApiSetDevice_ResetWiFi = "/api/SetDevice/ResetWiFiConnect";
+const ApiSetDevice_RestartDevice = "/api/SetDevice/ResetDevice";
 const ApiSetDevice_SetWiFi = "api/SetDevice/SetWiFiConnect";
 const ApiGetStatus_DeviceConfig = "/api/GetStatus/DeviceConfig";
 const ApiGetStatus_DeviceType = "/api/GetStatus/DeviceType";
 
+const ApiLoadPage = "api/LoadPage"
 const ApiSaveToPage = "/api/SaveToPage";
-const ApiResetProgram = "/api/ResetProgram";
+const ApiResetProgram = "/api/ResetSavedPages";
 
 /// File Routes
 const FileConfigFile = "IOConfiguration.json"
 const FileDeviceFile = "Device.json"
 const FileGetFile = "/config/"
 const FileUploadFile = "/uploadconfig/"
+const FileDeleteFile = "/deleteconfig/"
 
 const FileSizeLimit = {size: 200 * 1024, sizeString: '200 kB'} ;

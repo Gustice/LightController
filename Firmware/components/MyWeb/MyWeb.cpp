@@ -384,7 +384,7 @@ static const httpd_getUri_t getValueHandlers[] {
     {"/api/GetPort/IValues/", ProcessGrayValuesGet},
     {"/api/GetStatus/WiFiStatus", ProcessWiFiStatusGet},
     {"/api/GetStatus/DeviceConfig", ProcessGetDeviceConfig},
-    {"/api/GetStatus/DeviceConfig", ProcessGetDeviceType},
+    {"/api/GetStatus/DeviceType", ProcessGetDeviceType},
     {nullptr, nullptr},
 } ;
 
@@ -465,13 +465,14 @@ static const httpd_postUri_def postUriHandlers[]{
     {"/api/SetPort/RGBWAsync", ProcessRgbwPost},
     {"/api/SetPort/RGBWSingle", ProcessRgbwSinglePost},
     {"/api/SetPort/IValues", ProcessGrayValuesPost},
+    {"/api/LoadPage", ProcessLoadPage},
     {"/api/SaveToPage", ProcessSaveToPage},
-    {"/api/ResetProgram", ProcessResetPages},
+    {"/api/ResetSavedPages", ProcessResetPages},
     {"/api/SetDevice/WiFiConnect",ProcessWiFiStatusSet},
     {"/api/SetDevice/ResetWiFiConnect", ProcessResetWifiConfig},
+    {"/api/SetDevice/ResetDevice", ProcessRestartStation},
     {nullptr, nullptr},
 };
-
 
 /* An HTTP POST handler */
 static esp_err_t data_post_handler(httpd_req_t *req) {

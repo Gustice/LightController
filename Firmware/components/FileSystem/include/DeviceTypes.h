@@ -81,3 +81,13 @@ typedef struct deviceConfig_def {
     rgbwLedConfig_t RgbStrip;
     i2cExpander_t I2cExpander;
 } deviceConfig_t;
+
+
+#define NUMBER_OF_CHANNELS 4
+typedef struct colorEntry_def {
+    Color_t Color;
+} colorEntry_t;
+
+typedef struct colorImage_def {
+    colorEntry_t Channels[NUMBER_OF_CHANNELS];
+} colorImage_t;

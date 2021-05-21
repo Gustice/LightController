@@ -2,13 +2,6 @@ const http = new EasyHttp();
 
 let uploadTarget = undefined;
 
-function DeleteFile(file) {
-    
-}
-function DownloadFile(file) {
-
-}
-
 function GetFileName (str) {
     return str.split('\\').pop().split('/').pop();
 }
@@ -134,3 +127,25 @@ const SetupPage = (function () {
 /// Usage
 SetupPage.Setup();
 SetupPage.GetFiles();
+
+
+
+function DeleteFile(file) {
+    
+}
+function DownloadFile(file) {
+    http.get(file).then().catch();
+}
+
+function ResetSetups() {
+    http.post(ApiResetProgram, "").then().catch();
+}
+function ResetWiFiConfig() {
+    http.post(ApiSetDevice_ResetWiFi, "").then().catch();
+}
+function RestartDevice() {
+    http.post(ApiSetDevice_RestartDevice, "").then().catch();
+}
+function TriggerUpdate() {
+    alert("Function not implemented yet");
+}

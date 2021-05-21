@@ -4,7 +4,7 @@
  * @brief Implementation fo Reqeuest-Handlers
  * @version 0.1
  * @date 2021-03-04
- * 
+ *
  * @copyright Copyright (c) 2021
  */
 
@@ -45,10 +45,10 @@ esp_err_t set_content_type_from_file(httpd_req_t *req, const char *filepath) {
 static QueueHandle_t xColorQueue;
 static QueueHandle_t xGrayQueue;
 static esp_err_t (*GetChannelSettings)(ReqColorIdx_t channel, uint8_t *data, size_t length);
-static deviceConfig_t * pStationConfig;
+static deviceConfig_t *pStationConfig;
 
-void SetQueueHandlesForPostH(
-    QueueHandle_t colorQ, QueueHandle_t grayQ, pChannelGetCallback getCbk, deviceConfig_t * stationConfig) {
+void SetQueueHandlesForPostH(QueueHandle_t colorQ, QueueHandle_t grayQ, pChannelGetCallback getCbk,
+    deviceConfig_t *stationConfig) {
     xColorQueue = colorQ;
     xGrayQueue = grayQ;
     GetChannelSettings = getCbk;
@@ -248,7 +248,7 @@ esp_err_t ProcessRgbwPost(const char *message, const char **output) {
     int size = 4;
     const char *labels[size] = {"R", "G", "B", /*optional*/ "W"};
     uint8_t *values[size] = {&(msg.red), &(msg.green), &(msg.blue), &(msg.white)};
-    
+
     int maxStep = size;
     if (pStationConfig->AsyncLeds.Strip.Channels != ColorChannels::RGBW)
         maxStep = 3;
@@ -314,7 +314,7 @@ esp_err_t ProcessGrayValuesPost(const char *message, const char **output) {
     cJSON *root = cJSON_Parse(message);
     for (size_t i = 0; i < maxStep; i++) {
         cJSON *e = cJSON_GetObjectItem(root, labels[i]);
-        msg.gray[i]  = (uint8_t)e->valueint;
+        msg.gray[i] = (uint8_t)e->valueint;
     }
     // Not needed here
     // char *apply = cJSON_GetObjectItem(root, "appTo")->valuestring;
@@ -353,7 +353,7 @@ esp_err_t ProcessRgbiGet(const char *message, const char **output) {
     req.portIdx = idx.FirstTarget.portIdx;
     esp_err_t ret = GetChannelSettings(req, (uint8_t *)&value, sizeof(ColorMsg_t));
 
-    cJSON * root = cJSON_CreateObject();
+    cJSON *root = cJSON_CreateObject();
     const int size = 4;
     const char *labels[size] = {"R", "G", "B", "I"};
     uint8_t *values[size] = {&(value.red), &(value.green), &(value.blue), &(value.intensity)};
@@ -378,7 +378,7 @@ esp_err_t ProcessRgbwGet(const char *message, const char **output) {
     req.portIdx = idx.FirstTarget.portIdx;
     esp_err_t ret = GetChannelSettings(req, (uint8_t *)&value, sizeof(ColorMsg_t));
 
-    cJSON * root = cJSON_CreateObject();
+    cJSON *root = cJSON_CreateObject();
     const int size = 4;
     const char *labels[size] = {"R", "G", "B", "W"};
     uint8_t *values[size] = {&(value.red), &(value.green), &(value.blue), &(value.white)};
@@ -403,7 +403,7 @@ esp_err_t ProcessRgbwSingleGet(const char *message, const char **output) {
     req.portIdx = idx.FirstTarget.portIdx;
     esp_err_t ret = GetChannelSettings(req, (uint8_t *)&value, sizeof(ColorMsg_t));
 
-    cJSON * root = cJSON_CreateObject();
+    cJSON *root = cJSON_CreateObject();
     const int size = 4;
     const char *labels[size] = {"R", "G", "B", "W"};
     uint8_t *values[size] = {&(value.red), &(value.green), &(value.blue), &(value.white)};
@@ -428,7 +428,7 @@ esp_err_t ProcessGrayValuesGet(const char *message, const char **output) {
     req.portIdx = idx.FirstTarget.portIdx;
     esp_err_t ret = GetChannelSettings(req, (uint8_t *)&value, sizeof(GrayValMsg_t));
 
-    cJSON * root = cJSON_CreateObject();
+    cJSON *root = cJSON_CreateObject();
     const int size = 16;
     const char *labels[size] = {"G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "G9", "G10", "G11",
         "G12", "G13", "G14", "G15", "G16"};
@@ -497,6 +497,47 @@ esp_err_t ProcessGetDeviceType(const char *message, const char **output) {
     return Fs_ReadEntry(CONFIG_FACTORY_IMAGE_FILENAME, buffer, length);
 }
 
+const size_t ImagePagesCount = 4;
+const char *ImageFilePattern = "Image%d.txt";
+
+
+esp_err_t ProcessLoadPage(const char *message, const char **output) {
+    cJSON *root = cJSON_Parse(message);
+    cJSON *e = cJSON_GetObjectItem(root, "Page");
+    int page = e->valueint;
+    cJSON_Delete(root);
+
+    if (page >= 4)
+        return ESP_FAIL;
+
+    char fileStream[2048];
+    char fileName[32];
+    sprintf(fileName, ImageFilePattern, page);
+
+    if (!Fs_CheckIfExists(fileName)) {
+        ESP_LOGW(cModTag, "Page %d not set. Cannot load page.", page);
+    }
+    ESP_LOGI(cModTag, "Load Current Image to Page %d", page);
+    
+    Fs_ReadEntry(fileName, fileStream, sizeof(fileStream));
+
+    ColorMsg_t msg;
+    int channel; 
+    memset(&msg, 0, sizeof(ColorMsg_t));
+    msg.channel = RgbChannel::RgbwAsync;
+    msg.apply.ApplyTo[0] = 1;
+
+    auto pCn = strtok(fileStream, "\n");
+    while (pCn != NULL) {
+        sscanf(pCn, "Ch%d: R:0x%2x G:0x%2x B:0x%2x W:0x%2x ", 
+            &channel, &msg.red, &msg.green, &msg.blue, &msg.white);
+
+        SendColorQueue(msg);
+        pCn = strtok(NULL, "\n");
+    }
+    
+    return ESP_OK;
+}
 
 esp_err_t ProcessSaveToPage(const char *message, const char **output) {
     cJSON *root = cJSON_Parse(message);
@@ -504,8 +545,53 @@ esp_err_t ProcessSaveToPage(const char *message, const char **output) {
     int page = e->valueint;
     cJSON_Delete(root);
 
-    // @todo
+    if (page >= 4)
+        return ESP_FAIL;
+
+    ESP_LOGI(cModTag, "Save Current Image to Page %d", page);
+
+    ReqColorIdx_t req;
+    ColorMsg_t value;
+    esp_err_t ret;
+
+    char fileStream[2048];
+    char fileName[32];
+    sprintf(fileName, ImageFilePattern, page);
+
+    size_t idx = 0;
+    req.type = RgbChannel::RgbiSync, req.chIdx = req.portIdx = 0;
+    ret = GetChannelSettings(req, (uint8_t *)&value, sizeof(ColorMsg_t));
+
+    idx += sprintf(&fileStream[idx], "Ch1: R:0x%2x G:0x%2x B:0x%2x W:0x%2x \n", value.red, value.green,
+        value.blue, value.white);
+
+    req.type = RgbChannel::RgbwAsync, req.chIdx = req.portIdx = 0;
+    ret = GetChannelSettings(req, (uint8_t *)&value, sizeof(ColorMsg_t));
+
+    idx += sprintf(&fileStream[idx], "Ch2: R:0x%2x G:0x%2x B:0x%2x W:0x%2x \n", value.red, value.green,
+        value.blue, value.white);
+
+    ESP_LOGI(cModTag, "Writing Content to File %s: \n%s", fileName, fileStream);
+    Fs_SaveEntry(fileName, fileStream, idx);
     return ESP_OK;
 }
 
-esp_err_t ProcessResetPages(const char *message, const char **output) { return ESP_OK; }
+esp_err_t ProcessResetPages(const char *message, const char **output) {
+    char fileName[32];
+
+    for (size_t i = 0; i < ImagePagesCount; i++) {
+        sprintf(fileName, ImageFilePattern, i);
+
+        if (Fs_CheckIfExists(fileName)) {
+            ESP_LOGI(cModTag, "Deleting file %s", fileName);
+            Fs_DeleteEntry(fileName);
+        }
+    }
+
+    return ESP_OK;
+}
+
+esp_err_t ProcessRestartStation(const char *message, const char **output) {
+    esp_restart();
+    return ESP_OK;
+}

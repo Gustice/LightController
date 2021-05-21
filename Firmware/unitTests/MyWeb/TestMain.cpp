@@ -89,3 +89,6 @@ void esp_log_write(esp_log_level_t level, const char *tag, const char *format, .
 uint32_t esp_log_timestamp() { return 0; }
 
 esp_err_t httpd_resp_set_type(httpd_req_t *r, const char *type) { return ESP_OK; }
+
+
+

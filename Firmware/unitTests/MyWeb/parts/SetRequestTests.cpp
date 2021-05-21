@@ -94,20 +94,6 @@ TEST_CASE("Post IValues Values Handler-Tests", "[ColorPost]") {
     CHECK((LastColorMsg.apply.ApplyTo[0] == 0x00000001));
 }
 
-/** "POST /api/SaveToPage" */
-TEST_CASE("Post SetPage Handler-Tests", "[ConfigPost]") {
-    const char *Payload = "{\"Page\":1}";
-    const char *output;
-    SetQueueHandlesForPostH((QueueHandle_t)1, (QueueHandle_t)2, nullptr , &global_config);
-    bool result = ProcessSaveToPage(Payload, &output);
-}
-/** "POST /api/ResetProgram" */
-TEST_CASE("Post ResetPages Handler-Tests", "[ConfigPost]") {
-    const char *output;
-    SetQueueHandlesForPostH((QueueHandle_t)1, (QueueHandle_t)2, nullptr , &global_config);
-    bool result = ProcessResetPages(nullptr, &output);
-}
-
 /** "POST /api/SetDevice/WiFiConnect" */
 TEST_CASE("Post SetWiFiConnect Handler-Tests", "[ConfigPost]") {
     const char *Payload = "{\"ssid\":\"abc\",\"password\":\"123\"}";

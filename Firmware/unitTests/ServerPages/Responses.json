@@ -46,9 +46,24 @@
                 {"G1": 11, "G2": 12, "G3": 13, "G4": 14, "G5": 15, "G6": 16, "G7": 17, "G8": 18, "G9": 19, "G10": 110, "G11": 111, "G12": 112, "G13": 113, "G14": 114, "G15": 115, "G16": 116},
                 {}
             ]
+        },
+        {
+            "url": "/api/GetFiles",
+            "responses": [
+                { "files": [{"file": "Test.json", "size": 1234} ,{"file": "Config.json", "size": 8971} ]}
+            ]
+        },
+        {
+            "url": "/api/GetStatus/DeviceType",
+            "responses": [
+                { "DeviceType": "DemoDev-Mk1", "SerialNumber": "00000001", "HwVersion": "V 0.1.0" },
+                { "DeviceType": "DemoDev-Mk2", "SerialNumber": "00000002", "HwVersion": "V 0.2.0" }
+            ]
         }
     ],
     "SetResponses": [
 
     ]
 }
+
+

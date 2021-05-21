@@ -63,8 +63,8 @@ class MockServer(BaseHTTPRequestHandler):
 
         if self.path == '/':
             self.path = '/welcome.html' # redirect
-        # if self.path == '/favicon.ico':
-        #     self.path = '/favicon.png'
+        if self.path == '/favicon.ico':
+            self.path = '/favicon.png'
 
         responseType = 'text/html'
         ending = ""

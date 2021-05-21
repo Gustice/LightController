@@ -39,12 +39,12 @@
             </div>
             <div class="row">
                 <table id="localFilesTable">
-                    <tr> <td id="ConfigFileBtn"></td> <td><button onclick="Download(FileConfigFile)">Download</button></td> <td><button onclick="Replace(FileConfigFile)">Replace</button></td></tr>
-                    <tr> <td id="DeviceFileBtn"></td> <td><button onclick="Download(FileConfigFile)">Download</button></td> <td><button onclick="Replace(FileConfigFile)">Replace</button></td></tr>
-                    <tr> <td>Setup 1</td> <td><button onclick="Download('Setup1')">Download</button></td> <td></td></tr>
-                    <tr> <td>Setup 2</td> <td><button onclick="Download('Setup2')">Download</button></td> <td></td></tr>
-                    <tr> <td>Setup 3</td> <td><button onclick="Download('Setup3')">Download</button></td> <td></td></tr>
-                    <tr> <td>Setup 4</td> <td><button onclick="Download('Setup4')">Download</button></td> <td></td></tr>
+                    <tr> <td id="ConfigFileBtn"></td> <td><button onclick="DownloadFile(FileConfigFile)">Download</button></td> <td><button onclick="Replace(FileConfigFile)">Replace</button></td></tr>
+                    <tr> <td id="DeviceFileBtn"></td> <td><button onclick="DownloadFile(FileDeviceFile)">Download</button></td> <td><button onclick="Replace(FileConfigFile)">Replace</button></td></tr>
+                    <tr> <td>Setup 1</td> <td><button onclick="DownloadFile('Image1.txt')">Download</button></td> <td></td></tr>
+                    <tr> <td>Setup 2</td> <td><button onclick="DownloadFile('Image2.txt')">Download</button></td> <td></td></tr>
+                    <tr> <td>Setup 3</td> <td><button onclick="DownloadFile('Image3.txt')">Download</button></td> <td></td></tr>
+                    <tr> <td>Setup 4</td> <td><button onclick="DownloadFile('Image4.txt')">Download</button></td> <td></td></tr>
                 </table>
             </div>
 
@@ -67,16 +67,16 @@
         <div id="SysFunction">
             <h2>System Function</h2>
             <div class="row">
-                <button class="four columns">Reset Setups</button>
+                <button class="four columns" onclick="ResetSetups()">Reset Setups</button>
             </div>
             <div class="row">
-                <button class="four columns">Reset WiFi Config</button>
+                <button class="four columns" onclick="ResetWiFiConfig()">Reset WiFi Config</button>
             </div>
             <div class="row">
-                <button class="four columns">Restart Device</button>
+                <button class="four columns" onclick="RestartDevice()">Restart Device</button>
             </div>
             <div class="row">
-                <button class="four columns">Start Update</button>
+                <button class="four columns" onclick="TriggerUpdate()">Start Update</button>
             </div>
         </div>
 

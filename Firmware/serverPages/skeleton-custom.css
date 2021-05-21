@@ -45,3 +45,7 @@ input[type="range"] {
 h2 {
     padding-top: 20px;
 }
+
+button {
+    width: 100%;
+}

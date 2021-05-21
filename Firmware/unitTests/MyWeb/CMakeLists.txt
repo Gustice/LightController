@@ -12,6 +12,7 @@ get_filename_component(CONNECTOR_PARENT_DIR ../../components/MyConnect ABSOLUTE)
 get_filename_component(PARENT_INCLUDEDIR ../../components/LightEffect ABSOLUTE)
 
 add_compile_definitions(CONFIG_DEVICE_CONFIGURATION_FILENAME="DeviceConfig.json")
+add_compile_definitions(CONFIG_FACTORY_IMAGE_FILENAME="Device.json")
 
 add_executable(TestRunner   "TestMain.cpp"
                             "ReaderMock.cpp"
@@ -20,6 +21,7 @@ add_executable(TestRunner   "TestMain.cpp"
                             "parts/SetRequestTests.cpp"
                             "parts/GetRequestTests.cpp"
                             "parts/parseFileTest.cpp"
+                            "parts/SaveLoadPageTest.cpp"
                             )
 target_include_directories(TestRunner PUBLIC testUtils cJSON
                             ${CMAKE_CURRENT_LIST_DIR} 

@@ -35,6 +35,7 @@ esp_err_t ProcessRgbwSingleGet(const char *message, const char ** output);
 esp_err_t ProcessGrayValuesGet(const char *message, const char ** output);
 
 
+esp_err_t ProcessLoadPage(const char *message, const char **output);
 esp_err_t ProcessSaveToPage(const char *message, const char **output);
 esp_err_t ProcessResetPages(const char *messange, const char **output);
 
@@ -45,4 +46,5 @@ esp_err_t ProcessGetDeviceType(const char *message, const char **output);
 
 esp_err_t ProcessWiFiStatusSet(const char *message, const char ** output);
 esp_err_t ProcessResetWifiConfig(const char *messange, const char ** output);
+esp_err_t ProcessRestartStation(const char *message, const char **output);
 

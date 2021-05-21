@@ -260,7 +260,7 @@ function rgbFormGenerator(param) {
             <input type="text" class="u-full-width" id="appTo${num}" name="appTo" value="1">
             <!-- <label for="rgbSelector" id="rgbSelected">Selected Color #000000</label> -->
             <input type="color" id="rgbSelector${num}" class="u-full-width" oninput="UpdateColor(this);" style="height: 70px;"><br>
-            <button type="button" class="u-full-width" onclick='return onGetChannelValue(this, "${route}")'>Get Setting</button>
+            <button type="button" onclick='return onGetChannelValue(this, "${route}")'>Get Setting</button>
             <input class="button-primary u-full-width" type="submit" value="Apply">
         </div>
         `;
@@ -268,7 +268,7 @@ function rgbFormGenerator(param) {
     }
     function createColoredSlider(param, num) {
         const sliderTemplate = `
-            <button type="button" class="u-full-width" style="background-color: ${param.bntColor};" 
+            <button type="button" style="background-color: ${param.bntColor};" 
             onclick="${param.fieldRef}${num}.value = ${param.varName}${num}.value= ${param.maxValue}; UpdateColor(this);">${param.btnText}</button>
             <input type="range" id="${param.varName}${num}" oninput="${param.fieldRef}${num}.value = this.value; UpdateColor(this);" min="0"
             max="${param.maxValue}" step="1" value="0">
@@ -336,10 +336,10 @@ function grFormGenerator(param) {
         const controlTemplate = `
         <div class="row">
           <div class="four columns">
-            <button type="button" class="u-full-width" onclick='return onGetChannelValue(this, "${route}")'>Get Setting</button>
+            <button type="button" onclick='return onGetChannelValue(this, "${route}")'>Get Setting</button>
           </div>
           <div class="four columns">
-            <input class="button-primary u-full-width" type="submit" value="Apply">
+            <input class="button-primary" type="submit" value="Apply">
           </div>
         </div>
         `;
@@ -410,6 +410,19 @@ async function onSave(page) {
             console.warn(response);
         });
 }
+async function onLoad(page) {
+    const load = { Page: page };
+    await http.post(ApiLoadPage, load)
+        .then(() => {
+            console.warn("Sent object", load);
+            //SetupUi.showMessage(parentForm, "Page saved", 'userSuccess');
+        })
+        .catch(response => {
+            console.warn(response);
+        });
+}
+
+
 function onResetPages() {
 
     // await http.post(ApiResetProgram, {})
