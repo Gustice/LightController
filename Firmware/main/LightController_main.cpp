@@ -121,7 +121,7 @@ static void vRefreshLed(void *pvParameters) {
         ESP_LOGI(ModTag, " ## Starting Default Image");
         while (xSemaphoreTake(xNewWebCommand, (TickType_t)0) != pdTRUE) {
             vTaskDelay(40 / portTICK_PERIOD_MS);
-            Device->StartUpTick();
+            Device->EffectTick();
         }
         ESP_LOGI(ModTag, "First Message received");
     }

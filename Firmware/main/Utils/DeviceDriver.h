@@ -53,7 +53,7 @@ class DeviceDriver {
     esp_err_t ReadValue(ReqColorIdx_t channel, uint8_t *data, size_t length);
 
     void DemoTick(void);
-    void StartUpTick(void);
+    void EffectTick(void);
     const size_t EffectCount;
 
   private:

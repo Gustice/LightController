@@ -233,7 +233,7 @@ void SetColorByObject(Color_t *target, Color const *const obj, size_t repeat) {
     }
 }
 
-void DeviceDriver::StartUpTick(void) {
+void DeviceDriver::EffectTick(void) {
     Color const *c1 = Sequencers[0]->Tick();
     Color const *c2 = Sequencers[1]->Tick();
     Color const *c3 = Sequencers[2]->Tick();

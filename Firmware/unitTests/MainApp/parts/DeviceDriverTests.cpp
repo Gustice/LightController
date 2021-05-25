@@ -146,5 +146,5 @@ deviceConfig_t startupConfig{.StartUpMode = DeviceStartMode_t::RunDemo,
 
 TEST_CASE("Startup can be triggered without any trouble", "[DeviceDriver]") {
     DeviceDriver dut(&sync, &async, &strip, &expander, &startupConfig);
-    dut.StartUpTick();
+    dut.EffectTick();
 }

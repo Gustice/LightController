@@ -46,5 +46,31 @@
             "Address": 1,
             "GrayValues": [31,32,33,34, 35,36,37,38, 39,40,41,42, 43,44,45,46]
         }
+    ], 
+    "EffectProcessor": [
+        {
+            "TargetGate": "S",
+            "Ports": [1, 2],
+            "Color": [101,102,103,104],
+            "InitDelay": 0
+        },
+        {
+            "TargetGate": "A",
+            "Ports": [32],
+            "Color": [111,112,113,114],
+            "InitDelay": 32
+        },
+        {
+            "TargetGate": "R",
+            "Ports": [1,16,17,32],
+            "Color": [121,122,123,124],
+            "InitDelay": 64
+        },
+        {
+            "TargetGate": "I",
+            "Ports": [1,32],
+            "Color": [131,132,133,134],
+            "InitDelay": 128
+        }
     ]
 }

@@ -29,7 +29,7 @@ TEST_CASE("Reading Device configuration", "[cJson]")
     memset(&deviceSet, 0, sizeof(deviceConfig_t));
     REQUIRE ( Fs_ReadDeviceConfiguration(&deviceSet) == ESP_OK );
     
-    CHECK(deviceSet.StartUpMode == DeviceStartMode_t::RunDemo);
+    CHECK(deviceSet.StartUpMode == DeviceStartMode::RunDemo);
 
     CHECK(deviceSet.SyncLeds.IsActive == true);
     CHECK(deviceSet.SyncLeds.Strip.LedCount == 6);
@@ -52,6 +52,27 @@ TEST_CASE("Reading Device configuration", "[cJson]")
     CHECK(deviceSet.I2cExpander.IsActive == true);
     CHECK(deviceSet.I2cExpander.Device.LedCount == 16);
     CHECK( (deviceSet.I2cExpander.Device.Channels == ColorChannels_t::Gray) );
+
+
+    CHECK(deviceSet.EffectMachines[0].Target  == TargetGate::SyncLed);
+    CHECK(deviceSet.EffectMachines[0].ApplyFlags == 0x00000003);
+    CHECK(CheckColor(Color(101,102,103,104), deviceSet.EffectMachines[0].Color));
+    CHECK( (deviceSet.EffectMachines[0].Delay == 0) );
+
+    CHECK(deviceSet.EffectMachines[1].Target  == TargetGate::AsyncLed);
+    CHECK(deviceSet.EffectMachines[1].ApplyFlags == 0x80000000);
+    CHECK(CheckColor(Color(111,112,113,114), deviceSet.EffectMachines[1].Color));
+    CHECK( (deviceSet.EffectMachines[1].Delay == 32) );
+
+    CHECK(deviceSet.EffectMachines[2].Target  == TargetGate::LedStrip);
+    CHECK(deviceSet.EffectMachines[2].ApplyFlags == 0x80018001);
+    CHECK(CheckColor(Color(121,122,123,124), deviceSet.EffectMachines[2].Color));
+    CHECK( (deviceSet.EffectMachines[2].Delay == 64) );
+
+    CHECK(deviceSet.EffectMachines[3].Target  == TargetGate::I2cExpander);
+    CHECK(deviceSet.EffectMachines[3].ApplyFlags == 0x80000001);
+    CHECK(CheckColor(Color(131,132,133,134), deviceSet.EffectMachines[3].Color));
+    CHECK( (deviceSet.EffectMachines[3].Delay == 128) );
 }
 
 static bool stringIsEqual(const char * expected, const char * actual);
