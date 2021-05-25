@@ -557,7 +557,7 @@ static httpd_handle_t start_webserver(void) {
     return NULL;
 }
 
-void SetupMyWeb(QueueHandle_t colorQ, QueueHandle_t grayQ, SemaphoreHandle_t newWebCmd, pChannelGetCallback getCbk, deviceConfig_t * stationConfig) {
+void SetupMyWeb(QueueHandle_t setQ, SemaphoreHandle_t newWebCmd, pChannelGetCb getCbk, deviceConfig_t * stationConfig) {
     xNewLedWebCommand = newWebCmd;
     ESP_LOGI(cModTag, "Initialization of web interface ... ");
 
@@ -570,7 +570,7 @@ void SetupMyWeb(QueueHandle_t colorQ, QueueHandle_t grayQ, SemaphoreHandle_t new
     ESP_ERROR_CHECK(nvs_flash_init());
     ESP_ERROR_CHECK(esp_netif_init());
 
-    SetQueueHandlesForPostH(colorQ, grayQ, getCbk, stationConfig);
+    SetQueueHandlesForPostH(setQ, getCbk, stationConfig);
 
     /* Start the server for the first time */
     server = start_webserver();

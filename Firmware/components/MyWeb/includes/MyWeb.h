@@ -23,7 +23,7 @@
 
 esp_err_t Init_WebFs(void);
 
-typedef esp_err_t (*pChannelGetCallback)(ReqColorIdx_t , uint8_t *, size_t);
+typedef esp_err_t (*pChannelGetCb)(GetChannelMsg);
 
-void SetupMyWeb(QueueHandle_t colorQ, QueueHandle_t grayQ, SemaphoreHandle_t newLedWebCmd,
-    pChannelGetCallback getCbk, deviceConfig_t * stationConfig);
+void SetupMyWeb(QueueHandle_t setQ, SemaphoreHandle_t newLedWebCmd,
+    pChannelGetCb getCbk, deviceConfig_t * stationConfig);

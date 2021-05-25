@@ -17,11 +17,11 @@
 #include "esp_http_server.h"
 #include "DeviceTypes.h"
 
-void SetQueueHandlesForPostH(QueueHandle_t colorQ, QueueHandle_t grayQ, pChannelGetCallback getCbk, deviceConfig_t * stationConfig);
+void SetQueueHandlesForPostH(QueueHandle_t setQuery, pChannelGetCb getCbk, deviceConfig_t * stationConfig);
 
 esp_err_t set_content_type_from_file(httpd_req_t *req, const char *filepath);
 
-void ParseApplyToString(char * applyTo, ApplyIndexes_t * idx);
+uint32_t ParseApplyToString(char * applyTo, ApplyIndexes_t * idx);
 
 
 esp_err_t ProcessRgbiPost(const char *message, const char **output);

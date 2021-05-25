@@ -42,15 +42,13 @@ esp_err_t set_content_type_from_file(httpd_req_t *req, const char *filepath) {
     return httpd_resp_set_type(req, type);
 }
 
-static QueueHandle_t xColorQueue;
-static QueueHandle_t xGrayQueue;
-static esp_err_t (*GetChannelSettings)(ReqColorIdx_t channel, uint8_t *data, size_t length);
+static QueueHandle_t xSetQuery;
+static esp_err_t (*GetChannelSettings)(GetChannelMsg reqest);
 static deviceConfig_t *pStationConfig;
 
-void SetQueueHandlesForPostH(QueueHandle_t colorQ, QueueHandle_t grayQ, pChannelGetCallback getCbk,
-    deviceConfig_t *stationConfig) {
-    xColorQueue = colorQ;
-    xGrayQueue = grayQ;
+void SetQueueHandlesForPostH(
+    QueueHandle_t setQuery, pChannelGetCb getCbk, deviceConfig_t *stationConfig) {
+    xSetQuery = setQuery;
     GetChannelSettings = getCbk;
     pStationConfig = stationConfig;
 }
@@ -105,18 +103,16 @@ ReqColorIdx_t ParseApplyToElement(char *element) {
  * @param applyTo list of indexes to parse and translate to index-variable
  * @param indexes container to place found indexes in
  */
-void ParseApplyToString(
-    char *applyTo, ApplyIndexes_t *indexes) // @todo Exception handling badly needed :-/
-{
+uint32_t ParseApplyToString(char *applyTo, ApplyIndexes_t *indexes) {
+    // @todo Exception handling badly needed :-/
+    uint32_t errors = 0;
 
-    if (applyTo == nullptr || indexes == nullptr) {
-        indexes->Errors++;
-        return;
-    }
+    if (applyTo == nullptr || indexes == nullptr)
+        return ++errors;
 
     size_t len = strlen(applyTo);
     if (len == 0)
-        return;
+        return errors;
 
     if (len == 1) {
         if ((applyTo[0] == 'x') || (applyTo[0] == 'X')) {
@@ -124,7 +120,7 @@ void ParseApplyToString(
                 indexes->ApplyTo[i] = 0xFFFFFFFF;
                 indexes->Items += 32;
             }
-            return;
+            return errors;
         }
     }
 
@@ -152,19 +148,19 @@ void ParseApplyToString(
 
             if (pPre < pC) // On limit no number between delimiter and minus
             {
-                indexes->Errors++;
+                errors++;
                 continue;
             }
 
             idx = ParseApplyToElement(pC);
             if (idx.type == RgbChannel::None_Error) {
-                indexes->Errors++;
+                errors++;
                 continue;
             }
 
             ReqColorIdx_t toIdx = ParseApplyToElement(pR + 1);
             if (toIdx.type == RgbChannel::None_Error) {
-                indexes->Errors++;
+                errors++;
                 continue;
             }
 
@@ -172,7 +168,7 @@ void ParseApplyToString(
             size_t to = ApplyToChannelWidth * toIdx.chIdx + toIdx.portIdx;
 
             if (from >= to) {
-                indexes->Errors++;
+                errors++;
                 continue;
             }
 
@@ -186,7 +182,7 @@ void ParseApplyToString(
         } else {
             idx = ParseApplyToElement(pC);
             if (idx.type == RgbChannel::None_Error) {
-                indexes->Errors++;
+                errors++;
                 continue;
             }
 
@@ -200,14 +196,36 @@ void ParseApplyToString(
             indexes->FirstTarget.portIdx = idx.portIdx;
         }
     }
+
+    return errors;
 }
 
-void SendColorQueue(ColorMsg_t msg) {
-    ESP_LOGI(cModTag, "Light control: red = %d, green = %d, blue = %d, white = %d, intensity = %d",
-        msg.red, msg.green, msg.blue, msg.white, msg.intensity);
+void SendColorQueue(SetChannelMsg msg, ColorMsg_t color) {
+    msg.AdjustTargetIdx(msg.Apply.FirstTarget);
+    SetChannelDto_t dto = msg.GetDto();
+    ESP_LOGD(cModTag, "Light control: red = %d, green = %d, blue = %d, white = %d, intensity = %d",
+        color.red, color.green, color.blue, color.white, color.intensity);
 
-    if (xColorQueue != nullptr) {
-        if (xQueueSend(xColorQueue, (void *)&msg, (TickType_t)10) != pdPASS)
+    if (xSetQuery != nullptr) {
+        if (xQueueSend(xSetQuery, (void *)&dto, (TickType_t)10) != pdPASS)
+            ESP_LOGE(cModTag, "Failed to send the Message");
+    } else {
+        ESP_LOGE(cModTag, "Queue-Handle not set");
+    }
+}
+
+void SendGrayValQueue(SetChannelMsg msg, GrayValMsg_t color) {
+    msg.AdjustTargetIdx(msg.Apply.FirstTarget);
+    SetChannelDto_t dto = msg.GetDto();
+    ESP_LOGD(cModTag, "Light control: Ch1..8 = %d, %d, %d, %d, %d, %d, %d, %d", color.gray[0],
+        color.gray[1], color.gray[2], color.gray[3], color.gray[4], color.gray[5], color.gray[6],
+        color.gray[7]);
+    ESP_LOGD(cModTag, "Light control: Ch9..16 = %d, %d, %d, %d, %d, %d, %d, %d", color.gray[8],
+        color.gray[9], color.gray[10], color.gray[11], color.gray[12], color.gray[13],
+        color.gray[14], color.gray[15]);
+
+    if (xSetQuery != nullptr) {
+        if (xQueueSend(xSetQuery, (void *)&dto, (TickType_t)10) != pdPASS)
             ESP_LOGE(cModTag, "Failed to send the Message");
     } else {
         ESP_LOGE(cModTag, "Queue-Handle not set");
@@ -215,13 +233,12 @@ void SendColorQueue(ColorMsg_t msg) {
 }
 
 esp_err_t ProcessRgbiPost(const char *message, const char **output) {
-    ColorMsg_t msg;
-    memset(&msg, 0, sizeof(ColorMsg_t));
-    msg.channel = RgbChannel::RgbiSync;
+    static ColorMsg_t pColor;
+    SetChannelMsg msg(RgbChannel::RgbiSync, (uint8_t *)&pColor);
 
     const int size = 4;
     const char *labels[size] = {"R", "G", "B", "I"};
-    uint8_t *values[size] = {&(msg.red), &(msg.green), &(msg.blue), &(msg.intensity)};
+    uint8_t *values[size] = {&(pColor.red), &(pColor.green), &(pColor.blue), &(pColor.intensity)};
 
     cJSON *root = cJSON_Parse(message);
     for (size_t i = 0; i < size; i++) {
@@ -229,25 +246,24 @@ esp_err_t ProcessRgbiPost(const char *message, const char **output) {
         *(values[i]) = (uint8_t)e->valueint;
     }
     char *apply = cJSON_GetObjectItem(root, "appTo")->valuestring;
-    ParseApplyToString(apply, &msg.apply);
+    uint32_t errors = ParseApplyToString(apply, &msg.Apply);
     cJSON_Delete(root);
 
     // Apply allways to first item if no items are Set and nor errors occurred
-    if (msg.apply.Items == 0 && msg.apply.Errors == 0)
-        msg.apply.ApplyTo[0] = 1;
+    if (msg.Apply.Items == 0 && errors == 0)
+        msg.Apply.ApplyTo[0] = 1;
 
-    SendColorQueue(msg);
+    SendColorQueue(msg, pColor);
     return ESP_OK;
 }
 
 esp_err_t ProcessRgbwPost(const char *message, const char **output) {
-    ColorMsg_t msg;
-    memset(&msg, 0, sizeof(ColorMsg_t));
-    msg.channel = RgbChannel::RgbwAsync;
+    static ColorMsg_t pColor;
+    SetChannelMsg msg(RgbChannel::RgbwAsync, (uint8_t *)&pColor);
 
     int size = 4;
     const char *labels[size] = {"R", "G", "B", /*optional*/ "W"};
-    uint8_t *values[size] = {&(msg.red), &(msg.green), &(msg.blue), &(msg.white)};
+    uint8_t *values[size] = {&(pColor.red), &(pColor.green), &(pColor.blue), &(pColor.white)};
 
     int maxStep = size;
     if (pStationConfig->AsyncLeds.Strip.Channels != ColorChannels::RGBW)
@@ -260,25 +276,24 @@ esp_err_t ProcessRgbwPost(const char *message, const char **output) {
     }
 
     char *apply = cJSON_GetObjectItem(root, "appTo")->valuestring;
-    ParseApplyToString(apply, &msg.apply);
+    uint32_t errors = ParseApplyToString(apply, &msg.Apply);
     cJSON_Delete(root);
 
     // Apply allways to first item if no items are Set and nor errors occurred
-    if (msg.apply.Items == 0 && msg.apply.Errors == 0)
-        msg.apply.ApplyTo[0] = 1;
+    if (msg.Apply.Items == 0 && errors == 0)
+        msg.Apply.ApplyTo[0] = 1;
 
-    SendColorQueue(msg);
+    SendColorQueue(msg, pColor);
     return ESP_OK;
 }
 
 esp_err_t ProcessRgbwSinglePost(const char *message, const char **output) {
-    ColorMsg_t msg;
-    memset(&msg, 0, sizeof(ColorMsg_t));
-    msg.channel = RgbChannel::RgbwPwm;
+    static ColorMsg_t pColor;
+    SetChannelMsg msg(RgbChannel::RgbwPwm, (uint8_t *)&pColor);
 
     const int size = 4;
     const char *labels[size] = {"R", "G", "B", /*optional*/ "W"};
-    uint8_t *values[size] = {&(msg.red), &(msg.green), &(msg.blue), &(msg.white)};
+    uint8_t *values[size] = {&(pColor.red), &(pColor.green), &(pColor.blue), &(pColor.white)};
 
     int maxStep = size;
     if (pStationConfig->RgbStrip.Strip.Channels != ColorChannels::RGBW)
@@ -291,19 +306,21 @@ esp_err_t ProcessRgbwSinglePost(const char *message, const char **output) {
     }
 
     char *apply = cJSON_GetObjectItem(root, "appTo")->valuestring;
-    ParseApplyToString(apply, &msg.apply);
+    uint32_t errors = ParseApplyToString(apply, &msg.Apply);
     cJSON_Delete(root);
 
     // Apply allways to first item if no items are Set and nor errors occurred
-    if (msg.apply.Items == 0 && msg.apply.Errors == 0)
-        msg.apply.ApplyTo[0] = 1;
+    if (msg.Apply.Items == 0 && errors == 0)
+        msg.Apply.ApplyTo[0] = 1;
 
-    SendColorQueue(msg);
+    SendColorQueue(msg, pColor);
     return ESP_OK;
 }
 
 esp_err_t ProcessGrayValuesPost(const char *message, const char **output) {
-    GrayValMsg_t msg;
+    static GrayValMsg_t pValues;
+    SetChannelMsg msg(RgbChannel::I2cExpanderPwm, (uint8_t *)&pValues);
+
     const int size = 16;
     const char *labels[size] = {"G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "G9", "G10", "G11",
         "G12", "G13", "G14", "G15", "G16"};
@@ -314,49 +331,34 @@ esp_err_t ProcessGrayValuesPost(const char *message, const char **output) {
     cJSON *root = cJSON_Parse(message);
     for (size_t i = 0; i < maxStep; i++) {
         cJSON *e = cJSON_GetObjectItem(root, labels[i]);
-        msg.gray[i] = (uint8_t)e->valueint;
+        pValues.gray[i] = (uint8_t)e->valueint;
     }
-    // Not needed here
-    // char *apply = cJSON_GetObjectItem(root, "appTo")->valuestring;
-    // ParseApplyToString(apply, &msg.apply);
-    msg.channel = RgbChannel::I2cExpanderPwm;
-    msg.intensity = 0;
-    msg.targetIdx = 0;
+    char *apply = cJSON_GetObjectItem(root, "appTo")->valuestring;
+    ParseApplyToString(apply, &msg.Apply);
     cJSON_Delete(root);
 
-    ESP_LOGD(cModTag, "Light control: Ch1..8 = %d, %d, %d, %d, %d, %d, %d, %d", msg.gray[0],
-        msg.gray[1], msg.gray[2], msg.gray[3], msg.gray[4], msg.gray[5], msg.gray[6], msg.gray[7]);
-    ESP_LOGD(cModTag, "Light control: Ch9..16 = %d, %d, %d, %d, %d, %d, %d, %d", msg.gray[8],
-        msg.gray[9], msg.gray[10], msg.gray[11], msg.gray[12], msg.gray[13], msg.gray[14],
-        msg.gray[15]);
-
-    if (xGrayQueue != nullptr) {
-        if (xQueueSend(xGrayQueue, (void *)&msg, (TickType_t)10) != pdPASS)
-            ESP_LOGE(cModTag, "Failed to send the Message");
-    } else {
-        ESP_LOGE(cModTag, "Queue-Handle not set");
-    }
+    SendGrayValQueue(msg, pValues);
 
     return ESP_OK;
 }
 
 esp_err_t ProcessRgbiGet(const char *message, const char **output) {
-    ReqColorIdx_t req{RgbChannel::RgbiSync, 0, 0};
-    ColorMsg_t value;
+    static ColorMsg_t pColor;
+    GetChannelMsg req(RgbChannel::RgbiSync, (uint8_t *)&pColor);
     ApplyIndexes_t idx;
 
     char buffer[256];
     strcpy(buffer, message);
     ParseApplyToString(buffer, &idx);
+    req.AdjustTargetIdx(idx.FirstTarget);
+    if (GetChannelSettings(req) != ESP_OK)
+        return ESP_FAIL;
 
-    req.chIdx = idx.FirstTarget.chIdx;
-    req.portIdx = idx.FirstTarget.portIdx;
-    esp_err_t ret = GetChannelSettings(req, (uint8_t *)&value, sizeof(ColorMsg_t));
 
     cJSON *root = cJSON_CreateObject();
     const int size = 4;
     const char *labels[size] = {"R", "G", "B", "I"};
-    uint8_t *values[size] = {&(value.red), &(value.green), &(value.blue), &(value.intensity)};
+    uint8_t *values[size] = {&(pColor.red), &(pColor.green), &(pColor.blue), &(pColor.intensity)};
     for (size_t i = 0; i < size; i++) {
         cJSON_AddNumberToObject(root, labels[i], *(values[i]));
     }
@@ -366,22 +368,21 @@ esp_err_t ProcessRgbiGet(const char *message, const char **output) {
 }
 
 esp_err_t ProcessRgbwGet(const char *message, const char **output) {
-    ReqColorIdx_t req{RgbChannel::RgbwAsync, 0, 0};
-    ColorMsg_t value;
+    static ColorMsg_t pColor;
+    GetChannelMsg req(RgbChannel::RgbwAsync, (uint8_t *)&pColor);
     ApplyIndexes_t idx;
 
     char buffer[256];
     strcpy(buffer, message);
     ParseApplyToString(buffer, &idx);
-
-    req.chIdx = idx.FirstTarget.chIdx;
-    req.portIdx = idx.FirstTarget.portIdx;
-    esp_err_t ret = GetChannelSettings(req, (uint8_t *)&value, sizeof(ColorMsg_t));
+    req.AdjustTargetIdx(idx.FirstTarget);
+    if (GetChannelSettings(req) != ESP_OK)
+        return ESP_FAIL;
 
     cJSON *root = cJSON_CreateObject();
     const int size = 4;
     const char *labels[size] = {"R", "G", "B", "W"};
-    uint8_t *values[size] = {&(value.red), &(value.green), &(value.blue), &(value.white)};
+    uint8_t *values[size] = {&(pColor.red), &(pColor.green), &(pColor.blue), &(pColor.white)};
     for (size_t i = 0; i < size; i++) {
         cJSON_AddNumberToObject(root, labels[i], *(values[i]));
     }
@@ -391,22 +392,21 @@ esp_err_t ProcessRgbwGet(const char *message, const char **output) {
 }
 
 esp_err_t ProcessRgbwSingleGet(const char *message, const char **output) {
-    ReqColorIdx_t req{RgbChannel::RgbwPwm, 0, 0};
-    ColorMsg_t value;
+    static ColorMsg_t pColor;
+    GetChannelMsg req(RgbChannel::RgbwPwm, (uint8_t *)&pColor);
     ApplyIndexes_t idx;
 
     char buffer[256];
     strcpy(buffer, message);
     ParseApplyToString(buffer, &idx);
-
-    req.chIdx = idx.FirstTarget.chIdx;
-    req.portIdx = idx.FirstTarget.portIdx;
-    esp_err_t ret = GetChannelSettings(req, (uint8_t *)&value, sizeof(ColorMsg_t));
+    req.AdjustTargetIdx(idx.FirstTarget);
+    if (GetChannelSettings(req) != ESP_OK)
+        return ESP_FAIL;
 
     cJSON *root = cJSON_CreateObject();
     const int size = 4;
     const char *labels[size] = {"R", "G", "B", "W"};
-    uint8_t *values[size] = {&(value.red), &(value.green), &(value.blue), &(value.white)};
+    uint8_t *values[size] = {&(pColor.red), &(pColor.green), &(pColor.blue), &(pColor.white)};
     for (size_t i = 0; i < size; i++) {
         cJSON_AddNumberToObject(root, labels[i], *(values[i]));
     }
@@ -416,17 +416,16 @@ esp_err_t ProcessRgbwSingleGet(const char *message, const char **output) {
 }
 
 esp_err_t ProcessGrayValuesGet(const char *message, const char **output) {
-    ReqColorIdx_t req{RgbChannel::I2cExpanderPwm, 0, 0};
-    GrayValMsg_t value;
+    static GrayValMsg_t pValues;
+    GetChannelMsg req(RgbChannel::I2cExpanderPwm, (uint8_t *)&pValues);
     ApplyIndexes_t idx;
 
     char buffer[256];
     strcpy(buffer, message);
     ParseApplyToString(buffer, &idx);
-
-    req.chIdx = idx.FirstTarget.chIdx;
-    req.portIdx = idx.FirstTarget.portIdx;
-    esp_err_t ret = GetChannelSettings(req, (uint8_t *)&value, sizeof(GrayValMsg_t));
+    req.AdjustTargetIdx(idx.FirstTarget);
+    if (GetChannelSettings(req) != ESP_OK)
+        return ESP_FAIL;
 
     cJSON *root = cJSON_CreateObject();
     const int size = 16;
@@ -435,7 +434,7 @@ esp_err_t ProcessGrayValuesGet(const char *message, const char **output) {
 
     int maxStep = pStationConfig->I2cExpander.Device.LedCount;
     for (size_t i = 0; i < maxStep; i++) {
-        cJSON_AddNumberToObject(root, labels[i], value.gray[i]);
+        cJSON_AddNumberToObject(root, labels[i], pValues.gray[i]);
     }
     *output = cJSON_PrintUnformatted(root); // to save pretty whitespaces cJSON_Print
     cJSON_Delete(root);
@@ -465,9 +464,13 @@ esp_err_t ProcessWiFiStatusGet(const char *message, const char **output) {
 
     char *buffer = new char[256];
     WifiConfig_t config; // Is actually ignored
-    *output = "{\"wifiStatus\": \"WiFiParamNotSet\"}";
+
     if (LoadWiFiConfig(&config) == ESP_OK)
         *output = "{\"wifiStatus\": \"WiFiParamIsSet\"}";
+    else
+        sprintf(buffer, "{\"wifiStatus\": \"WiFiParamNotSet\"}");
+
+    *output = buffer;
     return ESP_OK;
 }
 
@@ -518,24 +521,23 @@ esp_err_t ProcessLoadPage(const char *message, const char **output) {
         ESP_LOGW(cModTag, "Page %d not set. Cannot load page.", page);
     }
     ESP_LOGI(cModTag, "Load Current Image to Page %d", page);
-    
+
     Fs_ReadEntry(fileName, fileStream, sizeof(fileStream));
 
-    ColorMsg_t msg;
-    int channel; 
-    memset(&msg, 0, sizeof(ColorMsg_t));
-    msg.channel = RgbChannel::RgbwAsync;
-    msg.apply.ApplyTo[0] = 1;
+    static ColorMsg_t pColor[4];
+    int channel;
 
     auto pCn = strtok(fileStream, "\n");
-    while (pCn != NULL) {
-        sscanf(pCn, "Ch%d: R:0x%2x G:0x%2x B:0x%2x W:0x%2x ", 
-            &channel, &msg.red, &msg.green, &msg.blue, &msg.white);
+    while ((pCn != NULL) && channel < 4) {
+        SetChannelMsg msg(RgbChannel::EffectProcessor, (uint8_t *)&pColor[channel]);
+        sscanf(pCn, "Ch%d: R:0x%2x G:0x%2x B:0x%2x W:0x%2x ", &channel,
+            (uint32_t *)&pColor[channel].red, (uint32_t *)&(pColor[channel].green),
+            (uint32_t *)&(pColor[channel].blue), (uint32_t *)&(pColor[channel].white));
 
-        SendColorQueue(msg);
+        SendColorQueue(msg, pColor[channel]);
         pCn = strtok(NULL, "\n");
     }
-    
+
     return ESP_OK;
 }
 
@@ -550,26 +552,26 @@ esp_err_t ProcessSaveToPage(const char *message, const char **output) {
 
     ESP_LOGI(cModTag, "Save Current Image to Page %d", page);
 
-    ReqColorIdx_t req;
-    ColorMsg_t value;
+    static ColorMsg_t pColor;
+    GetChannelMsg req(RgbChannel::EffectProcessor, (uint8_t *)&pColor);
     esp_err_t ret;
 
     char fileStream[2048];
     char fileName[32];
     sprintf(fileName, ImageFilePattern, page);
 
-    size_t idx = 0;
-    req.type = RgbChannel::RgbiSync, req.chIdx = req.portIdx = 0;
-    ret = GetChannelSettings(req, (uint8_t *)&value, sizeof(ColorMsg_t));
+    uint16_t idx = 0;
+    req.Target.chIdx = 0;
+    ret = GetChannelSettings(req);
 
-    idx += sprintf(&fileStream[idx], "Ch1: R:0x%2x G:0x%2x B:0x%2x W:0x%2x \n", value.red, value.green,
-        value.blue, value.white);
+    idx += sprintf(&fileStream[idx], "Ch1: R:0x%2x G:0x%2x B:0x%2x W:0x%2x \n", pColor.red,
+        pColor.green, pColor.blue, pColor.white);
 
-    req.type = RgbChannel::RgbwAsync, req.chIdx = req.portIdx = 0;
-    ret = GetChannelSettings(req, (uint8_t *)&value, sizeof(ColorMsg_t));
+    req.Target.chIdx = 1;
+    ret = GetChannelSettings(req);
 
-    idx += sprintf(&fileStream[idx], "Ch2: R:0x%2x G:0x%2x B:0x%2x W:0x%2x \n", value.red, value.green,
-        value.blue, value.white);
+    idx += sprintf(&fileStream[idx], "Ch2: R:0x%2x G:0x%2x B:0x%2x W:0x%2x \n", pColor.red,
+        pColor.green, pColor.blue, pColor.white);
 
     ESP_LOGI(cModTag, "Writing Content to File %s: \n%s", fileName, fileStream);
     Fs_SaveEntry(fileName, fileStream, idx);

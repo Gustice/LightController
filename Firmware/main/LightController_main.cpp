@@ -34,17 +34,17 @@
 #include "Apa102.h"
 #include "Color.h"
 #include "Encoder.h"
+#include "Macro.h"
 #include "MyWeb.h"
 #include "ParamReader.h"
 #include "Pca9685.h"
 #include "PcbHardware.h"
+#include "Processor.h"
 #include "RgbwStrip.h"
 #include "RotatingIndex.h"
 #include "SoftAp.h"
-#include "Ws2812.h"
-#include "Processor.h"
 #include "Waveforms.h"
-#include "Macro.h"
+#include "Ws2812.h"
 
 #include "DeviceDriver.h"
 #include "Utils.h"
@@ -74,12 +74,10 @@ static wifiConfig_def apConfig = {
 };              // Connect: http://192.168.4.1/Setup
 
 
-
 DeviceDriver *Device;
 
 SemaphoreHandle_t xNewWebCommand = NULL;
-QueueHandle_t xColorQueue;
-QueueHandle_t xGrayQueue;
+QueueHandle_t xSetQueue;
 
 // esp_err_t start_rest_server(const char *base_path);
 
@@ -98,9 +96,9 @@ QueueHandle_t xGrayQueue;
 //                                      sizeof(serviceTxtData) / sizeof(serviceTxtData[0])));
 // }
 
-Effect::EffectProcessor * SyncPcs;
-Effect::EffectProcessor * AsyncPcs;
-Effect::EffectProcessor * RgbPcs;
+Effect::EffectProcessor *SyncPcs;
+Effect::EffectProcessor *AsyncPcs;
+Effect::EffectProcessor *RgbPcs;
 
 /**
  * @brief LED-Task
@@ -121,36 +119,24 @@ static void vRefreshLed(void *pvParameters) {
         ESP_LOGI(ModTag, "First Message received");
     } else if (deviceConfig.StartUpMode == DeviceStartMode::StartImage) {
         ESP_LOGI(ModTag, " ## Starting Default Image");
-        while (xSemaphoreTake(xNewWebCommand, (TickType_t)0) != pdTRUE)
-        {
+        while (xSemaphoreTake(xNewWebCommand, (TickType_t)0) != pdTRUE) {
             vTaskDelay(40 / portTICK_PERIOD_MS);
             Device->StartUpTick();
         }
         ESP_LOGI(ModTag, "First Message received");
     }
 
-    if (xColorQueue != 0 && xGrayQueue != 0) { // Task should have start without correct pointer
+    if (xSetQueue != 0) { // Task shouldn't have start without correct pointer anyway
         ESP_LOGI(ModTag, "Starting LED-Refresh-Cycle");
 
         for (;;) {
-            ColorMsg_t xColorMsg;
-            GrayValMsg_t xGrayMsg;
+            SetChannelDto_t xSetMsg;
 
-            if (xQueueGenericReceive(xColorQueue, &xColorMsg, (TickType_t)1, pdFALSE) == pdTRUE) {
-                ESP_LOGI(ModTag, "New Color r%x g%x b%x w%x i%x to Channel %d", xColorMsg.red,
-                    xColorMsg.green, xColorMsg.blue, xColorMsg.white, xColorMsg.intensity,
-                    xColorMsg.channel);
-                Device->ApplyRgbColorMessage(&xColorMsg);
-            }
+            if (xQueueGenericReceive(xSetQueue, &xSetMsg, (TickType_t)1, pdFALSE) == pdTRUE) {
+                ESP_LOGI(ModTag, "Requesting Channel data from Gate: '%d', Ch=%d / Port=%d",
+                    xSetMsg.Target.type, xSetMsg.Target.chIdx, xSetMsg.Target.portIdx);
 
-            if (xQueueGenericReceive(xGrayQueue, &xGrayMsg, (TickType_t)1, pdFALSE) == pdTRUE) {
-                ESP_LOGI(ModTag, "Light control: Ch1..8 = %d, %d, %d, %d, %d, %d, %d, %d",
-                    xGrayMsg.gray[0], xGrayMsg.gray[1], xGrayMsg.gray[2], xGrayMsg.gray[3],
-                    xGrayMsg.gray[4], xGrayMsg.gray[5], xGrayMsg.gray[6], xGrayMsg.gray[7]);
-                ESP_LOGI(ModTag, "Light control: Ch9..16 = %d, %d, %d, %d, %d, %d, %d, %d",
-                    xGrayMsg.gray[8], xGrayMsg.gray[9], xGrayMsg.gray[10], xGrayMsg.gray[11],
-                    xGrayMsg.gray[12], xGrayMsg.gray[13], xGrayMsg.gray[14], xGrayMsg.gray[15]);
-                Device->ApplyGrayValueMessage(&xGrayMsg);
+                Device->SetValue(xSetMsg.Target, xSetMsg.pStream, xSetMsg.PayLoadSize, &xSetMsg.Apply);
             }
         }
     }
@@ -159,22 +145,24 @@ static void vRefreshLed(void *pvParameters) {
 QuadDecoder *Encoder;
 static void IRAM_ATTR gpio_isr_handler(void *arg) { Encoder->EvalStepSync(); }
 
-static esp_err_t GetChannelSettings(ReqColorIdx_t channel, uint8_t *data, size_t length) {
+static esp_err_t GetChannelSettings(GetChannelMsg request) {
     if (Device == nullptr)
         ESP_LOGE(ModTag, "Device not defined - Cannot read Lights");
 
-    ESP_LOGI(ModTag, "Requesting Channel data from Gate: '%d', Ch=%d / Port=%d", channel.type,
-        channel.chIdx, channel.portIdx);
+    ESP_LOGI(ModTag, "Requesting Channel data from Gate: '%d', Ch=%d / Port=%d",
+        request.Target.type, request.Target.chIdx, request.Target.portIdx);
 
-    return Device->ReadValue(channel, data, length);
+    return Device->ReadValue(request.Target, request.pStream, request.GetSize());
 }
 
 enum LedMode {
     Off = 0,
-    Steady,
+    SteadyOn,
     Blinking,
     Flashing,
     DoubleFlash,
+    Burst,
+    Flicker,
 };
 
 struct StatusLed_t {
@@ -188,10 +176,12 @@ StatusLed_t ErrLed;
 static void vManageStatusLeds(void *pvParameters) {
     const uint16_t cStates[]{
         0x0000, // Off
-        0xFFFF, // Steady
+        0xFFFF, // SteadyOn
         0xFF00, // Blinking
         0xF000, // Flashing
         0x8800, // DoubleFlash
+        0xAA00, // Burst
+        0xAAAA, // Flicker
     };
 
     if (WlanLed.port == nullptr || ErrLed.port == nullptr) {
@@ -202,8 +192,8 @@ static void vManageStatusLeds(void *pvParameters) {
     RotatingIndex rI(16);
     while (true) {
         uint16_t s = rI.GetIndexAndInkrement();
-        WlanLed.port->WritePort( cStates[(int)WlanLed.mode] >> s & 1 );
-        ErrLed.port->WritePort( cStates[(int)ErrLed.mode] >> s & 1 ); 
+        WlanLed.port->WritePort(cStates[(int)WlanLed.mode] >> s & 1);
+        ErrLed.port->WritePort(cStates[(int)ErrLed.mode] >> s & 1);
         vTaskDelay(80 / portTICK_PERIOD_MS);
     }
 }
@@ -274,10 +264,16 @@ void app_main(void) {
         static Effect::EffectProcessor syncPcs(Effect::cu16_TemplateLength, 8);
         static Effect::EffectProcessor asyncPcs(Effect::cu16_TemplateLength, 8);
         static Effect::EffectProcessor rgbPcs(Effect::cu16_TemplateLength, 8);
-        
-        syncPcs.SetEffect(Effect::macStartFull, &deviceConfig.SyncLeds.Color, Effect::gu8_fullIntensity);;
-        asyncPcs.SetEffect(Effect::macStartFull, &deviceConfig.AsyncLeds.Color, Effect::gu8_fullIntensity);;
-        rgbPcs.SetEffect(Effect::macStartFull, &deviceConfig.RgbStrip.Color, Effect::gu8_fullIntensity);;
+
+        syncPcs.SetEffect(
+            Effect::macStartFull, &deviceConfig.SyncLeds.Color, Effect::gu8_fullIntensity);
+        ;
+        asyncPcs.SetEffect(
+            Effect::macStartFull, &deviceConfig.AsyncLeds.Color, Effect::gu8_fullIntensity);
+        ;
+        rgbPcs.SetEffect(
+            Effect::macStartFull, &deviceConfig.RgbStrip.Color, Effect::gu8_fullIntensity);
+        ;
 
         SyncPcs = &syncPcs;
         AsyncPcs = &asyncPcs;
@@ -308,7 +304,6 @@ void app_main(void) {
     static QuadDecoder encoder(encInA, encInB);
     Encoder = &encoder;
 
-    // @todo status lights have currently no use
     static OutputPort RStatLed(RedStatusLedPin, GpioPort::OutputLogic::Inverted);
     static OutputPort BStatLed(BlueStatusLedPin, GpioPort::OutputLogic::Inverted);
 
@@ -320,18 +315,15 @@ void app_main(void) {
 
 
     xNewWebCommand = xSemaphoreCreateBinary();
-    xColorQueue = xQueueCreate(3, sizeof(ColorMsg_t));
-    xGrayQueue = xQueueCreate(3, sizeof(GrayValMsg_t));
+    xSetQueue = xQueueCreate(3, sizeof(SetChannelDto_t));
 
-    if (xNewWebCommand != NULL && xColorQueue != NULL && xGrayQueue != NULL) {
+    if (xNewWebCommand != NULL && xSetQueue != NULL) {
         static uint8_t taskParam;
-        SetupMyWeb(xColorQueue, xGrayQueue, xNewWebCommand, GetChannelSettings, &deviceConfig);
+        SetupMyWeb(xSetQueue, xNewWebCommand, GetChannelSettings, &deviceConfig);
         xTaskCreate(vRefreshLed, "RefreshLed", 4096, (void *)taskParam, tskIDLE_PRIORITY, NULL);
     } else {
         ESP_LOGE(ModTag,
             "Error creating the dynamic objects. LED task relies on it and cannot be created");
-        ESP_LOGD(
-            ModTag, "Return Pointer: ColorQueue = %p ; GrayQueue = %p ", xColorQueue, xGrayQueue);
     }
 
     char outString[] = "Test";

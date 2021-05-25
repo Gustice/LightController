@@ -40,22 +40,12 @@ esp_err_t ResetWiFiConfig(void)
     return ESP_OK;
 }
 
-ColorMsg_t LastColorMsg;
-GrayValMsg_t LastGrayValMsg;
+SetChannelDto_t LastSetMsg;
 
 esp_err_t xQueueSend( QueueHandle_t xQueue, const void * const pvItemToQueue, TickType_t xTicksToWait )
 {
-    if (xQueue == (QueueHandle_t)1)
-    {
-        memcpy(&LastColorMsg, pvItemToQueue, sizeof(ColorMsg_t));
-        return ESP_OK;
-    }
-    if (xQueue == (QueueHandle_t)2)
-    {
-        memcpy(&LastGrayValMsg, pvItemToQueue, sizeof(GrayValMsg_t));
-        return ESP_OK;
-    }
-    return ESP_FAIL;
+    memcpy(&LastSetMsg, pvItemToQueue, sizeof(SetChannelDto_t));
+    return ESP_OK;
 }
 
 

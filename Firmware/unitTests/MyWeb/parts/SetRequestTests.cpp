@@ -1,8 +1,7 @@
 #include "ProcessHandler.h"
 #include "TestUtils.h"
 
-extern ColorMsg_t LastColorMsg;
-extern GrayValMsg_t LastGrayValMsg;
+extern SetChannelDto_t LastSetMsg;
 
 TEST_CASE("Evaluate String Functions again (problems with compiler)", "[Basics]") {
     CHECK(2 == std::stoi("2"));
@@ -14,40 +13,32 @@ TEST_CASE("Evaluate String Functions again (problems with compiler)", "[Basics]"
     CHECK(4 == std::stoi("4 .3   "));
 }
 
-static deviceConfig_t global_config {
-    .SyncLeds {
-        .Strip {
-            .Channels = ColorChannels_t::RGBW,
-        }
-    },
-    .AsyncLeds {
-        .Strip {
-            .Channels = ColorChannels_t::RGBW,
-        }
-    },
-    .RgbStrip {
-        .Strip {
-            .Channels = ColorChannels_t::RGBW,
-        }
-    },
-    .I2cExpander {
-        .Device {
-            .LedCount = 16,
-        }
-    }
-};
+static deviceConfig_t global_config{.SyncLeds{.Strip{
+                                        .Channels = ColorChannels_t::RGBW,
+                                    }},
+    .AsyncLeds{.Strip{
+        .Channels = ColorChannels_t::RGBW,
+    }},
+    .RgbStrip{.Strip{
+        .Channels = ColorChannels_t::RGBW,
+    }},
+    .I2cExpander{.Device{
+        .LedCount = 16,
+    }}};
 /** "POST /api/SetPort/RGBISync" */
 TEST_CASE("Post RGBISync Values Handler-Tests", "[ColorPost]") {
     const char *Payload = "{\"form\":\"rgbiSync\", \"appTo\":\"1\", \"R\":2, \
         \"G\":3, \"B\":4, \"I\":5}";
     const char *output;
-    SetQueueHandlesForPostH((QueueHandle_t)1, (QueueHandle_t)2, nullptr , &global_config);
+    SetQueueHandlesForPostH((QueueHandle_t)1, nullptr, &global_config);
     bool result = ProcessRgbiPost(Payload, &output);
-    CHECK((LastColorMsg.red == 2));
-    CHECK((LastColorMsg.green == 3));
-    CHECK((LastColorMsg.blue == 4));
-    CHECK((LastColorMsg.intensity == 5));
-    CHECK((LastColorMsg.apply.ApplyTo[0] == 0x00000001));
+
+    ColorMsg_t *pColor = (ColorMsg_t *)LastSetMsg.pStream;
+    CHECK((pColor->red == 2));
+    CHECK((pColor->green == 3));
+    CHECK((pColor->blue == 4));
+    CHECK((pColor->intensity == 5));
+    CHECK((LastSetMsg.Apply.ApplyTo[0] == 0x00000001));
 }
 
 /** "POST /api/SetPort/RGBWAsync" */
@@ -55,13 +46,14 @@ TEST_CASE("Post RGBWAsync Values Handler-Tests", "[ColorPost]") {
     const char *Payload = "{\"form\":\"rgbwAsync\", \"appTo\":\"1\", \"R\":2, \
         \"G\":3, \"B\":4, \"W\":6}";
     const char *output;
-    SetQueueHandlesForPostH((QueueHandle_t)1, (QueueHandle_t)2, nullptr , &global_config);
+    SetQueueHandlesForPostH((QueueHandle_t)1, nullptr, &global_config);
     bool result = ProcessRgbwPost(Payload, &output);
-    CHECK((LastColorMsg.red == 2));
-    CHECK((LastColorMsg.green == 3));
-    CHECK((LastColorMsg.blue == 4));
-    CHECK((LastColorMsg.white == 6));
-    CHECK((LastColorMsg.apply.ApplyTo[0] == 0x00000001));
+    ColorMsg_t *pColor = (ColorMsg_t *)LastSetMsg.pStream;
+    CHECK((pColor->red == 2));
+    CHECK((pColor->green == 3));
+    CHECK((pColor->blue == 4));
+    CHECK((pColor->white == 6));
+    CHECK((LastSetMsg.Apply.ApplyTo[0] == 0x00000001));
 }
 
 /** "POST /api/SetPort/RGBWSingle" */
@@ -69,13 +61,14 @@ TEST_CASE("Post RGBWSingle Values Handler-Tests", "[ColorPost]") {
     const char *Payload = "{\"form\":\"rgbwStrip\", \"appTo\":\"1\", \"R\":2, \
         \"G\":3, \"B\":4, \"W\":6}";
     const char *output;
-    SetQueueHandlesForPostH((QueueHandle_t)1, (QueueHandle_t)2, nullptr , &global_config);
+    SetQueueHandlesForPostH((QueueHandle_t)1, nullptr, &global_config);
     bool result = ProcessRgbwSinglePost(Payload, &output);
-    CHECK((LastColorMsg.red == 2));
-    CHECK((LastColorMsg.green == 3));
-    CHECK((LastColorMsg.blue == 4));
-    CHECK((LastColorMsg.white == 6));
-    CHECK((LastColorMsg.apply.ApplyTo[0] == 0x00000001));
+    ColorMsg_t *pColor = (ColorMsg_t *)LastSetMsg.pStream;
+    CHECK((pColor->red == 2));
+    CHECK((pColor->green == 3));
+    CHECK((pColor->blue == 4));
+    CHECK((pColor->white == 6));
+    CHECK((LastSetMsg.Apply.ApplyTo[0] == 0x00000001));
 }
 
 /** "POST /api/SetPort/IValues" */
@@ -86,25 +79,27 @@ TEST_CASE("Post IValues Values Handler-Tests", "[ColorPost]") {
                 \"G9\":9,\"G10\":10,\"G11\":11,\"G12\":12,\
                 \"G13\":13,\"G14\":14,\"G15\":15,\"G16\":16}";
     const char *output;
-    SetQueueHandlesForPostH((QueueHandle_t)1, (QueueHandle_t)2, nullptr , &global_config);
+    SetQueueHandlesForPostH((QueueHandle_t)1, nullptr, &global_config);
     bool result = ProcessGrayValuesPost(Payload, &output);
+    GrayValMsg_t *pValues = (GrayValMsg_t *)LastSetMsg.pStream;
+
     for (size_t i = 0; i < 16; i++) {
-        CHECK((LastGrayValMsg.gray[i] == 1+i));
+        CHECK((pValues->gray[i] == 1 + i));
     }
-    CHECK((LastColorMsg.apply.ApplyTo[0] == 0x00000001));
+    CHECK((LastSetMsg.Apply.ApplyTo[0] == 0x00000001));
 }
 
 /** "POST /api/SetDevice/WiFiConnect" */
 TEST_CASE("Post SetWiFiConnect Handler-Tests", "[ConfigPost]") {
     const char *Payload = "{\"ssid\":\"abc\",\"password\":\"123\"}";
     const char *output;
-    SetQueueHandlesForPostH((QueueHandle_t)1, (QueueHandle_t)2, nullptr , &global_config);
+    SetQueueHandlesForPostH((QueueHandle_t)1, nullptr, &global_config);
     bool result = ProcessWiFiStatusSet(Payload, &output);
 }
 
 /** "POST /api/SetDevice/ResetWiFiConnect" */
 TEST_CASE("Post ResetWiFiConnect Handler-Tests", "[ConfigPost]") {
     const char *output;
-    SetQueueHandlesForPostH((QueueHandle_t)1, (QueueHandle_t)2, nullptr , &global_config);
+    SetQueueHandlesForPostH((QueueHandle_t)1, nullptr, &global_config);
     bool result = ProcessWiFiStatusGet(nullptr, &output);
 }

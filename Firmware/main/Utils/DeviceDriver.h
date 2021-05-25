@@ -31,11 +31,19 @@ class DeviceDriver {
         deviceConfig_t *config);
     ~DeviceDriver();
 
-    esp_err_t ApplyRgbColorMessage(ColorMsg_t *colorMsg);
-    esp_err_t ApplyGrayValueMessage(GrayValMsg_t *GrayMsg);
+    /**
+     * @brief Function for write-requests concering the applied data
+     * 
+     * @param channel target of the read operation. Also defines data format
+     * @param data data stream to write back requested values
+     * @param length size of the provided container
+     * @param apply bit array that specifies targets for the new value
+     * @return esp_err_t 
+     */
+    esp_err_t SetValue(ReqColorIdx_t channel, uint8_t *data, size_t length, ApplyIndexes_t * apply);
 
     /**
-     * @brief Function for read-requests concering the applied color data
+     * @brief Function for read-requests concering the applied values
      * 
      * @param channel target of the read operation. Also defines data format
      * @param data data stream to write back requested values
@@ -46,10 +54,8 @@ class DeviceDriver {
 
     void DemoTick(void);
     void StartUpTick(void);
-
-    esp_err_t ApplyColorToWholeChannel(Color_t color, RgbChannel channel);
-
     const size_t EffectCount;
+
   private:
     const char *modTag;
     Apa102 *SLedStrip;

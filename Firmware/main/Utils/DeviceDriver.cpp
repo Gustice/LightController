@@ -12,9 +12,9 @@
 #include "DeviceDriver.h"
 #include "Color.h"
 #include "RotatingIndex.h"
+#include "SequenceStepper.h"
 #include "esp_log.h"
 #include <string.h>
-#include "SequenceStepper.h"
 const Effect::Sequence StartupLightSequence[] = {
     Effect::Sequence(32, 1, Effect::eEffect::Light_Blank),
     Effect::Sequence(64, 2, Effect::gau8_initSlope, Effect::eEffect::Light_Wave),
@@ -37,7 +37,7 @@ const Color_t *colors[colorsCnt]{
 
 DeviceDriver::DeviceDriver(
     Apa102 *sLeds, Ws2812 *aLeds, RgbwStrip *ledStrip, Pca9685 *ledDriver, deviceConfig_t *config)
-    : EffectCount(4), modTag("DeviceDriver"){
+    : EffectCount(4), modTag("DeviceDriver") {
     SLedStrip = sLeds;
     ALedStrip = aLeds;
     LedStrip = ledStrip;
@@ -63,7 +63,7 @@ DeviceDriver::DeviceDriver(
     LedDriver->SendImage(expander);
 
     uint16_t delays[EffectCount];
-    Color_t * startColors[EffectCount];
+    Color_t *startColors[EffectCount];
     startColors[0] = &(config->SyncLeds.Color);
     delays[0] = config->SyncLeds.Delay;
     startColors[1] = &(config->AsyncLeds.Color);
@@ -77,10 +77,11 @@ DeviceDriver::DeviceDriver(
     cE.blue = config->I2cExpander.GrayValues[2];
     startColors[3] = &cE;
 
-    Sequencers = new EffectSequencer*[EffectCount];
+    Sequencers = new EffectSequencer *[EffectCount];
     for (size_t i = 0; i < EffectCount; i++) {
         Sequencers[i] = new EffectSequencer(Effect::cu16_TemplateLength, 1, 1);
-        Sequencers[i]->SetEffect(StartupLightSequence, startColors[i], gu8_idleIntensity, delays[i]);
+        Sequencers[i]->SetEffect(
+            StartupLightSequence, startColors[i], gu8_idleIntensity, delays[i]);
     }
 }
 
@@ -96,10 +97,10 @@ DeviceDriver::~DeviceDriver() {
     // delete[] Sequencers;
 }
 
-esp_err_t ApplyColor2RgbChannel(ColorMsg_t *colorMsg, ChannelIndexes *port) {
+esp_err_t ApplyColor2RgbChannel(ColorMsg_t *colorMsg, ApplyIndexes_t * apply, ChannelIndexes *port) {
     for (size_t i = 0; i < ApplyToChannelWidth; i++) {
         uint32_t testIdx = 1 << i;
-        if ((colorMsg->apply.ApplyTo[0] & testIdx) != 0) {
+        if ((apply->ApplyTo[0] & testIdx) != 0) {
             if (i >= port->Count)
                 return ESP_OK; // Index exceeds strip-size
             port->Image[i].red = colorMsg->red;
@@ -111,91 +112,74 @@ esp_err_t ApplyColor2RgbChannel(ColorMsg_t *colorMsg, ChannelIndexes *port) {
     return ESP_OK;
 }
 
-esp_err_t DeviceDriver::ApplyRgbColorMessage(ColorMsg_t *colorMsg) {
-    switch (colorMsg->channel) {
+esp_err_t DeviceDriver::SetValue(
+    ReqColorIdx_t channel, uint8_t *data, size_t length, ApplyIndexes_t *apply) {
+    ColorMsg_t *cm = (ColorMsg_t *)data;
+    GrayValMsg_t *gm = (GrayValMsg_t *)data;
+
+    switch (channel.type) {
     case RgbChannel::RgbiSync:
-        ApplyColor2RgbChannel(colorMsg, syncPort);
+        
+        ApplyColor2RgbChannel(cm, apply, syncPort);
         SLedStrip->SendImage(syncPort->Image);
         break;
 
     case RgbChannel::RgbwAsync:
-        ApplyColor2RgbChannel(colorMsg, asyncPort);
+        ApplyColor2RgbChannel(cm, apply, asyncPort);
         ALedStrip->SendImage(asyncPort->Image);
         break;
 
     case RgbChannel::RgbwPwm:
-        ApplyColor2RgbChannel(colorMsg, rgbPort);
+        ApplyColor2RgbChannel(cm, apply, rgbPort);
         LedStrip->SetImage(rgbPort->Image);
         break;
+
+    case RgbChannel::I2cExpanderPwm: {
+        for (size_t i = 0; i < expLedCount; i++) {
+            expander[i] = (uint16_t)gm->gray[i] << 4;
+        }
+        LedDriver->SendImage(expander);
+    } break;
 
     default:
         break;
         return ESP_FAIL;
     }
 
-    return ESP_OK;
-}
-
-esp_err_t DeviceDriver::ApplyColorToWholeChannel(Color_t color, RgbChannel channel) {
-    switch (channel) {
-    case RgbChannel::RgbiSync:
-        syncPort->SetImage(&color);
-        SLedStrip->SendImage(syncPort->Image);
-        break;
-
-    case RgbChannel::RgbwAsync:
-        asyncPort->SetImage(&color);
-        ALedStrip->SendImage(asyncPort->Image);
-        break;
-
-    case RgbChannel::RgbwPwm:
-        asyncPort->SetImage(&color);
-        LedStrip->SetImage(rgbPort->Image);
-        break;
-
-    default:
-        break;
-        return ESP_FAIL;
-    }
-    return ESP_OK;
-}
-
-esp_err_t DeviceDriver::ApplyGrayValueMessage(GrayValMsg_t *GrayMsg) {
-    for (size_t i = 0; i < expLedCount; i++) {
-        expander[i] = (uint16_t)GrayMsg->gray[i] << 4;
-    }
-    LedDriver->SendImage(expander);
     return ESP_OK;
 }
 
 esp_err_t DeviceDriver::ReadValue(ReqColorIdx_t channel, uint8_t *data, size_t length) {
-    ColorMsg_t *cm = (ColorMsg_t *)data;
 
     switch (channel.type) {
     case RgbChannel::RgbiSync: {
+        ColorMsg_t *cm = (ColorMsg_t *)data;
         Color_t *image = syncPort->Image;
-        cm->red = image[cm->apply.FirstTarget.portIdx].red;
-        cm->green = image[cm->apply.FirstTarget.portIdx].green;
-        cm->blue = image[cm->apply.FirstTarget.portIdx].blue;
-        // cm->intensity = sync[cm->apply.FirstTarget.portIdx].intensity;
+        cm->red = image[channel.portIdx].red;
+        cm->green = image[channel.portIdx].green;
+        cm->blue = image[channel.portIdx].blue;
+        // cm->intensity = sync[channel.portIdx].intensity;
     } break;
 
     case RgbChannel::RgbwAsync: {
+        ColorMsg_t *cm = (ColorMsg_t *)data;
         Color_t *image = asyncPort->Image;
-        cm->red = image[cm->apply.FirstTarget.portIdx].red;
-        cm->green = image[cm->apply.FirstTarget.portIdx].green;
-        cm->blue = image[cm->apply.FirstTarget.portIdx].blue;
+        cm->red = image[channel.portIdx].red;
+        cm->green = image[channel.portIdx].green;
+        cm->blue = image[channel.portIdx].blue;
     } break;
 
     case RgbChannel::RgbwPwm: {
+        ColorMsg_t *cm = (ColorMsg_t *)data;
         Color_t *image = rgbPort->Image;
-        cm->red = image[cm->apply.FirstTarget.portIdx].red;
-        cm->green = image[cm->apply.FirstTarget.portIdx].green;
-        cm->blue = image[cm->apply.FirstTarget.portIdx].blue;
+        cm->red = image[channel.portIdx].red;
+        cm->green = image[channel.portIdx].green;
+        cm->blue = image[channel.portIdx].blue;
     } break;
 
     case RgbChannel::I2cExpanderPwm: {
         GrayValMsg_t *gm = (GrayValMsg_t *)data;
+
         for (size_t i = 0; i < expLedCount; i++) {
             gm->gray[i] = expander[i];
         }
@@ -239,24 +223,21 @@ void DeviceDriver::DemoTick(void) {
     demoTickCount++;
 }
 
-void SetColorByObject(Color_t * target, Color const * const obj, size_t repeat)
-{
+void SetColorByObject(Color_t *target, Color const *const obj, size_t repeat) {
     Color_t c = obj->GetColor();
-    for (size_t i = 0; i < repeat; i++)
-    {
+    for (size_t i = 0; i < repeat; i++) {
         target[i].red = c.red;
         target[i].green = c.green;
         target[i].blue = c.blue;
         target[i].white = c.white;
     }
-    
 }
 
 void DeviceDriver::StartUpTick(void) {
-    Color const * c1 = Sequencers[0]->Tick();
-    Color const * c2 = Sequencers[1]->Tick();
-    Color const * c3 = Sequencers[2]->Tick();
-    Color const * c4 = Sequencers[3]->Tick();
+    Color const *c1 = Sequencers[0]->Tick();
+    Color const *c2 = Sequencers[1]->Tick();
+    Color const *c3 = Sequencers[2]->Tick();
+    Color const *c4 = Sequencers[3]->Tick();
 
     SetColorByObject(syncPort->Image, c1, 1);
     SLedStrip->SendImage(syncPort->Image);

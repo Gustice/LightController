@@ -14,17 +14,17 @@ extern ColorMsg_t LastColorMsg;
 extern GrayValMsg_t LastGrayValMsg;
 
 
-static esp_err_t GetChannelSettings(ReqColorIdx_t channel, uint8_t * data, size_t length)
+static esp_err_t GetChannelSettings(GetChannelMsg request)
 {
-    if (channel.type == RgbChannel::I2cExpanderPwm)
+    if (request.Target.type == RgbChannel::I2cExpanderPwm)
     {
-        memcpy(&LastChTarget, &channel, sizeof(ReqColorIdx_t));
-        memcpy(data, &NextGrayValObj, length);
+        memcpy(&LastChTarget, &request.Target, sizeof(ReqColorIdx_t));
+        memcpy(request.pStream, &NextGrayValObj, request.PayLoadSize);
         return ESP_OK;
     }
     
-    memcpy(&LastChTarget, &channel, sizeof(ReqColorIdx_t));
-    memcpy(data, &NextColorObj, length);
+    memcpy(&LastChTarget, &request.Target, sizeof(ReqColorIdx_t));
+    memcpy(request.pStream, &NextColorObj, request.PayLoadSize);
     return ESP_OK;
 }
 
@@ -59,7 +59,7 @@ TEST_CASE("Save to Page 1", "[Pages]") {
     const char *Payload = "{\"Page\":1}";
     const char *output;
 
-    SetQueueHandlesForPostH((QueueHandle_t)1, (QueueHandle_t)2, GetChannelSettings, &global_config);
+    SetQueueHandlesForPostH((QueueHandle_t)1, GetChannelSettings, &global_config);
 
     NextColorObj.red = 0x11;
     NextColorObj.green = 0x12;
@@ -67,11 +67,12 @@ TEST_CASE("Save to Page 1", "[Pages]") {
     NextColorObj.white = 0x14;
     bool result = ProcessSaveToPage(Payload, &output);
     
-    printf("FileBuffer: \n%s", FileBuffer);
-    printf("testStream: \n%s", testStream1);
+    INFO("FileBuffer: \n"); 
+    INFO(FileBuffer)
+    INFO("testStream: \n");
+    INFO(testStream1);
     CHECK( (0 == strcmp(FileBuffer, testStream1)) );
 }
-
 
 const char * testStream2 = "Ch1: R:0x31 G:0x32 B:0x33 W:0x34 \nCh2: R:0x41 G:0x42 B:0x43 W:0x44 \n";
 /** "POST /api/SetPort/RGBWAsync" */
@@ -82,15 +83,13 @@ TEST_CASE("Load from Page 1", "[Pages]") {
     const char *Payload = "{\"Page\":1}";
     
     const char *output;
-
-    SetQueueHandlesForPostH((QueueHandle_t)1, (QueueHandle_t)2, GetChannelSettings, &global_config);
+    SetQueueHandlesForPostH((QueueHandle_t)1, GetChannelSettings, &global_config);
     bool result = ProcessLoadPage(Payload, &output);
-
 }
 
 /** "POST /api/ResetSavedPages" */
-TEST_CASE("Post ResetPages Handler-Tests", "[ConfigPost]") {
+TEST_CASE("Post ResetPages Handler-Tests", "[ConfigPost]") {    
     const char *output;
-    SetQueueHandlesForPostH((QueueHandle_t)1, (QueueHandle_t)2, nullptr , &global_config);
+    SetQueueHandlesForPostH((QueueHandle_t)1, nullptr , &global_config);
     bool result = ProcessResetPages(nullptr, &output);
 }
