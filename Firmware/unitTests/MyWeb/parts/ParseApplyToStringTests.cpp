@@ -198,13 +198,7 @@ TEST_CASE("Span-Values -> Nor Error", "[ApplyParse]") {
     uint32_t errors;
 
     SECTION("All Values") {
-
-        SECTION("Lower case x") {
-            strcpy(input, "x");
-        }
-        SECTION("Upper case x") {
-            strcpy(input, "X");
-        }
+        strcpy(input, "*");
         errors = ParseApplyToString(input, &idx);
         static ApplyIndexes_t comp1 = {32*5, {RgbChannel::None_Error, 1,1}, {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF}};
         compIdx = &comp1;

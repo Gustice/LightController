@@ -17,6 +17,7 @@ add_compile_definitions(CONFIG_FACTORY_IMAGE_FILENAME="Device.json")
 add_executable(TestRunner   "TestMain.cpp"
                             "ReaderMock.cpp"
                             ${DUT_PARENT_DIR}"/ProcessHandler.cpp"
+                            ${DUT_PARENT_DIR}"/MappingParser.cpp"
                             "parts/ParseApplyToStringTests.cpp"
                             "parts/SetRequestTests.cpp"
                             "parts/GetRequestTests.cpp"
