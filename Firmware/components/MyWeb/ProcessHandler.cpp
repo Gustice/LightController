@@ -232,6 +232,75 @@ void SendGrayValQueue(SetChannelMsg msg, GrayValMsg_t color) {
     }
 }
 
+struct colorLabels_t {
+    const char *name;
+    const char **labels;
+    const size_t count;
+};
+
+const char *rgbLabels[] = {"R", "G", "B"};
+const char *rgbiLabels[] = {"R", "G", "B", "I"};
+const char *rgbwLabels[] = {"R", "G", "B", "w"}; // Red/Green/Blue/ColdWhite
+static const colorLabels_t Labels[]{
+    {"RGB", rgbLabels, 3},
+    {"RGBI", rgbiLabels, 4},
+    {"RGBW", rgbwLabels, 4},
+};
+
+// Payload = {"form: "genericForm", target: "effectCh", type:"RGB", appTo: "1", R: 1, G: 2, B: 3}
+esp_err_t ProcessGenericRgbPost(const char *message, const char **output) {
+    static ColorMsg_t pColor;
+    SetChannelMsg msg(RgbChannel::RgbiSync, (uint8_t *)&pColor);
+
+    const int size = 4;
+
+    uint8_t *values[size] = {&(pColor.red), &(pColor.green), &(pColor.blue), &(pColor.intensity)};
+
+    cJSON *root = cJSON_Parse(message);
+    char *type = cJSON_GetObjectItem(root, "type")->valuestring;
+    // @todo implement according type
+    for (size_t i = 0; i < Labels[0].count; i++) {
+        cJSON *e = cJSON_GetObjectItem(root, Labels[0].labels[i]);
+        *(values[i]) = (uint8_t)e->valueint;
+    }
+    char *apply = cJSON_GetObjectItem(root, "appTo")->valuestring;
+    uint32_t errors = ParseApplyToString(apply, &msg.Apply);
+    cJSON_Delete(root);
+
+    // Apply allways to first item if no items are Set and nor errors occurred
+    if (msg.Apply.Items == 0 && errors == 0)
+        msg.Apply.ApplyTo[0] = 1;
+
+    SendColorQueue(msg, pColor);
+    return ESP_OK;
+}
+
+esp_err_t ProcessGenericRgbGet(const char *message, const char **output) {
+    static ColorMsg_t pColor;
+    GetChannelMsg req(RgbChannel::RgbiSync, (uint8_t *)&pColor);
+    ApplyIndexes_t idx;
+
+    char buffer[256];
+    strcpy(buffer, message);
+    ParseApplyToString(buffer, &idx);
+    req.AdjustTargetIdx(idx.FirstTarget);
+    if (GetChannelSettings(req) != ESP_OK)
+        return ESP_FAIL;
+
+
+    cJSON *root = cJSON_CreateObject();
+    const int size = 4;
+    const char *labels[size] = {"R", "G", "B", "I"};
+    uint8_t *values[size] = {&(pColor.red), &(pColor.green), &(pColor.blue), &(pColor.intensity)};
+    for (size_t i = 0; i < size; i++) {
+        cJSON_AddNumberToObject(root, labels[i], *(values[i]));
+    }
+    *output = cJSON_PrintUnformatted(root); // to save pretty whitespaces cJSON_Print
+    cJSON_Delete(root);
+    return ESP_OK;
+}
+
+// Payload = {"form":"rgbiSync", "appTo":"1", "R":2, "G":3, "B":4, "I":5}
 esp_err_t ProcessRgbiPost(const char *message, const char **output) {
     static ColorMsg_t pColor;
     SetChannelMsg msg(RgbChannel::RgbiSync, (uint8_t *)&pColor);
@@ -257,6 +326,7 @@ esp_err_t ProcessRgbiPost(const char *message, const char **output) {
     return ESP_OK;
 }
 
+// Payload = {"form":"rgbwAsync", "appTo":"1", "R":2, "G":3, "B":4, "W":6}
 esp_err_t ProcessRgbwPost(const char *message, const char **output) {
     static ColorMsg_t pColor;
     SetChannelMsg msg(RgbChannel::RgbwAsync, (uint8_t *)&pColor);
@@ -287,6 +357,7 @@ esp_err_t ProcessRgbwPost(const char *message, const char **output) {
     return ESP_OK;
 }
 
+// Payload = {"form":"rgbwStrip", "appTo":"1", "R":2, "G":3, "B":4, "W":6}
 esp_err_t ProcessRgbwSinglePost(const char *message, const char **output) {
     static ColorMsg_t pColor;
     SetChannelMsg msg(RgbChannel::RgbwPwm, (uint8_t *)&pColor);
@@ -317,6 +388,9 @@ esp_err_t ProcessRgbwSinglePost(const char *message, const char **output) {
     return ESP_OK;
 }
 
+// Payload = {"form":"grayPort", "appTo":"1", "G1":1,"G2":2,"G3":3,"G4":4,
+// "G5":5,"G6":6,"G7":7,"G8":8,
+//                "G9":9,"G10":10,"G11":11,"G12":12, "G13":13,"G14":14,"G15":15,"G16":16}
 esp_err_t ProcessGrayValuesPost(const char *message, const char **output) {
     static GrayValMsg_t pValues;
     SetChannelMsg msg(RgbChannel::I2cExpanderPwm, (uint8_t *)&pValues);
@@ -441,6 +515,7 @@ esp_err_t ProcessGrayValuesGet(const char *message, const char **output) {
     return ESP_OK;
 }
 
+// Payload =  {"ssid":"abc","password":"123"}
 esp_err_t ProcessWiFiStatusSet(const char *message, const char **output) {
     WifiConfig_t config;
     memset(&config, 0, sizeof(WifiConfig_t));

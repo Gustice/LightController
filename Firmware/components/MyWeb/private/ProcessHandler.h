@@ -23,12 +23,13 @@ esp_err_t set_content_type_from_file(httpd_req_t *req, const char *filepath);
 
 uint32_t ParseApplyToString(char * applyTo, ApplyIndexes_t * idx);
 
-
+esp_err_t ProcessGenericRgbPost(const char *message, const char **output);
 esp_err_t ProcessRgbiPost(const char *message, const char **output);
 esp_err_t ProcessRgbwPost(const char *message, const char **output);
 esp_err_t ProcessRgbwSinglePost(const char *message, const char **output);
 esp_err_t ProcessGrayValuesPost(const char *message, const char **output);
 
+esp_err_t ProcessGenericRgbGet(const char *message, const char ** output);
 esp_err_t ProcessRgbiGet(const char *message, const char ** output);
 esp_err_t ProcessRgbwGet(const char *message, const char ** output);
 esp_err_t ProcessRgbwSingleGet(const char *message, const char ** output);

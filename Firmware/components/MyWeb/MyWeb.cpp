@@ -378,10 +378,11 @@ static esp_err_t pagePart_GetHandler(httpd_req_t *req) {
  *
  */
 static const httpd_getUri_t getValueHandlers[] {
-    {"/api/GetPort/RGBISync/", ProcessRgbiGet},
-    {"/api/GetPort/RGBWAsync/", ProcessRgbwGet},
-    {"/api/GetPort/RGBWSingle/", ProcessRgbwSingleGet},
-    {"/api/GetPort/IValues/", ProcessGrayValuesGet},
+    {"/api/GetPort/genericRGB", ProcessGenericRgbGet},
+    {"/api/GetPort/RGBISync", ProcessRgbiGet},
+    {"/api/GetPort/RGBWAsync", ProcessRgbwGet},
+    {"/api/GetPort/RGBWSingle", ProcessRgbwSingleGet},
+    {"/api/GetPort/IValues", ProcessGrayValuesGet},
     {"/api/GetStatus/WiFiStatus", ProcessWiFiStatusGet},
     {"/api/GetStatus/DeviceConfig", ProcessGetDeviceConfig},
     {"/api/GetStatus/DeviceType", ProcessGetDeviceType},
@@ -461,6 +462,7 @@ static const httpd_uri_t getPortReq = {
  *
  */
 static const httpd_postUri_def postUriHandlers[]{
+    {"/api/SetPort/genericRGB", ProcessGenericRgbPost},
     {"/api/SetPort/RGBISync", ProcessRgbiPost},
     {"/api/SetPort/RGBWAsync", ProcessRgbwPost},
     {"/api/SetPort/RGBWSingle", ProcessRgbwSinglePost},
@@ -619,7 +621,6 @@ void SetupMyWeb(QueueHandle_t setQ, SemaphoreHandle_t newWebCmd, pChannelGetCb g
 
     return;
 }
-
 
 const char * GetConfigRoute = "/config/*";
 const char * PostConfigRoute = "/uploadconfig/*";

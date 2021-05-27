@@ -71,5 +71,5 @@ class DeviceDriver {
     uint16_t expLedCount;
 
     uint16_t demoTickCount;
-   
+    deviceConfig_t * Config;
 };

@@ -57,10 +57,20 @@ function onSubmitColor(form, setUrl) {
 
     for (const [key, value] of formData) {
         var formE = form.querySelector(`input[name="${key}"]`);
-        if (formE.type == "number")
+        if (formE) {
+            if (formE.type == "number")
             jsonObject[key] = parseInt(value);
-        else
+            else
             jsonObject[key] = value;
+        } else {
+            formE = form.querySelector(`select[name="${key}"]`);
+            if (formE) {
+                if (formE.type == "number")
+                jsonObject[key] = parseInt(value);
+                else
+                jsonObject[key] = value;
+            }
+        }
     }
     console.log(jsonObject);
 

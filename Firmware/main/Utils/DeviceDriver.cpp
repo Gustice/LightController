@@ -21,7 +21,6 @@ const Effect::Sequence StartupLightSequence[] = {
     Effect::Sequence(64, 2, Effect::eEffect::Light_Idle), // Ininit Loop
 };
 
-
 const int grayCnt = 16;
 const int colorsCnt = 7;
 /// Color pool for demo
@@ -62,15 +61,11 @@ DeviceDriver::DeviceDriver(
     LedStrip->SetImage(rgbPort->Image);
     LedDriver->SendImage(expander);
 
-    uint16_t delays[EffectCount];
     Color_t *startColors[EffectCount];
     startColors[0] = &(config->SyncLeds.Color);
-    delays[0] = config->SyncLeds.Delay;
     startColors[1] = &(config->AsyncLeds.Color);
-    delays[1] = config->AsyncLeds.Delay;
     startColors[2] = &(config->RgbStrip.Color);
-    delays[3] = config->RgbStrip.Delay;
-
+    
     Color_t cE;
     cE.red = config->I2cExpander.GrayValues[0];
     cE.green = config->I2cExpander.GrayValues[1];
@@ -80,8 +75,16 @@ DeviceDriver::DeviceDriver(
     Sequencers = new EffectSequencer *[EffectCount];
     for (size_t i = 0; i < EffectCount; i++) {
         Sequencers[i] = new EffectSequencer(Effect::cu16_TemplateLength, 1, 1);
-        Sequencers[i]->SetEffect(
-            StartupLightSequence, startColors[i], gu8_idleIntensity, delays[i]);
+    }
+
+    Config = config;
+    if (config->StartUpMode == DeviceStartMode::StartImage) {
+        for (size_t i = 0; i < EffectCount; i++) {
+            if (config->EffectMachines[i].Target != TargetGate::None) {
+                Sequencers[i]->SetEffect(StartupLightSequence, &config->EffectMachines[i].Color,
+                    gu8_idleIntensity, config->EffectMachines[i].Delay);
+            }
+        }
     }
 }
 
@@ -97,7 +100,7 @@ DeviceDriver::~DeviceDriver() {
     // delete[] Sequencers;
 }
 
-esp_err_t ApplyColor2RgbChannel(ColorMsg_t *colorMsg, ApplyIndexes_t * apply, ChannelIndexes *port) {
+esp_err_t ApplyColor2RgbChannel(ColorMsg_t *colorMsg, ApplyIndexes_t *apply, ChannelIndexes *port) {
     for (size_t i = 0; i < ApplyToChannelWidth; i++) {
         uint32_t testIdx = 1 << i;
         if ((apply->ApplyTo[0] & testIdx) != 0) {
@@ -119,7 +122,7 @@ esp_err_t DeviceDriver::SetValue(
 
     switch (channel.type) {
     case RgbChannel::RgbiSync:
-        
+
         ApplyColor2RgbChannel(cm, apply, syncPort);
         SLedStrip->SendImage(syncPort->Image);
         break;
@@ -140,6 +143,9 @@ esp_err_t DeviceDriver::SetValue(
         }
         LedDriver->SendImage(expander);
     } break;
+
+    case RgbChannel::EffectProcessor: {
+    }
 
     default:
         break;
@@ -234,25 +240,34 @@ void SetColorByObject(Color_t *target, Color const *const obj, size_t repeat) {
 }
 
 void DeviceDriver::EffectTick(void) {
-    Color const *c1 = Sequencers[0]->Tick();
-    Color const *c2 = Sequencers[1]->Tick();
-    Color const *c3 = Sequencers[2]->Tick();
-    Color const *c4 = Sequencers[3]->Tick();
+    for (size_t i = 0; i < EffectCount; i++) {
+        effectProcessor_t * config = &(Config->EffectMachines[i]);
+        if (config->Target != TargetGate::None) {
+            Color const * color = Sequencers[i]->Tick();
+            Color_t * image = nullptr;
+            switch (config->Target)
+            {
+                case TargetGate::SyncLed: image = syncPort->Image; break; 
+                case TargetGate::AsyncLed: image = asyncPort->Image; break; 
+                case TargetGate::LedStrip: image = rgbPort->Image; break;
+                case TargetGate::I2cExpander:  /*@todo*/ break;
+                default: image = nullptr;
+            }
 
-    SetColorByObject(syncPort->Image, c1, 1);
+            if (image != nullptr) {
+                uint32_t apply = config->ApplyFlags;
+                for (size_t i = 0; i < 32; i++) {
+                    if ((((uint32_t)1 << i) & apply) != 0) {
+                        SetColorByObject(image, color, i);
+                    }
+                }
+            }
+        }
+    }
+    
     SLedStrip->SendImage(syncPort->Image);
-
-    Color c2m = (*c2) * 0x3;
-    SetColorByObject(asyncPort->Image, &c2m, 1);
     ALedStrip->SendImage(asyncPort->Image);
-
-    SetColorByObject(rgbPort->Image, c3, 1);
     LedStrip->SetImage(rgbPort->Image);
-
-    Color_t c4s = c4->GetColor();
-    expander[0] = (uint16_t)c4s.red << 2;
-    expander[1] = (uint16_t)c4s.green << 2;
-    expander[3] = (uint16_t)c4s.blue << 2;
 
     uint16_t pattern = demoTickCount;
     for (size_t i = 0; i < expLedCount; i++) {

@@ -35,12 +35,6 @@
                         "type": "array",
                         "maxItems": 4,
                         "minItems": 4
-                   },
-                   "InitDelay": {
-                       "description": "Initial steps bevor effect is started",
-                       "type": "integer",
-                       "minimum": 0, 
-                       "maximum": 65535
                    }
                 },
                 "required": ["Type", "Title"]

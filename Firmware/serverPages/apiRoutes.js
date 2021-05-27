@@ -2,12 +2,14 @@
 const Route_SetupFull = '/SetupFull';
 
 /// API Routes GET
-const ApiGetPort_RGBISync = "/api/GetPort/RGBISync/";
-const ApiGetPort_RGBWAsync = "/api/GetPort/RGBWAsync/";
-const ApiGetPort_RGBWSingle = "/api/GetPort/RGBWSingle/";
+const ApiGetPort_GenericRGB = "/api/GetPort/genericRGB";
+const ApiGetPort_RGBISync = "/api/GetPort/RGBISync";
+const ApiGetPort_RGBWAsync = "/api/GetPort/RGBWAsync";
+const ApiGetPort_RGBWSingle = "/api/GetPort/RGBWSingle";
 const ApiGetPort_IValues = "/api/GetPort/IValues/";
 const ApiGetFiles = "/api/GetFiles";
 /// API Routes SET
+const ApiSetPort_GenericRGB = "/api/SetPort/genericRGB";
 const ApiSetPort_RGBISync = "/api/SetPort/RGBISync";
 const ApiSetPort_RGBWAsync = "/api/SetPort/RGBWAsync";
 const ApiSetPort_RGBWSingle = "/api/SetPort/RGBWSingle";
@@ -18,6 +20,7 @@ const ChannelType_RGBISync = "rgbiSync";
 const ChannelType_RGBWAsync = "rgbwAsync";
 const ChannelType_RGBWSingle = "rgbwStrip";
 const ChannelType_IValues = "grayPort";
+const ChannelType_Effect = "effectCh";
 
 
 const ApiGetStatus_WiFiStatus = "/api/GetStatus/WiFiStatus";

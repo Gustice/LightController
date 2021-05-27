@@ -128,16 +128,15 @@ static void vRefreshLed(void *pvParameters) {
 
     if (xSetQueue != 0) { // Task shouldn't have start without correct pointer anyway
         ESP_LOGI(ModTag, "Starting LED-Refresh-Cycle");
-
         for (;;) {
             SetChannelDto_t xSetMsg;
-
-            if (xQueueGenericReceive(xSetQueue, &xSetMsg, (TickType_t)1, pdFALSE) == pdTRUE) {
-                ESP_LOGI(ModTag, "Requesting Channel data from Gate: '%d', Ch=%d / Port=%d",
+            if (xQueueGenericReceive(xSetQueue, &xSetMsg, 0, pdFALSE) == pdTRUE) {
+                ESP_LOGI(ModTag, "Setting Channel data for Gate: '%d', Ch=%d / Port=%d",
                     xSetMsg.Target.type, xSetMsg.Target.chIdx, xSetMsg.Target.portIdx);
-
                 Device->SetValue(xSetMsg.Target, xSetMsg.pStream, xSetMsg.PayLoadSize, &xSetMsg.Apply);
             }
+            Device->EffectTick();
+            vTaskDelay(40 / portTICK_PERIOD_MS);
         }
     }
 }
