@@ -229,14 +229,12 @@ void DeviceDriver::DemoTick(void) {
     demoTickCount++;
 }
 
-void SetColorByObject(Color_t *target, Color const *const obj, size_t repeat) {
+void SetColorByObject(Color_t *target, Color const *const obj, size_t index) {
     Color_t c = obj->GetColor();
-    for (size_t i = 0; i < repeat; i++) {
-        target[i].red = c.red;
-        target[i].green = c.green;
-        target[i].blue = c.blue;
-        target[i].white = c.white;
-    }
+        target[index].red = c.red;
+        target[index].green = c.green;
+        target[index].blue = c.blue;
+        target[index].white = c.white;
 }
 
 void DeviceDriver::EffectTick(void) {

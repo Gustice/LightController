@@ -12,6 +12,41 @@
 #include <sstream>
 #include <string.h>
 
+#define CHECK_FILE_EXTENSION(filename, ext)                                                        \
+    (strcmp(&filename[strlen(filename) - strlen(ext)], ext) == 0)
+
+const char * GetTypeAccordingToExtension(const char *filepath) {
+    const char *type = "text/plain";
+    // Special case: File has no extension -> Route
+    if (CHECK_FILE_EXTENSION(filepath, ".html")) {
+        type = "text/html";
+    } else if (CHECK_FILE_EXTENSION(filepath, ".js")) {
+        type = "application/javascript";
+    } else if (CHECK_FILE_EXTENSION(filepath, ".css")) {
+        type = "text/css";
+    } else if (CHECK_FILE_EXTENSION(filepath, ".png")) {
+        type = "image/png";
+    } else if (CHECK_FILE_EXTENSION(filepath, ".ico")) {
+        type = "image/x-icon";
+    } else if (CHECK_FILE_EXTENSION(filepath, ".svg")) {
+        type = "text/xml";
+    }
+    return type;
+}
+
+
+bool charInSpan(char c, char from, char to) {
+  return  ((c >= from) && (c <= to));
+}
+
+bool charIsumber(char c) {
+  return charInSpan(c, '0', '9');
+}
+
+bool charIsNotNumber(char c) {
+  return  !charInSpan(c, '0', '9');
+}
+
 ReqColorIdx_t ParseApplyToElement(char *element) {
     ReqColorIdx_t idx{
         .type = RgbChannel::None_Error,
@@ -21,11 +56,8 @@ ReqColorIdx_t ParseApplyToElement(char *element) {
 
     char *pD; // reference of Dot
     int ch, pos;
-
     pD = strchr(element, '.');
-    
     if (pD != NULL) {
-    // if (scanf(element, "%d.%d", &ch, &pos) == 2) {
         ch = std::stoi(element);
         pos = std::stoi(++pD);
 
@@ -39,16 +71,17 @@ ReqColorIdx_t ParseApplyToElement(char *element) {
         ch -= 1;
         pos -= 1;
     } else {
-        int i = std::stoi(element);
+        int port;
+        port = std::stoi(element);
 
-        if (i <= 0)
+        if (port <= 0)
             return idx;
-        if (i > ApplyToTargetChannels * ApplyToChannelWidth)
+        if (port > ApplyToTargetChannels * ApplyToChannelWidth)
             return idx;
 
-        i -= 1;
-        ch = i / ApplyToChannelWidth;
-        pos = i % ApplyToChannelWidth;
+        port -= 1;
+        ch = port / ApplyToChannelWidth;
+        pos = port % ApplyToChannelWidth;
     }
 
     idx.type = RgbChannel::Undefined;

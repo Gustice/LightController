@@ -120,8 +120,8 @@ static void vRefreshLed(void *pvParameters) {
     } else if (deviceConfig.StartUpMode == DeviceStartMode::StartImage) {
         ESP_LOGI(ModTag, " ## Starting Default Image");
         while (xSemaphoreTake(xNewWebCommand, (TickType_t)0) != pdTRUE) {
-            vTaskDelay(40 / portTICK_PERIOD_MS);
             Device->EffectTick();
+            vTaskDelay(40 / portTICK_PERIOD_MS);
         }
         ESP_LOGI(ModTag, "First Message received");
     }
@@ -255,6 +255,14 @@ void app_main(void) {
             deviceConfig.RgbStrip.Strip.LedCount);
         ESP_LOGI(ModTag, "    Expander LEDs En=%d Cnt=:%d", (int)deviceConfig.I2cExpander.IsActive,
             deviceConfig.I2cExpander.Device.LedCount);
+        
+        for (size_t i = 0; i < 4; i++)
+        {
+            auto target = &deviceConfig.EffectMachines[i];
+            ESP_LOGI(ModTag, "    EffectChannel1 T=%d -> %08x .. D=%d, 0#%02x%02x%02x%02x", (int)target->Target,
+            target->ApplyFlags, target->Delay, target->Color.red, target->Color.green, target->Color.blue, target->Color.white);
+        }
+        
         static Apa102 sledStrip(&spi, deviceConfig.SyncLeds.Strip.LedCount);
         static Ws2812 aLedStrip(&rmt, deviceConfig.AsyncLeds.Strip.LedCount);
         static RgbwStrip ledStrip(&pwmR, &pwmG, &pwmB, &pwmW);

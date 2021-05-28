@@ -1,7 +1,7 @@
 /**
  * @file ProcessHandler.cpp
  * @author Gustice
- * @brief Implementation fo Reqeuest-Handlers
+ * @brief Implementation fo Request-Handlers
  * @version 0.1
  * @date 2021-03-04
  *
@@ -10,36 +10,19 @@
 
 #include "ProcessHandler.h"
 #include "Color.h"
+#include "MappingParser.h"
 #include "MyWeb.h"
 #include "WebUtils.h"
 #include "cJSON.h"
 #include <esp_log.h>
 #include <sstream>
 #include <string.h>
-#include "MappingParser.h"
 
 static const char *cModTag = "Web-ReqPcs";
 
-#define CHECK_FILE_EXTENSION(filename, ext)                                                        \
-    (strcmp(&filename[strlen(filename) - strlen(ext)], ext) == 0)
-
 /* Set HTTP response content type according to file extension */
 esp_err_t set_content_type_from_file(httpd_req_t *req, const char *filepath) {
-    const char *type = "text/plain";
-    // Special case: File has no extension -> Route
-    if (CHECK_FILE_EXTENSION(filepath, ".html")) {
-        type = "text/html";
-    } else if (CHECK_FILE_EXTENSION(filepath, ".js")) {
-        type = "application/javascript";
-    } else if (CHECK_FILE_EXTENSION(filepath, ".css")) {
-        type = "text/css";
-    } else if (CHECK_FILE_EXTENSION(filepath, ".png")) {
-        type = "image/png";
-    } else if (CHECK_FILE_EXTENSION(filepath, ".ico")) {
-        type = "image/x-icon";
-    } else if (CHECK_FILE_EXTENSION(filepath, ".svg")) {
-        type = "text/xml";
-    }
+    const char *type = GetTypeAccordingToExtension(filepath);
     return httpd_resp_set_type(req, type);
 }
 
@@ -53,7 +36,6 @@ void SetQueueHandlesForPostH(
     GetChannelSettings = getCbk;
     pStationConfig = stationConfig;
 }
-
 
 void SendColorQueue(SetChannelMsg msg, ColorMsg_t color) {
     msg.AdjustTargetIdx(msg.Apply.FirstTarget);
@@ -90,33 +72,44 @@ void SendGrayValQueue(SetChannelMsg msg, GrayValMsg_t color) {
 struct colorLabels_t {
     const char *name;
     const char **labels;
+    uint8_t **values;
     const size_t count;
 };
 
-const char *rgbLabels[] = {"R", "G", "B"};
-const char *rgbiLabels[] = {"R", "G", "B", "I"};
-const char *rgbwLabels[] = {"R", "G", "B", "w"}; // Red/Green/Blue/ColdWhite
-static const colorLabels_t Labels[]{
-    {"RGB", rgbLabels, 3},
-    {"RGBI", rgbiLabels, 4},
-    {"RGBW", rgbwLabels, 4},
+const size_t ColorTypes = 3;
+static ColorMsg_t colorMsg;
+const char *rgbLabels[3] = {"R", "G", "B"};
+uint8_t *rgbValues[3] = {&(colorMsg.red), &(colorMsg.green), &(colorMsg.blue)};
+const char *rgbiLabels[4] = {"R", "G", "B", "I"};
+uint8_t *rgbiValues[4] = {
+    &(colorMsg.red), &(colorMsg.green), &(colorMsg.blue), &(colorMsg.intensity)};
+const char *rgbwLabels[4] = {"R", "G", "B", "w"};
+uint8_t *rgbwValues[4] = {&(colorMsg.red), &(colorMsg.green), &(colorMsg.blue), &(colorMsg.white)};
+static const colorLabels_t Labels[ColorTypes + 1]{
+    {"RGB", rgbLabels, rgbValues, 3},
+    {"RGBI", rgbiLabels, rgbiValues, 4},
+    {"RGBW", rgbwLabels, rgbwValues, 4},
+    {"", nullptr, 0},
 };
 
 // Payload = {"form: "genericForm", target: "effectCh", type:"RGB", appTo: "1", R: 1, G: 2, B: 3}
 esp_err_t ProcessGenericRgbPost(const char *message, const char **output) {
-    static ColorMsg_t pColor;
-    SetChannelMsg msg(RgbChannel::RgbiSync, (uint8_t *)&pColor);
-
-    const int size = 4;
-
-    uint8_t *values[size] = {&(pColor.red), &(pColor.green), &(pColor.blue), &(pColor.intensity)};
-
+    SetChannelMsg msg(RgbChannel::RgbiSync, (uint8_t *)&colorMsg);
     cJSON *root = cJSON_Parse(message);
     char *type = cJSON_GetObjectItem(root, "type")->valuestring;
-    // @todo implement according type
+
+    int idx = 0;
+    while (strcmp(Labels[idx].name, type) != 0 && idx < ColorTypes) {
+        idx++;
+    }
+    if (Labels[idx].count == 0) {
+        ESP_LOGE(cModTag, "Type %s could not be resolved", type);
+        return ESP_FAIL;
+    }
+
     for (size_t i = 0; i < Labels[0].count; i++) {
         cJSON *e = cJSON_GetObjectItem(root, Labels[0].labels[i]);
-        *(values[i]) = (uint8_t)e->valueint;
+        *(Labels[idx].values[i]) = (uint8_t)e->valueint;
     }
     char *apply = cJSON_GetObjectItem(root, "appTo")->valuestring;
     uint32_t errors = ParseApplyToString(apply, &msg.Apply);
@@ -126,7 +119,7 @@ esp_err_t ProcessGenericRgbPost(const char *message, const char **output) {
     if (msg.Apply.Items == 0 && errors == 0)
         msg.Apply.ApplyTo[0] = 1;
 
-    SendColorQueue(msg, pColor);
+    SendColorQueue(msg, colorMsg);
     return ESP_OK;
 }
 

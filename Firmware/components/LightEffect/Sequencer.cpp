@@ -18,6 +18,11 @@
 
 namespace Effect {
 
+const Sequence DarkIdle[] = {
+    Sequence(64, 0, Effect::eEffect::Light_Blank, &color_Black),
+};
+
+
 EffectSequencer::EffectSequencer(uint16_t const templateLength, uint8_t targetCount, uint8_t const fadeSteps)
     : _pColor(), _pColorOld(), _targetCount(targetCount) {
     _EffPV = new SequenceSM(templateLength, targetCount); 

@@ -11,5 +11,6 @@
 
 #include "ApiDataTypes.h"
 
+const char * GetTypeAccordingToExtension(const char *filepath);
 ReqColorIdx_t ParseApplyToElement(char *element);
 uint32_t ParseApplyToString(char *applyTo, ApplyIndexes_t *indexes);

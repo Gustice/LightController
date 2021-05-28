@@ -14,6 +14,8 @@ TEST_CASE("Evaluate String Functions", "[Basics]") {
 bool IndexesAreEqual(const ApplyIndexes_t * expected, const ApplyIndexes_t * actual);
 
 
+
+
 TEST_CASE("Parse no significant data -> Nor Errors", "[ApplyParse]") {
     ApplyIndexes_t const zeroIdx = {0, {RgbChannel::None_Error,0,0}, {0,0,0,0,0,}};
     ApplyIndexes_t idx = {0, {RgbChannel::None_Error, 0,0}, {0,0,0,0,0,}};
@@ -239,6 +241,7 @@ TEST_CASE("Span-Values -> Nor Error", "[ApplyParse]") {
 
     CHECK( IndexesAreEqual(&idx, compIdx) );
 }
+
 
 bool IndexesAreEqual(const ApplyIndexes_t * expected, const ApplyIndexes_t * actual)
 {

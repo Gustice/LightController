@@ -103,3 +103,24 @@ TEST_CASE("Post ResetWiFiConnect Handler-Tests", "[ConfigPost]") {
     SetQueueHandlesForPostH((QueueHandle_t)1, nullptr, &global_config);
     bool result = ProcessWiFiStatusGet(nullptr, &output);
 }
+
+
+/** "POST /api/SetPort/genericRGB" */
+TEST_CASE("Post genericRGB Values Handler-Tests", "[ColorPost]") {
+    SetQueueHandlesForPostH((QueueHandle_t)1, nullptr, &global_config);
+
+    SECTION("Effect Target") {
+        const char *Payload =
+            "{\"form\":\"genericForm\", \"target\":\"effectCh\", \"type\":\"RGB\", \"appTo\":\"1\", \"R\":2, \
+        \"G\":3, \"B\":4, \"I\":5}";
+        const char *output;
+        bool result = ProcessGenericRgbPost(Payload, &output);
+
+        ColorMsg_t *pColor = (ColorMsg_t *)LastSetMsg.pStream;
+        CHECK((pColor->red == 2));
+        CHECK((pColor->green == 3));
+        CHECK((pColor->blue == 4));
+        CHECK((LastSetMsg.Apply.ApplyTo[0] == 0x00000001));
+    }
+}
+
