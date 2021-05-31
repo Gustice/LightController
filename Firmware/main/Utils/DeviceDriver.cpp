@@ -16,7 +16,7 @@
 #include "esp_log.h"
 #include <string.h>
 const Effect::Sequence StartupLightSequence[] = {
-    Effect::Sequence(32, 1, Effect::eEffect::Light_Blank),
+    Effect::Sequence(16, 1, Effect::eEffect::Light_Blank),
     Effect::Sequence(64, 2, Effect::gau8_initSlope, Effect::eEffect::Light_Wave),
     Effect::Sequence(64, 2, Effect::eEffect::Light_Idle), // Ininit Loop
 };
@@ -65,7 +65,7 @@ DeviceDriver::DeviceDriver(
     startColors[0] = &(config->SyncLeds.Color);
     startColors[1] = &(config->AsyncLeds.Color);
     startColors[2] = &(config->RgbStrip.Color);
-    
+
     Color_t cE;
     cE.red = config->I2cExpander.GrayValues[0];
     cE.green = config->I2cExpander.GrayValues[1];
@@ -74,7 +74,7 @@ DeviceDriver::DeviceDriver(
 
     Sequencers = new EffectSequencer *[EffectCount];
     for (size_t i = 0; i < EffectCount; i++) {
-        Sequencers[i] = new EffectSequencer(Effect::cu16_TemplateLength, 1, 1);
+        Sequencers[i] = new EffectSequencer(Effect::cu16_TemplateLength, 1, 16);
     }
 
     Config = config;
@@ -145,6 +145,12 @@ esp_err_t DeviceDriver::SetValue(
     } break;
 
     case RgbChannel::EffectProcessor: {
+        if (channel.portIdx >= EffectCount)
+            return ESP_FAIL;
+
+        effectProcessor_t *proc = &(Config->EffectMachines[channel.portIdx]);
+        Color_t c = {.red = cm->red, .green = cm->green, .blue = cm->blue, .white = cm->white};
+        Sequencers[channel.portIdx]->SetEffect(StartupLightSequence, &c, gu8_idleIntensity, 0);
     }
 
     default:
@@ -191,6 +197,20 @@ esp_err_t DeviceDriver::ReadValue(ReqColorIdx_t channel, uint8_t *data, size_t l
         }
     } break;
 
+    case RgbChannel::EffectProcessor: {
+        if (channel.portIdx >= EffectCount)
+            return ESP_FAIL;
+
+        effectProcessor_t *proc = &(Config->EffectMachines[channel.portIdx]);
+        Color_t c = Sequencers[channel.portIdx]->GetActiveColor();
+
+        ColorMsg_t *cm = (ColorMsg_t *)data;
+        cm->red = c.red;
+        cm->green = c.green;
+        cm->blue = c.blue;
+        break;
+    }
+
     default:
         ESP_LOGE(modTag, "Channel type not defined");
         return ESP_FAIL;
@@ -231,25 +251,32 @@ void DeviceDriver::DemoTick(void) {
 
 void SetColorByObject(Color_t *target, Color const *const obj, size_t index) {
     Color_t c = obj->GetColor();
-        target[index].red = c.red;
-        target[index].green = c.green;
-        target[index].blue = c.blue;
-        target[index].white = c.white;
+    target[index].red = c.red;
+    target[index].green = c.green;
+    target[index].blue = c.blue;
+    target[index].white = c.white;
 }
 
 void DeviceDriver::EffectTick(void) {
     for (size_t i = 0; i < EffectCount; i++) {
-        effectProcessor_t * config = &(Config->EffectMachines[i]);
+        effectProcessor_t *config = &(Config->EffectMachines[i]);
         if (config->Target != TargetGate::None) {
-            Color const * color = Sequencers[i]->Tick();
-            Color_t * image = nullptr;
-            switch (config->Target)
-            {
-                case TargetGate::SyncLed: image = syncPort->Image; break; 
-                case TargetGate::AsyncLed: image = asyncPort->Image; break; 
-                case TargetGate::LedStrip: image = rgbPort->Image; break;
-                case TargetGate::I2cExpander:  /*@todo*/ break;
-                default: image = nullptr;
+            Color const *color = Sequencers[i]->Tick();
+            Color_t *image = nullptr;
+            switch (config->Target) {
+            case TargetGate::SyncLed:
+                image = syncPort->Image;
+                break;
+            case TargetGate::AsyncLed:
+                image = asyncPort->Image;
+                break;
+            case TargetGate::LedStrip:
+                image = rgbPort->Image;
+                break;
+            case TargetGate::I2cExpander: /*@todo*/
+                break;
+            default:
+                image = nullptr;
             }
 
             if (image != nullptr) {
@@ -262,7 +289,7 @@ void DeviceDriver::EffectTick(void) {
             }
         }
     }
-    
+
     SLedStrip->SendImage(syncPort->Image);
     ALedStrip->SendImage(asyncPort->Image);
     LedStrip->SetImage(rgbPort->Image);

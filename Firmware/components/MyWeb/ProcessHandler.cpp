@@ -94,7 +94,7 @@ static const colorLabels_t Labels[ColorTypes + 1]{
 
 // Payload = {"form: "genericForm", target: "effectCh", type:"RGB", appTo: "1", R: 1, G: 2, B: 3}
 esp_err_t ProcessGenericRgbPost(const char *message, const char **output) {
-    SetChannelMsg msg(RgbChannel::RgbiSync, (uint8_t *)&colorMsg);
+    SetChannelMsg msg(RgbChannel::EffectProcessor, (uint8_t *)&colorMsg);
     cJSON *root = cJSON_Parse(message);
     char *type = cJSON_GetObjectItem(root, "type")->valuestring;
 
@@ -108,7 +108,7 @@ esp_err_t ProcessGenericRgbPost(const char *message, const char **output) {
     }
 
     for (size_t i = 0; i < Labels[0].count; i++) {
-        cJSON *e = cJSON_GetObjectItem(root, Labels[0].labels[i]);
+        cJSON *e = cJSON_GetObjectItem(root, Labels[idx].labels[i]);
         *(Labels[idx].values[i]) = (uint8_t)e->valueint;
     }
     char *apply = cJSON_GetObjectItem(root, "appTo")->valuestring;
@@ -124,24 +124,31 @@ esp_err_t ProcessGenericRgbPost(const char *message, const char **output) {
 }
 
 esp_err_t ProcessGenericRgbGet(const char *message, const char **output) {
-    static ColorMsg_t pColor;
-    GetChannelMsg req(RgbChannel::RgbiSync, (uint8_t *)&pColor);
-    ApplyIndexes_t idx;
+    GetChannelMsg req(RgbChannel::EffectProcessor, (uint8_t *)&colorMsg);
+    ApplyIndexes_t target;
 
     char buffer[256];
     strcpy(buffer, message);
-    ParseApplyToString(buffer, &idx);
-    req.AdjustTargetIdx(idx.FirstTarget);
+    //char *type = cJSON_GetObjectItem(root, "type")->valuestring;
+    char *type = "RGB"; // Expand route
+
+    ParseApplyToString(buffer, &target);
+    req.AdjustTargetIdx(target.FirstTarget);
     if (GetChannelSettings(req) != ESP_OK)
         return ESP_FAIL;
 
+    int idx = 0;
+    while (strcmp(Labels[idx].name, type) != 0 && idx < ColorTypes) {
+        idx++;
+    }
+    if (Labels[idx].count == 0) {
+        ESP_LOGE(cModTag, "Type %s could not be resolved", type);
+        return ESP_FAIL;
+    }
 
     cJSON *root = cJSON_CreateObject();
-    const int size = 4;
-    const char *labels[size] = {"R", "G", "B", "I"};
-    uint8_t *values[size] = {&(pColor.red), &(pColor.green), &(pColor.blue), &(pColor.intensity)};
-    for (size_t i = 0; i < size; i++) {
-        cJSON_AddNumberToObject(root, labels[i], *(values[i]));
+    for (size_t i = 0; i < Labels[0].count; i++) {
+        cJSON_AddNumberToObject(root, Labels[0].labels[i], *(Labels[idx].values[i]));
     }
     *output = cJSON_PrintUnformatted(root); // to save pretty whitespaces cJSON_Print
     cJSON_Delete(root);
@@ -436,7 +443,7 @@ esp_err_t ProcessLoadPage(const char *message, const char **output) {
     if (page >= 4)
         return ESP_FAIL;
 
-    char fileStream[2048];
+    char fileStream[512];
     char fileName[32];
     sprintf(fileName, ImageFilePattern, page);
 
@@ -479,18 +486,18 @@ esp_err_t ProcessSaveToPage(const char *message, const char **output) {
     GetChannelMsg req(RgbChannel::EffectProcessor, (uint8_t *)&pColor);
     esp_err_t ret;
 
-    char fileStream[2048];
+    char fileStream[512];
     char fileName[32];
     sprintf(fileName, ImageFilePattern, page);
 
     uint16_t idx = 0;
-    req.Target.chIdx = 0;
+    req.Target.portIdx = 0;
     ret = GetChannelSettings(req);
 
     idx += sprintf(&fileStream[idx], "Ch1: R:0x%2x G:0x%2x B:0x%2x W:0x%2x \n", pColor.red,
         pColor.green, pColor.blue, pColor.white);
 
-    req.Target.chIdx = 1;
+    req.Target.portIdx = 1;
     ret = GetChannelSettings(req);
 
     idx += sprintf(&fileStream[idx], "Ch2: R:0x%2x G:0x%2x B:0x%2x W:0x%2x \n", pColor.red,

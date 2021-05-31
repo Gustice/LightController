@@ -378,11 +378,11 @@ static esp_err_t pagePart_GetHandler(httpd_req_t *req) {
  *
  */
 static const httpd_getUri_t getValueHandlers[] {
-    {"/api/GetPort/genericRGB", ProcessGenericRgbGet},
-    {"/api/GetPort/RGBISync", ProcessRgbiGet},
-    {"/api/GetPort/RGBWAsync", ProcessRgbwGet},
-    {"/api/GetPort/RGBWSingle", ProcessRgbwSingleGet},
-    {"/api/GetPort/IValues", ProcessGrayValuesGet},
+    {"/api/GetPort/genericRGB/", ProcessGenericRgbGet},
+    {"/api/GetPort/RGBISync/", ProcessRgbiGet},
+    {"/api/GetPort/RGBWAsync/", ProcessRgbwGet},
+    {"/api/GetPort/RGBWSingle/", ProcessRgbwSingleGet},
+    {"/api/GetPort/IValues/", ProcessGrayValuesGet},
     {"/api/GetStatus/WiFiStatus", ProcessWiFiStatusGet},
     {"/api/GetStatus/DeviceConfig", ProcessGetDeviceConfig},
     {"/api/GetStatus/DeviceType", ProcessGetDeviceType},

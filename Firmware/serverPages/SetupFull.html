@@ -55,7 +55,7 @@
                     </select>
                     <input type="color" id="rgbSelector_1" class="u-full-width" oninput="UpdateColor(this);"
                         style="height: 70px;"><br>
-                    <button class="u-full-width" onclick="">Get Setting</button>
+                    <button class="u-full-width" type="button" onclick="return onGetChannelValue(this, '/api/GetPort/genericRGB/')">Get Setting</button>  
                     <input class="button-primary u-full-width" type="submit" value="Apply">
                 </div>
                 <div class="eight columns">

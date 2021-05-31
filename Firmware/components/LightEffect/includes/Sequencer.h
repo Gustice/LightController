@@ -46,6 +46,14 @@ class EffectSequencer {
      */
     void SetEffect(const Sequence *sequence, Color_t const *sColor = noColor, uint8_t intens = gu8_idleIntensity, uint8_t delay = 0);
 
+
+    /**
+     * @brief Get the currently active Color. 
+     * @details In transient conditions during fading, only the new color is outputted.
+     * @return Color_t Currently active color
+     */
+    Color_t GetActiveColor(void) {return _pColor->GetColor();};
+
     /**
      * @brief Execute step of effect sequencer
      * @return Reference to color result
