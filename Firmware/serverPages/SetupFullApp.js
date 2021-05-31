@@ -83,17 +83,21 @@ function onSubmitColor(form, setUrl) {
 }
 
 async function onGetChannelValue(btn, getUrl) {
-    console.log("requesting from '%s'", getUrl);
-
+    
     parentForm = btn.parentElement;
     while (parentForm.tagName != 'FORM') {
         parentForm = parentForm.parentElement;
     }
-
-    const formE = parentForm.querySelector(`input[name="appTo"]`);
+    
     let appRef = 0
+    const formE = parentForm.querySelector(`input[name="appTo"]`);
     if (formE != null)
         appRef = formE.value
+    else {
+        const formS = parentForm.querySelector(`select[name="appTo"]`);
+        appRef = formS.value
+    }
+    console.log("requesting from '%s'", getUrl + appRef);
     await http.get(getUrl + appRef)
         .then(data => {
             SetupUi.showMessage(parentForm, "Data requested ...", 'userSuccess');
@@ -101,7 +105,7 @@ async function onGetChannelValue(btn, getUrl) {
 
             for (var element in data) {
                 var formE = parentForm.querySelector(`input[name="${element}"]`);
-                if (formE.type == "number")
+                if (formE && formE.type == "number")
                 {
                     formE.value = data[element];
                     simulateEvent(formE.id, 'input');

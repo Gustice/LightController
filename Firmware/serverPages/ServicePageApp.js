@@ -133,8 +133,22 @@ SetupPage.GetFiles();
 function DeleteFile(file) {
     
 }
+
 function DownloadFile(file) {
-    http.get(file).then().catch();
+    const url = FileGetFile + file;
+    console.log(`Download request for '${url}'`)
+    
+    let http = new XMLHttpRequest();
+    http.open('GET', url, true);
+    let self = this;
+    http.onload = function () {
+        if (http.status === 200) {
+            console.log(http.responseText);
+        } else {
+            console.warn('Error in File-Download');
+        }
+    }
+    http.send();
 }
 
 function ResetSetups() {
