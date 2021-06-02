@@ -9,8 +9,11 @@
  */
 
 #include "MappingParser.h"
+#include "esp_log.h"
 #include <sstream>
 #include <string.h>
+
+static const char *cModTag = "Web-ReqParser";
 
 #define CHECK_FILE_EXTENSION(filename, ext)                                                        \
     (strcmp(&filename[strlen(filename) - strlen(ext)], ext) == 0)
@@ -204,4 +207,37 @@ uint32_t ParseApplyToString(char *applyTo, ApplyIndexes_t *indexes) {
     }
 
     return errors;
+}
+
+
+const size_t ColorTypes = 3;
+ColorMsg_t CommonColorMsg;
+
+const char *rgbLabels[3] = {"R", "G", "B"};
+uint8_t *rgbValues[3] = {&(CommonColorMsg.red), &(CommonColorMsg.green), &(CommonColorMsg.blue)};
+const char *rgbiLabels[4] = {"R", "G", "B", "I"};
+uint8_t *rgbiValues[4] = {&(CommonColorMsg.red), &(CommonColorMsg.green), &(CommonColorMsg.blue),
+    &(CommonColorMsg.intensity)};
+const char *rgbwLabels[4] = {"R", "G", "B", "w"};
+
+uint8_t *rgbwValues[4] = {&(CommonColorMsg.red), &(CommonColorMsg.green), &(CommonColorMsg.blue),
+    &(CommonColorMsg.white)};
+
+static const colorLabels_t Labels[ColorTypes + 1]{
+    {"RGB", rgbLabels, rgbValues, 3, &CommonColorMsg},
+    {"RGBI", rgbiLabels, rgbiValues, 4, &CommonColorMsg},
+    {"RGBW", rgbwLabels, rgbwValues, 4, &CommonColorMsg},
+    {"", nullptr, nullptr, 0, nullptr},
+};
+
+const colorLabels_t *EvaluateLabelAssignment(char *type) {
+    int idx = 0;
+    while (strcmp(Labels[idx].name, type) != 0 && idx < ColorTypes) {
+        idx++;
+    }
+    if (Labels[idx].count == 0) {
+        ESP_LOGE(cModTag, "Type %s could not be resolved", type);
+        return nullptr;
+    }
+    return &Labels[idx];
 }

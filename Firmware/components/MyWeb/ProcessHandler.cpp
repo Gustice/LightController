@@ -69,47 +69,19 @@ void SendGrayValQueue(SetChannelMsg msg, GrayValMsg_t color) {
     }
 }
 
-struct colorLabels_t {
-    const char *name;
-    const char **labels;
-    uint8_t **values;
-    const size_t count;
-};
-
-const size_t ColorTypes = 3;
-static ColorMsg_t colorMsg;
-const char *rgbLabels[3] = {"R", "G", "B"};
-uint8_t *rgbValues[3] = {&(colorMsg.red), &(colorMsg.green), &(colorMsg.blue)};
-const char *rgbiLabels[4] = {"R", "G", "B", "I"};
-uint8_t *rgbiValues[4] = {
-    &(colorMsg.red), &(colorMsg.green), &(colorMsg.blue), &(colorMsg.intensity)};
-const char *rgbwLabels[4] = {"R", "G", "B", "w"};
-uint8_t *rgbwValues[4] = {&(colorMsg.red), &(colorMsg.green), &(colorMsg.blue), &(colorMsg.white)};
-static const colorLabels_t Labels[ColorTypes + 1]{
-    {"RGB", rgbLabels, rgbValues, 3},
-    {"RGBI", rgbiLabels, rgbiValues, 4},
-    {"RGBW", rgbwLabels, rgbwValues, 4},
-    {"", nullptr, 0},
-};
-
 // Payload = {"form: "genericForm", target: "effectCh", type:"RGB", appTo: "1", R: 1, G: 2, B: 3}
 esp_err_t ProcessGenericRgbPost(const char *message, const char **output) {
-    SetChannelMsg msg(RgbChannel::EffectProcessor, (uint8_t *)&colorMsg);
     cJSON *root = cJSON_Parse(message);
     char *type = cJSON_GetObjectItem(root, "type")->valuestring;
 
-    int idx = 0;
-    while (strcmp(Labels[idx].name, type) != 0 && idx < ColorTypes) {
-        idx++;
-    }
-    if (Labels[idx].count == 0) {
-        ESP_LOGE(cModTag, "Type %s could not be resolved", type);
+    const colorLabels_t * labelSet = EvaluateLabelAssignment(type);
+    if (labelSet == nullptr)
         return ESP_FAIL;
-    }
-
-    for (size_t i = 0; i < Labels[0].count; i++) {
-        cJSON *e = cJSON_GetObjectItem(root, Labels[idx].labels[i]);
-        *(Labels[idx].values[i]) = (uint8_t)e->valueint;
+    SetChannelMsg msg(RgbChannel::EffectProcessor, (uint8_t *)labelSet->colorMsg);
+    
+    for (size_t i = 0; i < labelSet->count; i++) {
+        cJSON *e = cJSON_GetObjectItem(root, labelSet->labels[i]);
+        *(labelSet->values[i]) = (uint8_t)e->valueint;
     }
     char *apply = cJSON_GetObjectItem(root, "appTo")->valuestring;
     uint32_t errors = ParseApplyToString(apply, &msg.Apply);
@@ -119,13 +91,12 @@ esp_err_t ProcessGenericRgbPost(const char *message, const char **output) {
     if (msg.Apply.Items == 0 && errors == 0)
         msg.Apply.ApplyTo[0] = 1;
 
-    SendColorQueue(msg, colorMsg);
+    SendColorQueue(msg, *labelSet->colorMsg);
     return ESP_OK;
 }
 
 // Payload "RGB/1"
 esp_err_t ProcessGenericRgbGet(const char *message, const char **output) {
-    GetChannelMsg req(RgbChannel::EffectProcessor, (uint8_t *)&colorMsg);
     ApplyIndexes_t target;
 
     char buffer[256];
@@ -136,23 +107,19 @@ esp_err_t ProcessGenericRgbGet(const char *message, const char **output) {
     if (ESP_OK != RgbTargetPathSplitter(buffer, &type, &applyStr))
         return ESP_FAIL;
 
+    const colorLabels_t * labelSet = EvaluateLabelAssignment(type);
+    if (labelSet == nullptr)
+        return ESP_FAIL;
+    GetChannelMsg req(RgbChannel::EffectProcessor, (uint8_t *)labelSet->colorMsg);
+
     ParseApplyToString(applyStr, &target);
     req.AdjustTargetIdx(target.FirstTarget);
     if (GetChannelSettings(req) != ESP_OK)
         return ESP_FAIL;
 
-    int idx = 0;
-    while (strcmp(Labels[idx].name, type) != 0 && idx < ColorTypes) {
-        idx++;
-    }
-    if (Labels[idx].count == 0) {
-        ESP_LOGE(cModTag, "Type %s could not be resolved", type);
-        return ESP_FAIL;
-    }
-
     cJSON *root = cJSON_CreateObject();
-    for (size_t i = 0; i < Labels[0].count; i++) {
-        cJSON_AddNumberToObject(root, Labels[0].labels[i], *(Labels[idx].values[i]));
+    for (size_t i = 0; i < labelSet->count; i++) {
+        cJSON_AddNumberToObject(root, labelSet->labels[i], *(labelSet->values[i]));
     }
     *output = cJSON_PrintUnformatted(root); // to save pretty whitespaces cJSON_Print
     cJSON_Delete(root);
