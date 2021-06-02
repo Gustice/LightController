@@ -30,7 +30,7 @@ class EffectComplex {
     const size_t Count;
 
     /**
-     * @brief Construct of effect complex 
+     * @brief Construct of effect complex
      * @param count Number of effect channels
      * @param EffectMachines configuration of effects channels
      */
@@ -60,7 +60,7 @@ class EffectComplex {
      * @param color New color
      * @return esp_err_t Returns error if channel not defined
      */
-    esp_err_t FadeToColor(int index, Color_t& color);
+    esp_err_t FadeToColor(int index, Color_t &color);
 
     /**
      * @brief Read active color setting
@@ -68,9 +68,12 @@ class EffectComplex {
      * @param color Read color
      * @return esp_err_t Returns error if channel not defined
      */
-    esp_err_t ReadColor(int index, Color_t& color);
+    esp_err_t ReadColor(int index, Color_t &color);
 
-    const Color * TickEffect(int index) {
-        return Sequencers[index]->Tick();
-    }
+    /**
+     * @brief Execute Tick which evaluates next color image
+     * @param index Index of effect channel
+     * @return const Color* Evaluated color
+     */
+    const Color *TickEffect(int index) { return Sequencers[index]->Tick(); }
 };

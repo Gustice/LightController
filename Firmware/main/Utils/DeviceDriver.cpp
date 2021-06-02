@@ -28,8 +28,8 @@ const Color_t *colors[]{
 };
 const int colorsCnt = sizeof(colors) / sizeof(Color_t);
 
-DeviceDriver::DeviceDriver(
-    Apa102 *sLeds, Ws2812 *aLeds, RgbwStrip *ledStrip, Pca9685 *ledDriver, EffectComplex *effects, deviceConfig_t *config)
+DeviceDriver::DeviceDriver(Apa102 *sLeds, Ws2812 *aLeds, RgbwStrip *ledStrip, Pca9685 *ledDriver,
+    EffectComplex *effects, deviceConfig_t *config)
     : modTag("DeviceDriver") {
     SLedStrip = sLeds;
     ALedStrip = aLeds;
@@ -45,11 +45,11 @@ DeviceDriver::DeviceDriver(
     for (size_t i = 0; i < (int)RgbChannel::LastChannel; i++) {
         Images[i] = nullptr;
     }
-    
+
     Images[RgbChannel::RgbiSync] = syncPort;
     Images[RgbChannel::RgbwAsync] = asyncPort;
     Images[RgbChannel::RgbwPwm] = rgbPort;
-    
+
     syncPort->ClearImage();
     asyncPort->ClearImage();
     rgbPort->ClearImage();
@@ -94,7 +94,7 @@ esp_err_t ApplyColor2RgbChannel(ColorMsg_t *colorMsg, ApplyIndexes_t *apply, Cha
         if ((apply->ApplyTo[0] & testIdx) != 0) {
             if (i >= port->Count)
                 return ESP_OK; // Index exceeds strip-size
-            CopyColorMessageToColor(&port->Image[i],colorMsg);
+            CopyColorMessageToColor(&port->Image[i], colorMsg);
         }
     }
     return ESP_OK;
@@ -144,9 +144,15 @@ esp_err_t DeviceDriver::SetValue(
 esp_err_t DeviceDriver::ReadValue(ReqColorIdx_t channel, uint8_t *data, size_t length) {
 
     switch (channel.type) {
-    case RgbChannel::RgbiSync: CopyColorToColorMessage((ColorMsg_t *)data, syncPort->Image); break;
-    case RgbChannel::RgbwAsync: CopyColorToColorMessage((ColorMsg_t *)data, asyncPort->Image); break;
-    case RgbChannel::RgbwPwm: CopyColorToColorMessage((ColorMsg_t *)data, rgbPort->Image); break;
+    case RgbChannel::RgbiSync:
+        CopyColorToColorMessage((ColorMsg_t *)data, syncPort->Image);
+        break;
+    case RgbChannel::RgbwAsync:
+        CopyColorToColorMessage((ColorMsg_t *)data, asyncPort->Image);
+        break;
+    case RgbChannel::RgbwPwm:
+        CopyColorToColorMessage((ColorMsg_t *)data, rgbPort->Image);
+        break;
 
     case RgbChannel::I2cExpanderPwm: {
         GrayValMsg_t *gm = (GrayValMsg_t *)data;

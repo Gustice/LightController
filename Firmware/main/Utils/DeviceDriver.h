@@ -74,8 +74,8 @@ class DeviceDriver {
      */
     void EffectTick(void);
 
-  /// Reference to Image handles (for manual modification of colors)
-  ChannelIndexes * Images[RgbChannel::LastChannel];
+    /// Reference to Image handles (for manual modification of colors)
+    ChannelIndexes *Images[RgbChannel::LastChannel];
 
   private:
     /// Module tag for logging

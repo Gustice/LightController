@@ -60,7 +60,9 @@ class RotatingIndex {
         return false;
     }
 
-    /// Reset Index to 0
+    /**
+     * @brief Reset Index to 0
+     */
     void ResetIndex(void) { index = 0; }
 
   private:

@@ -28,13 +28,13 @@ class ChannelIndexes {
 
     /// Reference to array of colors that can be used in an automatic revolving manner
     const Color_t **colorPool;
-    
+
     /// Color image that is used to be written on LED strip
     Color_t *Image;
-    
+
     /// Index to currently active LED
     RotatingIndex Led;
-    
+
     /// Index to currently set color
     RotatingIndex Color;
 
@@ -42,7 +42,7 @@ class ChannelIndexes {
      * @brief Construct
      * @param ledCount LED count in target LED strip
      * @param pool Color pool for automatic color switching
-     * @param colorCount 
+     * @param colorCount
      */
     ChannelIndexes(const size_t ledCount, const Color_t **pool, const size_t colorCount)
         : Count(ledCount), ImageSize(sizeof(Color_t) * ledCount), colorPool(pool), Led(ledCount),
@@ -59,8 +59,8 @@ class ChannelIndexes {
 
     /**
      * @brief Get next index for moving dot (with overflow)
-     * @details Active color dot moves across LED strip 
-     * @return uint16_t 
+     * @details Active color dot moves across LED strip
+     * @return uint16_t
      */
     uint16_t GetNextSlot() {
         uint16_t idx = Led.GetIndex();
@@ -78,8 +78,7 @@ class ChannelIndexes {
      * @brief Set all pixels of an image to given color
      * @param pColor set color
      */
-    void SetImage(Color_t * pColor)
-    {
+    void SetImage(Color_t *pColor) {
         for (size_t i = 0; i < Count; i++) {
             memcpy(&Image[i], pColor, sizeof(Color_t));
         }

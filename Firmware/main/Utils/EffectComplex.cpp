@@ -33,13 +33,13 @@ esp_err_t EffectComplex::FadeToColor(int index, Color_t &color) {
     return ESP_OK;
 }
 
-    esp_err_t EffectComplex::ReadColor(int index, Color_t& color) {
-        if (index >= Count)
-            return ESP_FAIL;
-        Color_t c = Sequencers[index]->GetActiveColor();
-        color.red = c.red;
-        color.green = c.green;
-        color.blue = c.blue;
-        color.white = c.white;
-        return ESP_OK;
-    }
+esp_err_t EffectComplex::ReadColor(int index, Color_t &color) {
+    if (index >= Count)
+        return ESP_FAIL;
+    Color_t c = Sequencers[index]->GetActiveColor();
+    color.red = c.red;
+    color.green = c.green;
+    color.blue = c.blue;
+    color.white = c.white;
+    return ESP_OK;
+}
