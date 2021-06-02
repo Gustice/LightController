@@ -15,39 +15,55 @@
 
 /**
  * @brief Index with automatic revolution back to start position
- * 
  * @details Useful for Buffer-Pointer, or similar tasks
- * 
  */
 class RotatingIndex {
   public:
     /// Value at witch the index rotates back to beginning
     const uint16_t MaxIndex;
-    RotatingIndex(uint16_t max) : MaxIndex(max) { _index = 0; }
+    /**
+     * @brief Constructor for rotating index
+     * @brief output index will be set to 0 if incremented value reaches Maximum
+     * @param max Maximum index for overflow-condition
+     */
+    RotatingIndex(uint16_t max) : MaxIndex(max) { index = 0; }
 
-
+    /**
+     * @brief Get the current index and inkrement index afterwards
+     * @return uint16_t current index
+     */
     uint16_t GetIndexAndInkrement(void) {
-        auto retVal = _index;
-        _index++;
-        if (_index >= MaxIndex) {
-            _index = 0;
+        auto ci = index;
+        index++;
+        if (index >= MaxIndex) {
+            index = 0;
         }
-        return retVal;
+        return ci;
     };
 
+    /**
+     * @brief Get the current index without incrementing the index
+     * @return uint16_t current index
+     */
+    uint16_t GetIndex(void) { return index; }
+
+    /**
+     * @brief Check if next get will lead to overflow condition
+     */
     bool PeekRevolution(void) {
         if (MaxIndex == 0)
             return true;
 
-        if (_index >= MaxIndex - 1) {
+        if (index >= MaxIndex - 1) {
             return true;
         }
         return false;
     }
 
-    uint16_t GetIndex(void) { return _index; }
-    void ResetIndex(void) { _index = 0; }
+    /// Reset Index to 0
+    void ResetIndex(void) { index = 0; }
 
   private:
-    uint16_t _index;
+    /// Current Index
+    uint16_t index;
 };

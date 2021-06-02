@@ -28,6 +28,13 @@ typedef struct {
     uint8_t white;
 } Color_t;
 
+inline void SetColor(Color_t * tC, Color_t const * sC) {
+    tC->red = sC->red;
+    tC->green = sC->green;
+    tC->blue = sC->blue;
+    tC->white = sC->white;
+}
+
 /**
  * @brief   Color class
  *

@@ -20,13 +20,14 @@ typedef enum RgbChannel {
     RgbwPwm,         // May be multiple channels
     I2cExpanderPwm,  // May be multiple channels
     EffectProcessor, // Normally multiple channels, drives some of the above
+    LastChannel
 } eRgbChannel_t;
 
-typedef struct ReqColorIdx_def {
+struct ReqColorIdx_t {
     RgbChannel type;
     int16_t chIdx;
     int16_t portIdx;
-} ReqColorIdx_t;
+};
 
 #define ApplyToTargetChannels 5
 #define ApplyToChannelWidth   32
@@ -43,6 +44,19 @@ struct ColorMsg_t {
     uint8_t white;
     uint8_t intensity;
 };
+
+inline void CopyColorToColorMessage(ColorMsg_t * msg, Color_t * color){
+    msg->red = color->red;
+    msg->green = color->green;
+    msg->blue = color->blue;
+    msg->white = color->white;
+}
+inline void CopyColorMessageToColor(Color_t * color, ColorMsg_t * msg){
+    color->red = msg->red;
+    color->green = msg->green;
+    color->blue = msg->blue;
+    color->white = msg->white;
+}
 
 struct GrayValMsg_t {
     uint8_t gray[16];

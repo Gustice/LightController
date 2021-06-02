@@ -286,7 +286,8 @@ void app_main(void) {
         AsyncPcs = &asyncPcs;
         RgbPcs = &rgbPcs;
 
-        static DeviceDriver device(&sledStrip, &aLedStrip, &ledStrip, &ledDriver, &deviceConfig);
+        static EffectComplex effects(EffectMachinesCount, deviceConfig.EffectMachines);
+        static DeviceDriver device(&sledStrip, &aLedStrip, &ledStrip, &ledDriver, &effects, &deviceConfig);
         Device = &device;
     } else {
         Device = nullptr;

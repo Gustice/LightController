@@ -8,23 +8,16 @@
  * @copyright Copyright (c) 2021
  */
 
-
 #include "DeviceDriver.h"
 #include "Color.h"
 #include "RotatingIndex.h"
 #include "SequenceStepper.h"
 #include "esp_log.h"
 #include <string.h>
-const Effect::Sequence StartupLightSequence[] = {
-    Effect::Sequence(16, 1, Effect::eEffect::Light_Blank),
-    Effect::Sequence(64, 2, Effect::gau8_initSlope, Effect::eEffect::Light_Wave),
-    Effect::Sequence(64, 2, Effect::eEffect::Light_Idle), // Ininit Loop
-};
 
 const int grayCnt = 16;
-const int colorsCnt = 7;
 /// Color pool for demo
-const Color_t *colors[colorsCnt]{
+const Color_t *colors[]{
     &color_Red,
     &color_Green,
     &color_Blue,
@@ -33,20 +26,30 @@ const Color_t *colors[colorsCnt]{
     &color_Yellow,
     &color_White,
 };
+const int colorsCnt = sizeof(colors) / sizeof(Color_t);
 
 DeviceDriver::DeviceDriver(
-    Apa102 *sLeds, Ws2812 *aLeds, RgbwStrip *ledStrip, Pca9685 *ledDriver, deviceConfig_t *config)
-    : EffectCount(4), modTag("DeviceDriver") {
+    Apa102 *sLeds, Ws2812 *aLeds, RgbwStrip *ledStrip, Pca9685 *ledDriver, EffectComplex *effects, deviceConfig_t *config)
+    : modTag("DeviceDriver") {
     SLedStrip = sLeds;
     ALedStrip = aLeds;
     LedStrip = ledStrip;
     LedDriver = ledDriver;
+    Effects = effects;
 
     syncPort = new ChannelIndexes(config->SyncLeds.Strip.LedCount, colors, colorsCnt);
     asyncPort = new ChannelIndexes(config->AsyncLeds.Strip.LedCount, colors, colorsCnt);
     rgbPort = new ChannelIndexes(config->RgbStrip.ChannelCount, colors, colorsCnt);
     expander = new uint16_t[config->I2cExpander.Device.LedCount];
 
+    for (size_t i = 0; i < (int)RgbChannel::LastChannel; i++) {
+        Images[i] = nullptr;
+    }
+    
+    Images[RgbChannel::RgbiSync] = syncPort;
+    Images[RgbChannel::RgbwAsync] = asyncPort;
+    Images[RgbChannel::RgbwPwm] = rgbPort;
+    
     syncPort->ClearImage();
     asyncPort->ClearImage();
     rgbPort->ClearImage();
@@ -61,7 +64,7 @@ DeviceDriver::DeviceDriver(
     LedStrip->SetImage(rgbPort->Image);
     LedDriver->SendImage(expander);
 
-    Color_t *startColors[EffectCount];
+    Color_t *startColors[4];
     startColors[0] = &(config->SyncLeds.Color);
     startColors[1] = &(config->AsyncLeds.Color);
     startColors[2] = &(config->RgbStrip.Color);
@@ -72,19 +75,9 @@ DeviceDriver::DeviceDriver(
     cE.blue = config->I2cExpander.GrayValues[2];
     startColors[3] = &cE;
 
-    Sequencers = new EffectSequencer *[EffectCount];
-    for (size_t i = 0; i < EffectCount; i++) {
-        Sequencers[i] = new EffectSequencer(Effect::cu16_TemplateLength, 1, 16);
-    }
-
     Config = config;
     if (config->StartUpMode == DeviceStartMode::StartImage) {
-        for (size_t i = 0; i < EffectCount; i++) {
-            if (config->EffectMachines[i].Target != TargetGate::None) {
-                Sequencers[i]->SetEffect(StartupLightSequence, &config->EffectMachines[i].Color,
-                    gu8_idleIntensity, config->EffectMachines[i].Delay);
-            }
-        }
+        effects->ActivateStartupEffects();
     }
 }
 
@@ -93,11 +86,6 @@ DeviceDriver::~DeviceDriver() {
     delete asyncPort;
     delete rgbPort;
     delete[] expander;
-
-    for (size_t i = 0; i < EffectCount; i++) {
-        // delete Sequencers[i];
-    }
-    // delete[] Sequencers;
 }
 
 esp_err_t ApplyColor2RgbChannel(ColorMsg_t *colorMsg, ApplyIndexes_t *apply, ChannelIndexes *port) {
@@ -106,10 +94,7 @@ esp_err_t ApplyColor2RgbChannel(ColorMsg_t *colorMsg, ApplyIndexes_t *apply, Cha
         if ((apply->ApplyTo[0] & testIdx) != 0) {
             if (i >= port->Count)
                 return ESP_OK; // Index exceeds strip-size
-            port->Image[i].red = colorMsg->red;
-            port->Image[i].green = colorMsg->green;
-            port->Image[i].blue = colorMsg->blue;
-            port->Image[i].white = colorMsg->white;
+            CopyColorMessageToColor(&port->Image[i],colorMsg);
         }
     }
     return ESP_OK;
@@ -122,7 +107,6 @@ esp_err_t DeviceDriver::SetValue(
 
     switch (channel.type) {
     case RgbChannel::RgbiSync:
-
         ApplyColor2RgbChannel(cm, apply, syncPort);
         SLedStrip->SendImage(syncPort->Image);
         break;
@@ -145,13 +129,9 @@ esp_err_t DeviceDriver::SetValue(
     } break;
 
     case RgbChannel::EffectProcessor: {
-        if (channel.portIdx >= EffectCount)
-            return ESP_FAIL;
-
-        effectProcessor_t *proc = &(Config->EffectMachines[channel.portIdx]);
         Color_t c = {.red = cm->red, .green = cm->green, .blue = cm->blue, .white = cm->white};
-        Sequencers[channel.portIdx]->SetEffect(StartupLightSequence, &c, gu8_idleIntensity, 0);
-    }
+        Effects->FadeToColor(channel.portIdx, c);
+    } break;
 
     default:
         break;
@@ -164,30 +144,9 @@ esp_err_t DeviceDriver::SetValue(
 esp_err_t DeviceDriver::ReadValue(ReqColorIdx_t channel, uint8_t *data, size_t length) {
 
     switch (channel.type) {
-    case RgbChannel::RgbiSync: {
-        ColorMsg_t *cm = (ColorMsg_t *)data;
-        Color_t *image = syncPort->Image;
-        cm->red = image[channel.portIdx].red;
-        cm->green = image[channel.portIdx].green;
-        cm->blue = image[channel.portIdx].blue;
-        // cm->intensity = sync[channel.portIdx].intensity;
-    } break;
-
-    case RgbChannel::RgbwAsync: {
-        ColorMsg_t *cm = (ColorMsg_t *)data;
-        Color_t *image = asyncPort->Image;
-        cm->red = image[channel.portIdx].red;
-        cm->green = image[channel.portIdx].green;
-        cm->blue = image[channel.portIdx].blue;
-    } break;
-
-    case RgbChannel::RgbwPwm: {
-        ColorMsg_t *cm = (ColorMsg_t *)data;
-        Color_t *image = rgbPort->Image;
-        cm->red = image[channel.portIdx].red;
-        cm->green = image[channel.portIdx].green;
-        cm->blue = image[channel.portIdx].blue;
-    } break;
+    case RgbChannel::RgbiSync: CopyColorToColorMessage((ColorMsg_t *)data, syncPort->Image); break;
+    case RgbChannel::RgbwAsync: CopyColorToColorMessage((ColorMsg_t *)data, asyncPort->Image); break;
+    case RgbChannel::RgbwPwm: CopyColorToColorMessage((ColorMsg_t *)data, rgbPort->Image); break;
 
     case RgbChannel::I2cExpanderPwm: {
         GrayValMsg_t *gm = (GrayValMsg_t *)data;
@@ -198,16 +157,9 @@ esp_err_t DeviceDriver::ReadValue(ReqColorIdx_t channel, uint8_t *data, size_t l
     } break;
 
     case RgbChannel::EffectProcessor: {
-        if (channel.portIdx >= EffectCount)
-            return ESP_FAIL;
-
-        effectProcessor_t *proc = &(Config->EffectMachines[channel.portIdx]);
-        Color_t c = Sequencers[channel.portIdx]->GetActiveColor();
-
-        ColorMsg_t *cm = (ColorMsg_t *)data;
-        cm->red = c.red;
-        cm->green = c.green;
-        cm->blue = c.blue;
+        Color_t c;
+        Effects->ReadColor(channel.portIdx, c);
+        CopyColorToColorMessage((ColorMsg_t *)data, &c);
         break;
     }
 
@@ -221,14 +173,14 @@ esp_err_t DeviceDriver::ReadValue(ReqColorIdx_t channel, uint8_t *data, size_t l
 
 void DeviceDriver::DemoTick(void) {
     syncPort->ClearImage();
-    syncPort->SetNextSlotMindOverflow();
+    syncPort->GetNextSlot();
 
     asyncPort->ClearImage();
-    uint16_t aIdx = asyncPort->SetNextSlotMindOverflow();
+    uint16_t aIdx = asyncPort->GetNextSlot();
     SLedStrip->SendImage(syncPort->Image);
 
     rgbPort->ClearImage();
-    rgbPort->SetNextSlotMindOverflow();
+    rgbPort->GetNextSlot();
     // todo this is shit ... implement maximum brightness
     asyncPort->Image[aIdx].red = asyncPort->Image[aIdx].red >> 5;
     asyncPort->Image[aIdx].green = asyncPort->Image[aIdx].green >> 5;
@@ -258,10 +210,10 @@ void SetColorByObject(Color_t *target, Color const *const obj, size_t index) {
 }
 
 void DeviceDriver::EffectTick(void) {
-    for (size_t i = 0; i < EffectCount; i++) {
+    for (size_t i = 0; i < Effects->Count; i++) {
         effectProcessor_t *config = &(Config->EffectMachines[i]);
         if (config->Target != TargetGate::None) {
-            Color const *color = Sequencers[i]->Tick();
+            Color const *color = Effects->TickEffect(i);
             Color_t *image = nullptr;
             switch (config->Target) {
             case TargetGate::SyncLed:

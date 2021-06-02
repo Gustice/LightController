@@ -63,7 +63,7 @@ TEST_CASE("FirstColor is completely set. After first inkrement", "[ChannelIndex]
     ChannelIndexes dut(count, testColors, cCount);
 
     dut.ClearImage();
-    dut.SetNextSlotMindOverflow();
+    dut.GetNextSlot();
     CHECK(dut.Image[0].red == 1);
     CHECK(dut.Image[0].green == 11);
     CHECK(dut.Image[0].blue == 21);
@@ -76,29 +76,29 @@ TEST_CASE("FirstColor moves once though chain. After that it switches to second 
     ChannelIndexes dut(count, testColors, cCount);
 
     dut.ClearImage();
-    dut.SetNextSlotMindOverflow();
+    dut.GetNextSlot();
     CHECK(dut.Image[0].red == 1);
     CHECK(dut.Image[1].red == 0);
 
     dut.ClearImage();
-    dut.SetNextSlotMindOverflow();
+    dut.GetNextSlot();
     CHECK(dut.Image[0].red == 0);
     CHECK(dut.Image[1].red == 1);
     CHECK(dut.Image[2].red == 0);
 
     dut.ClearImage();
-    dut.SetNextSlotMindOverflow();
+    dut.GetNextSlot();
     CHECK(dut.Image[1].red == 0);
     CHECK(dut.Image[2].red == 1);
     CHECK(dut.Image[3].red == 0);
 
     dut.ClearImage();
-    dut.SetNextSlotMindOverflow();
+    dut.GetNextSlot();
     CHECK(dut.Image[2].red == 0);
     CHECK(dut.Image[3].red == 1);
 
     dut.ClearImage();
-    dut.SetNextSlotMindOverflow();
+    dut.GetNextSlot();
     CHECK(dut.Image[0].red == 2);
     CHECK(dut.Image[1].red == 0);
     CHECK(dut.Image[3].red == 0);
@@ -109,33 +109,33 @@ TEST_CASE("Color rotates correctly back after all Colors have been used", "[Chan
     ChannelIndexes dut(count, testColors, cCount);
 
     dut.ClearImage();
-    dut.SetNextSlotMindOverflow();
+    dut.GetNextSlot();
     CHECK(dut.Image[0].red == 1);
     CHECK(dut.Image[1].red == 0);
 
     for (size_t i = 0; i < 4; i++) {
         dut.ClearImage();
-        dut.SetNextSlotMindOverflow();
+        dut.GetNextSlot();
     }
     CHECK(dut.Image[0].red == 2);
     CHECK(dut.Image[1].red == 0);
 
     for (size_t i = 0; i < 4; i++) {
         dut.ClearImage();
-        dut.SetNextSlotMindOverflow();
+        dut.GetNextSlot();
     }
     CHECK(dut.Image[0].red == 3);
     CHECK(dut.Image[1].red == 0);
 
     for (size_t i = 0; i < 4*6-1; i++) {
         dut.ClearImage();
-        dut.SetNextSlotMindOverflow();
+        dut.GetNextSlot();
     }
     CHECK(dut.Image[2].red == 0);
     CHECK(dut.Image[3].red == 8);
 
     dut.ClearImage();
-    dut.SetNextSlotMindOverflow();
+    dut.GetNextSlot();
     CHECK(dut.Image[0].red == 1);
     CHECK(dut.Image[1].red == 0);
 }

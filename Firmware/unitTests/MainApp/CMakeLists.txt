@@ -25,6 +25,7 @@ target_include_directories(effectProc PUBLIC "${EFFECT_INCLUDEDIR}/includes")
 
 add_executable(TestRunner   "TestMain.cpp"
                             ${DUT_PARENT_DIR}"/Utils/DeviceDriver.cpp"
+                            ${DUT_PARENT_DIR}"/Utils/EffectComplex.cpp"
                             "parts/RotatingIndexTests.cpp"
                             "parts/ChannelIndexesTests.cpp"
                             "parts/DeviceDriverTests.cpp"

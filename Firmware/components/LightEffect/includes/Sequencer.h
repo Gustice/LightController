@@ -52,7 +52,7 @@ class EffectSequencer {
      * @details In transient conditions during fading, only the new color is outputted.
      * @return Color_t Currently active color
      */
-    Color_t GetActiveColor(void) {return _pColor->GetColor();};
+    Color_t GetActiveColor(void) {return cColor.GetColor();};
 
     /**
      * @brief Execute step of effect sequencer
@@ -61,7 +61,9 @@ class EffectSequencer {
     Color const *Tick(void);
 
   private:
-    /// Current color
+    /// Currently active Color
+    Color cColor;
+    /// Current color image (after Tick)
     Color *_pColor;
     /// Last applied color (used to crossfade in intermediate states)
     Color *_pColorOld;
