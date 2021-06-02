@@ -4,7 +4,7 @@
  * @brief Implementation of Parser
  * @version 0.1
  * @date 2021-05-27
- * 
+ *
  * @copyright Copyright (c) 2021
  */
 
@@ -15,7 +15,7 @@
 #define CHECK_FILE_EXTENSION(filename, ext)                                                        \
     (strcmp(&filename[strlen(filename) - strlen(ext)], ext) == 0)
 
-const char * GetTypeAccordingToExtension(const char *filepath) {
+const char *GetTypeAccordingToExtension(const char *filepath) {
     const char *type = "text/plain";
     // Special case: File has no extension -> Route
     if (CHECK_FILE_EXTENSION(filepath, ".html")) {
@@ -35,16 +35,24 @@ const char * GetTypeAccordingToExtension(const char *filepath) {
 }
 
 
-bool charInSpan(char c, char from, char to) {
-  return  ((c >= from) && (c <= to));
-}
+bool charInSpan(char c, char from, char to) { return ((c >= from) && (c <= to)); }
 
-bool charIsumber(char c) {
-  return charInSpan(c, '0', '9');
-}
+bool charIsumber(char c) { return charInSpan(c, '0', '9'); }
 
-bool charIsNotNumber(char c) {
-  return  !charInSpan(c, '0', '9');
+bool charIsNotNumber(char c) { return !charInSpan(c, '0', '9'); }
+
+esp_err_t RgbTargetPathSplitter(char *path, char **type, char **index) {
+    char *pDeliter = strtok(path, "/");
+    if (pDeliter == nullptr)
+        return ESP_FAIL;
+    *type = pDeliter;
+
+    pDeliter = strtok(NULL, "/");
+    if (pDeliter == nullptr)
+        return ESP_FAIL;
+    *index = pDeliter;
+
+    return ESP_OK;
 }
 
 ReqColorIdx_t ParseApplyToElement(char *element) {
@@ -130,12 +138,12 @@ uint32_t ParseApplyToString(char *applyTo, ApplyIndexes_t *indexes) {
     };
 
     // Split list on next comma
-    pCn = strtok(applyTo, ","); 
+    pCn = strtok(applyTo, ",");
 
     while (pCn != NULL) { // While comma is present
         pC = pCn;
         // Split list on next comma
-        pCn = strtok(NULL, ","); 
+        pCn = strtok(NULL, ",");
 
         pR = strchr(pC, '-');
         if (pR != NULL) { // '-'
@@ -146,7 +154,7 @@ uint32_t ParseApplyToString(char *applyTo, ApplyIndexes_t *indexes) {
             }
 
             if (pPre < pC) // On limit no number between delimiter and minus
-            { // negative numbers are not accepted
+            {              // negative numbers are not accepted
                 errors++;
                 continue;
             }

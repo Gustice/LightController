@@ -64,7 +64,6 @@ struct GrayValMsg_t {
     uint8_t intensity;
 };
 
-
 class ChannelMsg {
   public:
     size_t PayLoadSize;

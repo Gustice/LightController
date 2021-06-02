@@ -22,17 +22,17 @@ static esp_err_t GetChannelSettings(GetChannelMsg request)
 static deviceConfig_t global_config {
     .SyncLeds {
         .Strip {
-            .Channels = ColorChannels_t::RGBW,
+            .Channels = ColorChannels::RGBW,
         }
     },
     .AsyncLeds {
         .Strip {
-            .Channels = ColorChannels_t::RGBW,
+            .Channels = ColorChannels::RGBW,
         }
     },
     .RgbStrip {
         .Strip {
-            .Channels = ColorChannels_t::RGBW,
+            .Channels = ColorChannels::RGBW,
         }
     },
     .I2cExpander {
@@ -126,3 +126,25 @@ TEST_CASE("Get IValues Values Handler-Tests", "[ColorGet]") {
     delete[] OutPayload;
 }
 
+
+
+/** "GET /api/GetPort/genericRGB" */
+TEST_CASE("Get genericRGB Values Handler-Tests", "[ColorGet]") {
+    const char *Payload = "RGB/2";
+    const char *OutPayload = "{\"R\":11,\"G\":12,\"B\":13}";
+
+    const char *output;
+    SetQueueHandlesForPostH(nullptr, GetChannelSettings, &global_config);
+    NextColorObj.red = 11;
+    NextColorObj.green = 12;
+    NextColorObj.blue = 13;
+    NextColorObj.white = 15;
+
+    bool result = ProcessGenericRgbGet(Payload, &output);
+    INFO(" Return string is: " << output);
+    INFO("Compare string is: " << OutPayload);
+    CHECK( (strcmp(output, OutPayload) == 0) );
+    CHECK( (LastChTarget.chIdx == 0) );
+    CHECK( (LastChTarget.portIdx == 1) );
+    delete[] OutPayload;
+}

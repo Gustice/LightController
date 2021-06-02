@@ -14,17 +14,18 @@ TEST_CASE("Evaluate String Functions again (problems with compiler)", "[Basics]"
 }
 
 static deviceConfig_t global_config{.SyncLeds{.Strip{
-                                        .Channels = ColorChannels_t::RGBW,
+                                        .Channels = ColorChannels::RGBW,
                                     }},
     .AsyncLeds{.Strip{
-        .Channels = ColorChannels_t::RGBW,
+        .Channels = ColorChannels::RGBW,
     }},
     .RgbStrip{.Strip{
-        .Channels = ColorChannels_t::RGBW,
+        .Channels = ColorChannels::RGBW,
     }},
     .I2cExpander{.Device{
         .LedCount = 16,
     }}};
+    
 /** "POST /api/SetPort/RGBISync" */
 TEST_CASE("Post RGBISync Values Handler-Tests", "[ColorPost]") {
     const char *Payload = "{\"form\":\"rgbiSync\", \"appTo\":\"1\", \"R\":2, \

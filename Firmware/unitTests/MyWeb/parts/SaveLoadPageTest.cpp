@@ -31,17 +31,17 @@ static esp_err_t GetChannelSettings(GetChannelMsg request)
 static deviceConfig_t global_config {
     .SyncLeds {
         .Strip {
-            .Channels = ColorChannels_t::RGBW,
+            .Channels = ColorChannels::RGBW,
         }
     },
     .AsyncLeds {
         .Strip {
-            .Channels = ColorChannels_t::RGBW,
+            .Channels = ColorChannels::RGBW,
         }
     },
     .RgbStrip {
         .Strip {
-            .Channels = ColorChannels_t::RGBW,
+            .Channels = ColorChannels::RGBW,
         }
     },
     .I2cExpander {

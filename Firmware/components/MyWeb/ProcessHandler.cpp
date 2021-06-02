@@ -123,16 +123,20 @@ esp_err_t ProcessGenericRgbPost(const char *message, const char **output) {
     return ESP_OK;
 }
 
+// Payload "RGB/1"
 esp_err_t ProcessGenericRgbGet(const char *message, const char **output) {
     GetChannelMsg req(RgbChannel::EffectProcessor, (uint8_t *)&colorMsg);
     ApplyIndexes_t target;
 
     char buffer[256];
     strcpy(buffer, message);
-    //char *type = cJSON_GetObjectItem(root, "type")->valuestring;
-    char *type = "RGB"; // Expand route
+    char * trgStr; // Something like RgbChannel::RgbiSync
+    char * type; // Something like RGB
+    char * applyStr; // Something like 1 or 1.1
+    if (ESP_OK != RgbTargetPathSplitter(buffer, &type, &applyStr))
+        return ESP_FAIL;
 
-    ParseApplyToString(buffer, &target);
+    ParseApplyToString(applyStr, &target);
     req.AdjustTargetIdx(target.FirstTarget);
     if (GetChannelSettings(req) != ESP_OK)
         return ESP_FAIL;

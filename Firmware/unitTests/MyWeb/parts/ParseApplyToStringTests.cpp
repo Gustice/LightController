@@ -242,7 +242,6 @@ TEST_CASE("Span-Values -> Nor Error", "[ApplyParse]") {
     CHECK( IndexesAreEqual(&idx, compIdx) );
 }
 
-
 bool IndexesAreEqual(const ApplyIndexes_t * expected, const ApplyIndexes_t * actual)
 {
     char buffer[128];
