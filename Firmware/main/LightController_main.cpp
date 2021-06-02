@@ -67,7 +67,7 @@ factoryInfo_t factoryCfg;
  * @brief Configuration for wifi
  * @details Applied in Access-Point-Mode. Device provides an WiFi Access in this case.
  */
-static wifiConfig_def apConfig = {
+static WifiConfig_t apConfig = {
     "cLight",   // ssid
     "FiatLux!", // password
     4,          // max_connection
@@ -328,7 +328,7 @@ void app_main(void) {
     if (xNewWebCommand != NULL && xSetQueue != NULL) {
         static uint8_t taskParam;
         SetupMyWeb(xSetQueue, xNewWebCommand, GetChannelSettings, &deviceConfig);
-        xTaskCreate(vRefreshLed, "RefreshLed", 4096, (void *)taskParam, tskIDLE_PRIORITY, NULL);
+        xTaskCreate(vRefreshLed, "RefreshLed", 4096, (void *)&taskParam, tskIDLE_PRIORITY, NULL);
     } else {
         ESP_LOGE(ModTag,
             "Error creating the dynamic objects. LED task relies on it and cannot be created");

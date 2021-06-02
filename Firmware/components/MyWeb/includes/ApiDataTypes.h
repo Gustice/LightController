@@ -11,6 +11,7 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <Color.h>
 
 typedef enum RgbChannel {
     None_Error = -1,
@@ -76,14 +77,14 @@ class ChannelMsg {
         Target.portIdx = 0;
 
         switch (type) {
-        case RgbiSync:
-        case RgbwAsync:
-        case RgbwPwm:
-        case EffectProcessor:
+        case RgbChannel::RgbiSync:
+        case RgbChannel::RgbwAsync:
+        case RgbChannel::RgbwPwm:
+        case RgbChannel::EffectProcessor:
             PayLoadSize = sizeof(ColorMsg_t);
             break;
 
-        case I2cExpanderPwm:
+        case RgbChannel::I2cExpanderPwm:
             PayLoadSize = sizeof(GrayValMsg_t);
             break;
 

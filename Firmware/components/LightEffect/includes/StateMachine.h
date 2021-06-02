@@ -121,7 +121,7 @@ class EffectSM {
      * @brief Get index to current macro in sequence
      * @return EffMacro_type const* const
      */
-    Macro_t *const GetStep(void) { return _p_effMac; };
+    Macro_t const * GetStep(void) { return _p_effMac; };
 
     /**
      * @brief Get Process values of state machen

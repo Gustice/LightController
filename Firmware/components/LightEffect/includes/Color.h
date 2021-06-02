@@ -21,12 +21,12 @@ extern uint8_t const *const noWave;
  * @brief Color Structure
  * @details Defines red/green/blue and white color channel values
  */
-typedef struct {
+struct Color_t {
     uint8_t red;
     uint8_t green;
     uint8_t blue;
     uint8_t white;
-} Color_t;
+};
 
 inline void SetColor(Color_t * tC, Color_t const * sC) {
     tC->red = sC->red;

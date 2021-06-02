@@ -153,6 +153,34 @@ TEST_CASE("Set Values works for all cases", "[DeviceDriver]") {
         CHECK(ColorIsEqual(&sync.buffer[0], &refColor));
         CHECK(ColorIsEqual(&sync.buffer[1], pDark));
     }
+    SECTION("Setting Second Sync RGB-Channels") {
+        idx.type = RgbChannel::RgbiSync;
+        idx.portIdx = 1;
+        app.ApplyTo[0] = 0x00000002;
+        dut.SetValue(idx, (uint8_t *)&msg, sizeof(ColorMsg_t), &app);
+        CHECK(ColorIsEqual(&sync.buffer[0], pDark));
+        CHECK(ColorIsEqual(&sync.buffer[1], &refColor));
+        CHECK(ColorIsEqual(&sync.buffer[2], pDark));
+    }
+    SECTION("Setting Multiple Sync RGB-Channels") {
+        idx.type = RgbChannel::RgbiSync;
+        idx.portIdx = 0;
+        app.ApplyTo[0] = 0x00000007;
+        dut.SetValue(idx, (uint8_t *)&msg, sizeof(ColorMsg_t), &app);
+        CHECK(ColorIsEqual(&sync.buffer[0], &refColor));
+        CHECK(ColorIsEqual(&sync.buffer[1], &refColor));
+        CHECK(ColorIsEqual(&sync.buffer[2], &refColor));
+        CHECK(ColorIsEqual(&sync.buffer[3], pDark));
+    }
+    SECTION("Available Sync RGB-Image is not overwritten") {
+        idx.type = RgbChannel::RgbiSync;
+        idx.portIdx = 3;
+        app.ApplyTo[0] = 0x00000018;
+        dut.SetValue(idx, (uint8_t *)&msg, sizeof(ColorMsg_t), &app);
+        CHECK(ColorIsEqual(&sync.buffer[3], &refColor));
+        CHECK(ColorIsEqual(&sync.buffer[4], pDark));
+    }
+
     SECTION("Setting Async RGB-Channels") {
         idx.type = RgbChannel::RgbwAsync;
         dut.SetValue(idx, (uint8_t *)&msg, sizeof(ColorMsg_t), &app);
@@ -192,30 +220,56 @@ TEST_CASE("Get Values works for all cases", "[DeviceDriver]") {
     Color_t refColor2 = {11,12,13,14};
     Color_t refColor3 = {21,22,23,24};
     Color_t refColor4 = {31,32,33,34};
+    Color_t refColor5 = {41,42,43,44};
 
     SetColor(dut.Images[RgbChannel::RgbiSync]->Image, &refColor1);
+    SetColor(&dut.Images[RgbChannel::RgbiSync]->Image[1], &refColor5);
     SetColor(dut.Images[RgbChannel::RgbwAsync]->Image, &refColor2);
+    SetColor(&dut.Images[RgbChannel::RgbwAsync]->Image[1], &refColor5);
     SetColor(dut.Images[RgbChannel::RgbwPwm]->Image, &refColor3);
+    SetColor(&dut.Images[RgbChannel::RgbwPwm]->Image[1], &refColor5);
     eff.FadeToColor(0, refColor4);
+    eff.FadeToColor(1, refColor5);
 
     ColorMsg_t msg;
-    SECTION("Getting Sync RGB-Channels") {
+    SECTION("Getting Sync RGB-Channel") {
         idx.type = RgbChannel::RgbiSync;
         refColor = &refColor1;
     }
-    SECTION("Getting Async RGB-Channels") {
+    SECTION("Getting Second Sync RGB-Channel") {
+        idx.type = RgbChannel::RgbiSync;
+        idx.portIdx = 1;
+        refColor = &refColor5;
+    }
+    SECTION("Getting Async RGB-Channel") {
         idx.type = RgbChannel::RgbwAsync;
         refColor = &refColor2;
+    }
+    SECTION("Getting Second Async RGB-Channel") {
+        idx.type = RgbChannel::RgbwAsync;
+        idx.portIdx = 1;
+        refColor = &refColor5;
     }
     SECTION("Getting PWM RGB-Strips") {
         idx.type = RgbChannel::RgbwPwm;
         refColor = &refColor3;
     }
+    // SECTION("Getting Second PWM RGB-Channel") {
+    //     idx.type = RgbChannel::RgbwPwm;
+    //     idx.portIdx = 1;
+    //     refColor = &refColor5;
+    // }
     // SECTION("Getting I2C-Expander") {}
-    SECTION("Getting Effect channels") {
+    SECTION("Getting Effect channel") {
         idx.type = RgbChannel::EffectProcessor;
         refColor = &refColor4;
     }
+    SECTION("Getting Second Effect channel") {
+        idx.type = RgbChannel::EffectProcessor;
+        idx.portIdx = 1;
+        refColor = &refColor5;
+    }
+
 
     char buff[512];
     dut.ReadValue(idx, (uint8_t *)&msg, sizeof(ColorMsg_t));
@@ -223,4 +277,32 @@ TEST_CASE("Get Values works for all cases", "[DeviceDriver]") {
     INFO(buff);
     Color_t retC = {.red = msg.red, .green = msg.green, .blue = msg.blue, .white = msg.white};
     CHECK(ColorIsEqual(&retC, refColor));
+}
+
+
+TEST_CASE("Get Values detects border violation", "[DeviceDriver]") {
+    EffectComplex eff(4, startupConfig.EffectMachines);
+    DeviceDriver dut(&sync, &async, &strip, &expander, &eff, &startupConfig);
+    ReqColorIdx_t idx = {.type = RgbChannel::None_Error, .chIdx = 0, .portIdx = 0};
+
+    ColorMsg_t msg;
+    SECTION("On Sync RGB-Channel") {
+        idx.type = RgbChannel::RgbiSync;
+        idx.portIdx = 4;
+    }
+    SECTION("Getting Second Async RGB-Channel") {
+        idx.type = RgbChannel::RgbwAsync;
+        idx.portIdx = 6;
+    }
+    SECTION("Getting Second PWM RGB-Channel") {
+        idx.type = RgbChannel::RgbwPwm;
+        idx.portIdx = 1;
+    }
+    // SECTION("Getting I2C-Expander") {}
+    SECTION("Getting Second Effect channel") {
+        idx.type = RgbChannel::EffectProcessor;
+        idx.portIdx = 4;
+    }
+
+    CHECK( ESP_FAIL == dut.ReadValue(idx, (uint8_t *)&msg, sizeof(ColorMsg_t)));
 }

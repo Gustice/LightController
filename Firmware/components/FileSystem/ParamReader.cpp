@@ -408,15 +408,15 @@ esp_err_t ParseStripDefinition(cJSON *chRoot, const char *tockenName, stripConfi
         return ESP_FAIL;
 
     if (strcmp("RGBI", channel->valuestring) == 0)
-        config->Channels = ColorChannels_t::RGBI;
+        config->Channels = ColorChannels::RGBI;
     else if (strcmp("RGBW", channel->valuestring) == 0)
-        config->Channels = ColorChannels_t::RGBW;
+        config->Channels = ColorChannels::RGBW;
     else if (strcmp("RGB", channel->valuestring) == 0)
-        config->Channels = ColorChannels_t::RGB;
+        config->Channels = ColorChannels::RGB;
     else if (strcmp("Gray", channel->valuestring) == 0)
-        config->Channels = ColorChannels_t::Gray;
+        config->Channels = ColorChannels::Gray;
     else {
-        config->Channels = ColorChannels_t::NoChannel;
+        config->Channels = ColorChannels::NoChannel;
         return ESP_FAIL;
     }
 

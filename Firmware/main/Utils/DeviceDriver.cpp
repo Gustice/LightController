@@ -142,16 +142,23 @@ esp_err_t DeviceDriver::SetValue(
 }
 
 esp_err_t DeviceDriver::ReadValue(ReqColorIdx_t channel, uint8_t *data, size_t length) {
+    int LinearIdx = ApplyToChannelWidth * channel.chIdx + channel.portIdx;
 
     switch (channel.type) {
     case RgbChannel::RgbiSync:
-        CopyColorToColorMessage((ColorMsg_t *)data, syncPort->Image);
+        if (LinearIdx >= syncPort->Count)
+            return ESP_FAIL;
+        CopyColorToColorMessage((ColorMsg_t *)data, &syncPort->Image[LinearIdx]);
         break;
     case RgbChannel::RgbwAsync:
-        CopyColorToColorMessage((ColorMsg_t *)data, asyncPort->Image);
+        if (LinearIdx >= asyncPort->Count)
+            return ESP_FAIL;
+        CopyColorToColorMessage((ColorMsg_t *)data, &asyncPort->Image[LinearIdx]);
         break;
     case RgbChannel::RgbwPwm:
-        CopyColorToColorMessage((ColorMsg_t *)data, rgbPort->Image);
+        if (LinearIdx >= rgbPort->Count)
+            return ESP_FAIL;
+        CopyColorToColorMessage((ColorMsg_t *)data, &rgbPort->Image[LinearIdx]);
         break;
 
     case RgbChannel::I2cExpanderPwm: {
@@ -163,6 +170,8 @@ esp_err_t DeviceDriver::ReadValue(ReqColorIdx_t channel, uint8_t *data, size_t l
     } break;
 
     case RgbChannel::EffectProcessor: {
+        if (LinearIdx >= Effects->Count)
+            return ESP_FAIL;
         Color_t c;
         Effects->ReadColor(channel.portIdx, c);
         CopyColorToColorMessage((ColorMsg_t *)data, &c);

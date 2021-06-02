@@ -11,27 +11,27 @@
 
 #include "Color.h"
 
-typedef struct factoryInfo_def { // @todo the container can be easily overwritten
+struct factoryInfo_t { // @todo the container can be easily overwritten
     char DeviceType[24];
     char SerialNumber[12]; // Something like SN:123ABC
     char HwVersion[16];    // V 1.00.00
     char SwVersion[12];
-} factoryInfo_t;
+};
 
-typedef struct wifiConfig_def {
+struct WifiConfig_t {
     uint8_t ssid[32];
     /** @note Length must be >= 8 (if not 0) */
     uint8_t password[64];
     uint8_t max_connection;
-} WifiConfig_t;
+};
 
-typedef enum ColorChannels {
+enum ColorChannels {
     NoChannel = 0,
     RGBI,
     RGB,
     RGBW,
     Gray,
-} ColorChannels_t;
+};
 
 enum DeviceStartMode {
     StartDark,
@@ -42,7 +42,7 @@ enum DeviceStartMode {
 struct stripConfig_t {
     uint16_t LedCount;
     uint16_t Intensity;
-    ColorChannels_t Channels;
+    ColorChannels Channels;
 };
 
 struct syncLedConfig_t {
