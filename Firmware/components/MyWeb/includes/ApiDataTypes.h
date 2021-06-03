@@ -26,8 +26,8 @@ typedef enum RgbChannel {
 
 struct ReqColorIdx_t {
     RgbChannel type;
-    int16_t chIdx;
-    int16_t portIdx;
+    uint16_t chIdx;
+    uint16_t portIdx;
 };
 
 #define ApplyToTargetChannels 5
@@ -141,4 +141,10 @@ class SetChannelMsg : public ChannelMsg {
         memcpy(&dto.Apply, &Apply, sizeof(ApplyIndexes_t));
         return dto;
     }
+
+    void AdjustFirstTargetIdx(ReqColorIdx_t target) {
+        Apply.FirstTarget.chIdx = target.chIdx;
+        Apply.FirstTarget.portIdx = target.portIdx;
+    }
+
 };

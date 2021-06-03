@@ -10,8 +10,8 @@
  * @todo HAL-Port-Classes should countain debug information (some already have)
  * @todo Log-data should be also provided via web-Interface or to an IP-Socket
  * @todo Refactor all lighting-port names. The wording is incoherent.
- *
  */
+
 #include "esp_event.h"
 #include "esp_log.h"
 #include "esp_netif.h"
@@ -79,27 +79,6 @@ DeviceDriver *Device;
 SemaphoreHandle_t xNewWebCommand = NULL;
 QueueHandle_t xSetQueue;
 
-// esp_err_t start_rest_server(const char *base_path);
-
-// static void initialise_mdns(void)
-// {
-//     mdns_init();
-//     mdns_hostname_set(CONFIG_EXAMPLE_MDNS_HOST_NAME);
-//     mdns_instance_name_set(MDNS_INSTANCE);
-
-//     mdns_txt_item_t serviceTxtData[] = {
-//         {"board", "esp32"},
-//         {"path", "/"}
-//     };
-
-//     ESP_ERROR_CHECK(mdns_service_add("ESP32-WebServer", "_http", "_tcp", 80, serviceTxtData,
-//                                      sizeof(serviceTxtData) / sizeof(serviceTxtData[0])));
-// }
-
-Effect::EffectProcessor *SyncPcs;
-Effect::EffectProcessor *AsyncPcs;
-Effect::EffectProcessor *RgbPcs;
-
 /**
  * @brief LED-Task
  * @details Task for managing LED-Output. Receives processed Colors and applies them
@@ -133,7 +112,8 @@ static void vRefreshLed(void *pvParameters) {
             if (xQueueGenericReceive(xSetQueue, &xSetMsg, 0, pdFALSE) == pdTRUE) {
                 ESP_LOGI(ModTag, "Setting Channel data for Gate: '%d', Ch=%d / Port=%d",
                     xSetMsg.Target.type, xSetMsg.Target.chIdx, xSetMsg.Target.portIdx);
-                Device->SetValue(xSetMsg.Target, xSetMsg.pStream, xSetMsg.PayLoadSize, &xSetMsg.Apply);
+                Device->SetValue(
+                    xSetMsg.Target, xSetMsg.pStream, xSetMsg.PayLoadSize, &xSetMsg.Apply);
             }
             Device->EffectTick();
             vTaskDelay(40 / portTICK_PERIOD_MS);
@@ -198,6 +178,45 @@ static void vManageStatusLeds(void *pvParameters) {
 }
 
 
+void SetBoardDriverAccordingToConfig() {
+    static SpiPort spi(SpiPort::SpiPorts::HSpi, SyncDataOutPin, gpio_num_t::GPIO_NUM_NC,
+        SyncClockOutPin, spi_mode_t::mode3);
+    static RmtPort rmt(rmt_channel_t::RMT_CHANNEL_0, GPIO_NUM_21, RmtPort::RmtProtocols::RtzWs2812);
+    static I2cPort i2c(0, I2cDataPin, I2cClockPin);
+    static PwmPort pwmR(ledc_channel_t::LEDC_CHANNEL_0, LedRedPwmPin);
+    static PwmPort pwmG(ledc_channel_t::LEDC_CHANNEL_1, LedGreenPwmPin);
+    static PwmPort pwmB(ledc_channel_t::LEDC_CHANNEL_2, LedBluePwmPin);
+    static PwmPort pwmW(ledc_channel_t::LEDC_CHANNEL_3, LedWhitePwmPin);
+
+    ESP_LOGI(ModTag, " ## Found Configuration: ");
+    ESP_LOGI(ModTag, "    Sync LEDs En=%d Cnt=:%d", (int)deviceConfig.SyncLeds.IsActive,
+        deviceConfig.SyncLeds.Strip.LedCount);
+    ESP_LOGI(ModTag, "    Async LEDs En=%d Cnt=:%d", (int)deviceConfig.AsyncLeds.IsActive,
+        deviceConfig.AsyncLeds.Strip.LedCount);
+    ESP_LOGI(ModTag, "    RgbStrip LEDs En=%d Chn=%d Cnt=:%d",
+        (int)deviceConfig.RgbStrip.IsActive, deviceConfig.RgbStrip.ChannelCount,
+        deviceConfig.RgbStrip.Strip.LedCount);
+    ESP_LOGI(ModTag, "    Expander LEDs En=%d Cnt=:%d", (int)deviceConfig.I2cExpander.IsActive,
+        deviceConfig.I2cExpander.Device.LedCount);
+
+    for (size_t i = 0; i < 4; i++) {
+        auto target = &deviceConfig.EffectMachines[i];
+        ESP_LOGI(ModTag, "    EffectChannel1 T=%d -> %08x .. D=%d, 0#%02x%02x%02x%02x",
+            (int)target->Target, target->ApplyFlags, target->Delay, target->Color.red,
+            target->Color.green, target->Color.blue, target->Color.white);
+    }
+
+    static Apa102 sledStrip(&spi, deviceConfig.SyncLeds.Strip.LedCount);
+    static Ws2812 aLedStrip(&rmt, deviceConfig.AsyncLeds.Strip.LedCount);
+    static RgbwStrip ledStrip(&pwmR, &pwmG, &pwmB, &pwmW);
+    static Pca9685 ledDriver(&i2c, 0x40);
+
+    static EffectComplex effects(EffectMachinesCount, deviceConfig.EffectMachines);
+    static DeviceDriver device(
+        &sledStrip, &aLedStrip, &ledStrip, &ledDriver, &effects, &deviceConfig);
+    Device = &device;
+}
+
 /**
  * @brief Enter function for underlying OS
  *
@@ -232,63 +251,9 @@ void app_main(void) {
     static InputPort sw1(Sw1Pin);
     static InputPort sw2(Sw2Pin);
 
-    static SpiPort spi(SpiPort::SpiPorts::HSpi, SyncDataOutPin, gpio_num_t::GPIO_NUM_NC,
-        SyncClockOutPin, spi_mode_t::mode3);
-    static RmtPort rmt(rmt_channel_t::RMT_CHANNEL_0, GPIO_NUM_21, RmtPort::RmtProtocols::RtzWs2812);
     static UartPort uart(UartTxPin, UartRxPin);
-
-    static I2cPort i2c(0, I2cDataPin, I2cClockPin);
-
-    static PwmPort pwmR(ledc_channel_t::LEDC_CHANNEL_0, LedRedPwmPin);
-    static PwmPort pwmG(ledc_channel_t::LEDC_CHANNEL_1, LedGreenPwmPin);
-    static PwmPort pwmB(ledc_channel_t::LEDC_CHANNEL_2, LedBluePwmPin);
-    static PwmPort pwmW(ledc_channel_t::LEDC_CHANNEL_3, LedWhitePwmPin);
-
     if (Fs_ReadDeviceConfiguration(&deviceConfig) == ESP_OK) {
-        ESP_LOGI(ModTag, " ## Found Configuration: ");
-        ESP_LOGI(ModTag, "    Sync LEDs En=%d Cnt=:%d", (int)deviceConfig.SyncLeds.IsActive,
-            deviceConfig.SyncLeds.Strip.LedCount);
-        ESP_LOGI(ModTag, "    Async LEDs En=%d Cnt=:%d", (int)deviceConfig.AsyncLeds.IsActive,
-            deviceConfig.AsyncLeds.Strip.LedCount);
-        ESP_LOGI(ModTag, "    RgbStrip LEDs En=%d Chn=%d Cnt=:%d",
-            (int)deviceConfig.RgbStrip.IsActive, deviceConfig.RgbStrip.ChannelCount,
-            deviceConfig.RgbStrip.Strip.LedCount);
-        ESP_LOGI(ModTag, "    Expander LEDs En=%d Cnt=:%d", (int)deviceConfig.I2cExpander.IsActive,
-            deviceConfig.I2cExpander.Device.LedCount);
-        
-        for (size_t i = 0; i < 4; i++)
-        {
-            auto target = &deviceConfig.EffectMachines[i];
-            ESP_LOGI(ModTag, "    EffectChannel1 T=%d -> %08x .. D=%d, 0#%02x%02x%02x%02x", (int)target->Target,
-            target->ApplyFlags, target->Delay, target->Color.red, target->Color.green, target->Color.blue, target->Color.white);
-        }
-        
-        static Apa102 sledStrip(&spi, deviceConfig.SyncLeds.Strip.LedCount);
-        static Ws2812 aLedStrip(&rmt, deviceConfig.AsyncLeds.Strip.LedCount);
-        static RgbwStrip ledStrip(&pwmR, &pwmG, &pwmB, &pwmW);
-        static Pca9685 ledDriver(&i2c, 0x40);
-
-        static Effect::EffectProcessor syncPcs(Effect::cu16_TemplateLength, 8);
-        static Effect::EffectProcessor asyncPcs(Effect::cu16_TemplateLength, 8);
-        static Effect::EffectProcessor rgbPcs(Effect::cu16_TemplateLength, 8);
-
-        syncPcs.SetEffect(
-            Effect::macStartFull, &deviceConfig.SyncLeds.Color, Effect::gu8_fullIntensity);
-        ;
-        asyncPcs.SetEffect(
-            Effect::macStartFull, &deviceConfig.AsyncLeds.Color, Effect::gu8_fullIntensity);
-        ;
-        rgbPcs.SetEffect(
-            Effect::macStartFull, &deviceConfig.RgbStrip.Color, Effect::gu8_fullIntensity);
-        ;
-
-        SyncPcs = &syncPcs;
-        AsyncPcs = &asyncPcs;
-        RgbPcs = &rgbPcs;
-
-        static EffectComplex effects(EffectMachinesCount, deviceConfig.EffectMachines);
-        static DeviceDriver device(&sledStrip, &aLedStrip, &ledStrip, &ledDriver, &effects, &deviceConfig);
-        Device = &device;
+        SetBoardDriverAccordingToConfig();
     } else {
         Device = nullptr;
         ESP_LOGE(ModTag, "Could not read Device configuration. No Demo or operation possible");
