@@ -1,5 +1,11 @@
 idf_component_register(SRCS 
-            "Macro.cpp" "Processor.cpp" "StateMachine.cpp" "Waveforms.cpp" "Color.cpp" "LightEffect.cpp" 
+            "Color.cpp" 
+            "Macro.cpp" 
+            "Processor.cpp" 
+            "Sequencer.cpp" 
+            "SequenceStepper.cpp" 
+            "StateMachine.cpp" 
+            "Waveforms.cpp" 
             INCLUDE_DIRS "includes"
             # REQUIRES 
             )

@@ -23,4 +23,10 @@ menu "App Configuration"
         default "/server"
         help
             Specify the mount point for server partition. This is the spiffs partition name in partitions.csv
+
+    config SETUP_MOUNT_POINT
+        string "Partition mount point for storage files"
+        default "/storage"
+        help
+            Specify the mount point for storage partition. This is the spiffs partition name in partitions.csv
 endmenu

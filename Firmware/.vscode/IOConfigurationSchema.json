@@ -1,0 +1,82 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "title": "IOConfiguration",
+    "description": "Schema to define a device configuration",
+    "type": "object",
+    "properties": {
+        "StartupMode": {
+            "description": "Defines the devices behavior from start up",
+            "type": "string",
+            "enum": ["RunDemo", "StartImage", "StartDark"]
+        },
+        "Outputs": {
+            "description": "Defines the configuration fo the physical interfaces",
+            "type": "array",
+            "items": {
+                "description": "Defines the physical channel configuration",
+                "type": "object",
+                "properties": {
+                    "Type": {
+                        "description": "Names channel type",
+                        "type": "string",
+                        "enum": ["SyncLedCh", "AsyncLedCh","RgbStrip","I2cExpander"]
+                    },
+                    "Title": {
+                        "description": "Channel title that will be displayed at the web GUI",
+                        "type": "string",
+                        "maxLength": 32
+                    },
+                    "Description": {
+                        "description": "Channel description that will be displayed as paragraph below the title",
+                        "type": "string"
+                    },
+                   "Color": {
+                        "description": "Start color of channel coded as RGBx-values. x can be white, intensity or don't-care depending on the Channel type",
+                        "type": "array",
+                        "maxItems": 4,
+                        "minItems": 4
+                   }
+                },
+                "required": ["Type", "Title"]
+            }
+        },
+        "EffectProcessor": {
+            "description": "Provides an effect processor for assigned Outputs",
+            "type": "array",
+            "items": {
+                "description": "Effect Processor assignment",
+                "type": "object",
+                "properties": {
+                    "TargetGate": {
+                        "description": "Hardware Terminal code to assign target hardware. Use S for SyncSerial A for AsyncSerial, R for RGBstrip, I for I2C-Expander ",
+                        "type": "string",
+                        "enum": ["S", "A", "R", "I"]
+                    },
+                    "Ports": {
+                        "description": "Index to ports to apply transmitted value",
+                        "type": "array",
+                        "items": {
+                            "type": "integer",
+                            "minimum": 1, 
+                            "maximum": 32
+                        }
+                    },
+                    "Color": {
+                        "description": "Start color of channel coded as RGBx-values. x can be white, intensity or don't-care depending on the Channel type",
+                        "type": "array",
+                        "maxItems": 4,
+                        "minItems": 4
+                   },
+                   "InitDelay": {
+                       "description": "Initial steps bevor effect is started",
+                       "type": "integer",
+                       "minimum": 0, 
+                       "maximum": 65535
+                   }
+                },
+                "required": ["TargetGate", "Ports"]
+            }
+        }
+    },
+    "required": ["StartupMode", "Outputs"]
+}

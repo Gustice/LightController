@@ -92,7 +92,7 @@ To be able to flash your ESP you need a USB to UART bridge, that also exposes RT
 - Device-IDs and device configuration are read from data-storage. The http-webserver, provides the
     whole webpage from web-storage. 
 
-**Note**: Many of the components are partly ore even mostly tested by unit-tests (that are run locally on the computer not on the SoC). Currently catch2 is used als test-framework.
+**Note**: Many of the components are partly ore even mostly tested by unit-tests (that are run locally on the computer not on the SoC). Currently catch2 is used as test-framework.
 
 **Note**: You can also use the ServerMock.py script to emulate parts of the behavior of the http-webserver. At least display and the navigation across the websites. Also partly demo data is already generated.
 
@@ -100,21 +100,13 @@ To be able to flash your ESP you need a USB to UART bridge, that also exposes RT
 
 This project is anything but finished. I have several open tasks and they somehow appear to increase rather than getting less. 
 
-- Status LEDs don't display any status yet.
-- Light-Control state machine is still not integrated. Currently the is no soft switching or any prepared effect used. 
-- The memory-pages don't work currently. They are intended to save current color configuration to be called by remote or similar devices.
-- The is some kind of configuration management completely missing. It would be necessary to provide a flash stored configuration of the device which introduces used interfaces and LED count so the GUI could be rendered accordingly
-- The web GUI is as simple as it can be. There are no web sockets implemented or anything else. 
+- Status LEDs don't display any status yet (just fancy blink codes).
 - Linear power states with configurable current flow are not designed yet.
 - Wide parts are written more in c-style rather than c++. Sorry i was a little in hurry
 
 ## ToDos
 
 - OverTheAirUpdates would be nice
-- Integration of Light-Controller with soft-switching and light effects
-- Layout and description of sockets and buttons
 - Design for linear Endstage (expander board)
 - Adaption of ZigBee
-- Interactive GUI with true Rest-Interface
 - Logging should be switched to network path. Means some network placed destination must be configured as logging destination. 
-- Bootloader would be nice. You just cant connect all your devices to your computer if you want to run an update.

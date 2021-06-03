@@ -1,47 +1,52 @@
 {
-    "StartupMode": "RunDemo",
-    "DisplayMode": "ExpertView",
+    "StartupMode": "StartImage",
     "Outputs": [
         {
             "Type": "SyncLedCh",
-            "Description": "Synchronous serial LED port", 
-            "Strip": {
-                "LedCount": 6,
-                "Intens": 16,
-                "Channel": "RGBI"
-            },
-            "Color": [0,0,0,0]
+            "Title": "Synchronous serial LED port", 
+            "Strip": { "LedCount": 6, "Intens": 16, "Channel": "RGBI"},
+            "Color": [255,0,0,0]
         },
         {
             "Type": "AsyncLedCh",
-            "Description": "Asynchronous serial LED port", 
-            "Strip": {
-                "LedCount": 8,
-                "Intens": 16,
-                "Channel": "RGB"
-            },
-            "Color": [0,0,0,0]
+            "Title": "Asynchronous serial LED port", 
+            "Strip": { "LedCount": 8, "Intens": 16, "Channel": "RGB" },
+            "Color": [0,255,0,0]
         },
         {   
             "Type": "RgbStrip",
-            "Description": "Rgb-Strip LED port",
-            "Strip": {
-                "LedCount": 12,
-                "Intens": 1024,
-                "Channel": "RGBW"
-            },
-            "Color": [0,0,0,0]
+            "Title": "Rgb-Strip LED port",
+            "Strip": { "LedCount": 12, "Intens": 1024, "Channel": "RGBW" },
+            "Color": [0,0,255,0]
         },
         {
             "Type": "I2cExpander",
-            "Description": "I2C-Expander port",
-            "Device": {
-                "LedCount": 16,
-                "Intens": 1024,
-                "Channel": "Gray"
-            },
+            "Title": "I2C-Expander port",
+            "Device": { "LedCount": 16,  "Intens": 1024, "Channel": "Gray" },
             "Address": 1,
-            "GrayValues": [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]
+            "GrayValues": [255,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0]
+        }
+    ],
+    "EffectProcessor": [
+        {
+            "TargetGate": "S", "Ports": [1, 2],
+            "Color": [255,0,0,0],
+            "InitDelay": 0
+        },
+        {
+            "TargetGate": "A", "Ports": [1],
+            "Color": [0,255,0,0],
+            "InitDelay": 32
+        },
+        {
+            "TargetGate": "R", "Ports": [1],
+            "Color": [0,0,255,0],
+            "InitDelay": 64
+        },
+        {
+            "TargetGate": "S", "Ports": [3],
+            "Color": [0,0,255,0],
+            "InitDelay": 128
         }
     ]
 }

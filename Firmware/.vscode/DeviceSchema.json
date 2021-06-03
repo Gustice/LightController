@@ -1,0 +1,25 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "title": "Device configuration",
+    "description": "Schema to define device configuration",
+    "type": "object",
+    "properties": {
+        "DeviceType": {
+            "description": "Defines the devices type - can be descriptive",
+            "type": "string",
+            "maxLength": 20
+        },
+        "SerialNumber": {
+            "description": "Defines arbitrary serial number coded in alpha numeric characters",
+            "type": "string",
+            "maxLength": 8,
+            "pattern": "^(-|\\w)+$"
+        },
+        "HwVersion": {
+            "description": "Describes the hardware version pattern like 'V 1.0.0'",
+            "type": "string",
+            "maxLength": 12
+        }
+    },
+    "required": ["DeviceType", "SerialNumber", "HwVersion"]
+}

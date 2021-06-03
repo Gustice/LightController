@@ -57,10 +57,20 @@ function onSubmitColor(form, setUrl) {
 
     for (const [key, value] of formData) {
         var formE = form.querySelector(`input[name="${key}"]`);
-        if (formE.type == "number")
+        if (formE) {
+            if (formE.type == "number")
             jsonObject[key] = parseInt(value);
-        else
+            else
             jsonObject[key] = value;
+        } else {
+            formE = form.querySelector(`select[name="${key}"]`);
+            if (formE) {
+                if (formE.type == "number")
+                jsonObject[key] = parseInt(value);
+                else
+                jsonObject[key] = value;
+            }
+        }
     }
     console.log(jsonObject);
 
@@ -73,17 +83,21 @@ function onSubmitColor(form, setUrl) {
 }
 
 async function onGetChannelValue(btn, getUrl) {
-    console.log("requesting from '%s'", getUrl);
-
+    
     parentForm = btn.parentElement;
     while (parentForm.tagName != 'FORM') {
         parentForm = parentForm.parentElement;
     }
-
-    const formE = parentForm.querySelector(`input[name="appTo"]`);
+    
     let appRef = 0
+    const formE = parentForm.querySelector(`input[name="appTo"]`);
     if (formE != null)
         appRef = formE.value
+    else {
+        const formS = parentForm.querySelector(`select[name="appTo"]`);
+        appRef = formS.value
+    }
+    console.log("requesting from '%s'", getUrl + appRef);
     await http.get(getUrl + appRef)
         .then(data => {
             SetupUi.showMessage(parentForm, "Data requested ...", 'userSuccess');
@@ -91,8 +105,11 @@ async function onGetChannelValue(btn, getUrl) {
 
             for (var element in data) {
                 var formE = parentForm.querySelector(`input[name="${element}"]`);
-                if (formE.type == "number")
+                if (formE && formE.type == "number")
+                {
                     formE.value = data[element];
+                    simulateEvent(formE.id, 'input');
+                }
             }
         })
         .catch(response => {
@@ -257,7 +274,7 @@ function rgbFormGenerator(param) {
             <input type="text" class="u-full-width" id="appTo${num}" name="appTo" value="1">
             <!-- <label for="rgbSelector" id="rgbSelected">Selected Color #000000</label> -->
             <input type="color" id="rgbSelector${num}" class="u-full-width" oninput="UpdateColor(this);" style="height: 70px;"><br>
-            <button type="button" class="u-full-width" onclick='return onGetChannelValue(this, "${route}")'>Get Setting</button>
+            <button type="button" onclick='return onGetChannelValue(this, "${route}")'>Get Setting</button>
             <input class="button-primary u-full-width" type="submit" value="Apply">
         </div>
         `;
@@ -265,7 +282,7 @@ function rgbFormGenerator(param) {
     }
     function createColoredSlider(param, num) {
         const sliderTemplate = `
-            <button type="button" class="u-full-width" style="background-color: ${param.bntColor};" 
+            <button type="button" style="background-color: ${param.bntColor};" 
             onclick="${param.fieldRef}${num}.value = ${param.varName}${num}.value= ${param.maxValue}; UpdateColor(this);">${param.btnText}</button>
             <input type="range" id="${param.varName}${num}" oninput="${param.fieldRef}${num}.value = this.value; UpdateColor(this);" min="0"
             max="${param.maxValue}" step="1" value="0">
@@ -333,10 +350,10 @@ function grFormGenerator(param) {
         const controlTemplate = `
         <div class="row">
           <div class="four columns">
-            <button type="button" class="u-full-width" onclick='return onGetChannelValue(this, "${route}")'>Get Setting</button>
+            <button type="button" onclick='return onGetChannelValue(this, "${route}")'>Get Setting</button>
           </div>
           <div class="four columns">
-            <input class="button-primary u-full-width" type="submit" value="Apply">
+            <input class="button-primary" type="submit" value="Apply">
           </div>
         </div>
         `;
@@ -407,6 +424,19 @@ async function onSave(page) {
             console.warn(response);
         });
 }
+async function onLoad(page) {
+    const load = { Page: page };
+    await http.post(ApiLoadPage, load)
+        .then(() => {
+            console.warn("Sent object", load);
+            //SetupUi.showMessage(parentForm, "Page saved", 'userSuccess');
+        })
+        .catch(response => {
+            console.warn(response);
+        });
+}
+
+
 function onResetPages() {
 
     // await http.post(ApiResetProgram, {})
@@ -441,4 +471,18 @@ async function onGetAllValues(form) {
         });
     var SetUrl = "/GetValues/RGBValues"
     console.log("sending to %s", SetUrl);
+}
+
+function simulateEvent (id, event) {//js trigger event -- event constructor
+    var evt = document.createEvent("Event");
+    evt.initEvent(event, true, true);
+    var cb = document.getElementById(id);
+    var canceled = !cb.dispatchEvent(evt);
+    if (canceled) {
+        // A handler called preventDefault
+        // console.log("canceled");
+    } else {
+        // None of the handlers called preventDefault
+        // console.log("not canceled");
+    }
 }

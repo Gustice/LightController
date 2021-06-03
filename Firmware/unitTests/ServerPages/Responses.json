@@ -40,11 +40,34 @@
             ]
         },
         {
+            "url": "/api/GetPort/genericRGB/",
+            "responses": [
+                {"R": 21, "G": 22, "B": 23, "W": 24},
+                {"R": 1, "G": 2, "B": 3, "W": 4},
+                {"R": 11, "G": 12, "B": 13, "W": 14},
+                {"R": 0, "G": 0, "B": 0, "W": 0},
+                {}
+            ]
+        },
+        {
             "url": "/api/GetPort/IValues/",
             "responses": [
                 {"G1": 1, "G2": 2, "G3": 3, "G4": 4, "G5": 5, "G6": 6, "G7": 7, "G8": 8, "G9": 9, "G10": 10, "G11": 11, "G12": 12, "G13": 13, "G14": 14, "G15": 15, "G16": 16},
                 {"G1": 11, "G2": 12, "G3": 13, "G4": 14, "G5": 15, "G6": 16, "G7": 17, "G8": 18, "G9": 19, "G10": 110, "G11": 111, "G12": 112, "G13": 113, "G14": 114, "G15": 115, "G16": 116},
                 {}
+            ]
+        },
+        {
+            "url": "/api/GetFiles",
+            "responses": [
+                { "files": [{"file": "Test.json", "size": 1234} ,{"file": "Config.json", "size": 8971} ]}
+            ]
+        },
+        {
+            "url": "/api/GetStatus/DeviceType",
+            "responses": [
+                { "DeviceType": "DemoDev-Mk1", "SerialNumber": "00000001", "HwVersion": "V 0.1.0" },
+                { "DeviceType": "DemoDev-Mk2", "SerialNumber": "00000002", "HwVersion": "V 0.2.0" }
             ]
         }
     ],
@@ -52,3 +75,5 @@
 
     ]
 }
+
+

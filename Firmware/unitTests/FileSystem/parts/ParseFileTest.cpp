@@ -9,6 +9,19 @@ TEST_CASE("ReadingConfig yields error if module not initializes", "[cJson]")
     REQUIRE ( (Fs_ReadFactoryConfiguration(&factorySet) == ESP_FAIL) );
 }
 
+
+static bool CheckColor(Color c1, Color c2) {
+    if (c1 == c2)
+        return true;
+
+    Color_t v1 = c1.GetColor();
+    Color_t v2 = c2.GetColor();
+    INFO(printf(" rgbw: 0x%02x 0x%02x 0x%02x 0x%02x != 0x%02x 0x%02x 0x%02x 0x%02x\n", v1.red, v1.green, v1.blue,
+                v1.white, v2.red, v2.green, v2.blue, v2.white));
+    INFO(printf(" rgbw: %d %d %d %d != %d %d %d %d\n", v1.red, v1.green, v1.blue, v1.white, v2.red, v2.green, v2.blue,
+                v2.white));
+    return false;
+}
 TEST_CASE("Reading Device configuration", "[cJson]")
 {
     Fs_SetupSpiFFs();
@@ -16,23 +29,50 @@ TEST_CASE("Reading Device configuration", "[cJson]")
     memset(&deviceSet, 0, sizeof(deviceConfig_t));
     REQUIRE ( Fs_ReadDeviceConfiguration(&deviceSet) == ESP_OK );
     
-    CHECK(deviceSet.StartUpMode == DeviceStartMode_t::RunDemo);
+    CHECK(deviceSet.StartUpMode == DeviceStartMode::RunDemo);
 
     CHECK(deviceSet.SyncLeds.IsActive == true);
     CHECK(deviceSet.SyncLeds.Strip.LedCount == 6);
     CHECK( (deviceSet.SyncLeds.Strip.Channels == ColorChannels_t::RGBI) );
-    
+    CHECK(CheckColor(Color(1, 2, 3, 4), deviceSet.SyncLeds.Color));
+    CHECK( 5 == deviceSet.SyncLeds.Delay);
+
     CHECK(deviceSet.AsyncLeds.IsActive == true);
     CHECK(deviceSet.AsyncLeds.Strip.LedCount == 10);
     CHECK( (deviceSet.AsyncLeds.Strip.Channels == ColorChannels_t::RGBW) );
+    CHECK(CheckColor(Color(11, 12, 13, 14), deviceSet.AsyncLeds.Color));
+    CHECK( 15 == deviceSet.AsyncLeds.Delay);
     
     CHECK(deviceSet.RgbStrip.IsActive == true);
     CHECK(deviceSet.RgbStrip.Strip.LedCount == 12);
     CHECK( (deviceSet.RgbStrip.Strip.Channels == ColorChannels_t::RGB) );
-
+    CHECK(CheckColor(Color(21, 22, 23, 24), deviceSet.RgbStrip.Color));
+    CHECK( 25 == deviceSet.RgbStrip.Delay);
+    
     CHECK(deviceSet.I2cExpander.IsActive == true);
     CHECK(deviceSet.I2cExpander.Device.LedCount == 16);
     CHECK( (deviceSet.I2cExpander.Device.Channels == ColorChannels_t::Gray) );
+
+
+    CHECK(deviceSet.EffectMachines[0].Target  == TargetGate::SyncLed);
+    CHECK(deviceSet.EffectMachines[0].ApplyFlags == 0x00000003);
+    CHECK(CheckColor(Color(101,102,103,104), deviceSet.EffectMachines[0].Color));
+    CHECK( (deviceSet.EffectMachines[0].Delay == 0) );
+
+    CHECK(deviceSet.EffectMachines[1].Target  == TargetGate::AsyncLed);
+    CHECK(deviceSet.EffectMachines[1].ApplyFlags == 0x80000000);
+    CHECK(CheckColor(Color(111,112,113,114), deviceSet.EffectMachines[1].Color));
+    CHECK( (deviceSet.EffectMachines[1].Delay == 32) );
+
+    CHECK(deviceSet.EffectMachines[2].Target  == TargetGate::LedStrip);
+    CHECK(deviceSet.EffectMachines[2].ApplyFlags == 0x80018001);
+    CHECK(CheckColor(Color(121,122,123,124), deviceSet.EffectMachines[2].Color));
+    CHECK( (deviceSet.EffectMachines[2].Delay == 64) );
+
+    CHECK(deviceSet.EffectMachines[3].Target  == TargetGate::I2cExpander);
+    CHECK(deviceSet.EffectMachines[3].ApplyFlags == 0x80000001);
+    CHECK(CheckColor(Color(131,132,133,134), deviceSet.EffectMachines[3].Color));
+    CHECK( (deviceSet.EffectMachines[3].Delay == 128) );
 }
 
 static bool stringIsEqual(const char * expected, const char * actual);

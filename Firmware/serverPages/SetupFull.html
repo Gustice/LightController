@@ -22,26 +22,122 @@
 
 <body>
   <div class="container darkui1">
+    <div id="channelSpace">
+      <h2 class="userWarning">Content is defined in html</h2>
+      <div class="row">
+        <h2>Effect Cannel</h2>
+        <p>The number of effect channels is defined in 'IOConfiguration.json'. Each channel can by driven by this form. 
+          The affected ports for each effect are also defined in the json file. </p>
+        <form title="Channel-Setup" id="genericForm" name="genericForm"
+            onsubmit='return onSubmitColor(this, "/api/SetPort/genericRGB")'>
+            <div class="row">
+            </div>
+            <div class="row">
+                <div class="four columns">
+                    <label for="appTo">Apply to ...</label>
+                    <select name="target" class="u-full-width" hidden=true>
+                      <option value="effectCh">Effect Channel</option>
+                      <option value="rgbiSync">Sync RGB Strip</option>
+                      <option value="rgbwAsync">Async RGB Strip</option>
+                      <option value="rgbwStrip">RGB Strip</option>
+                      <option value="grayPort">Gray Values</option>
+                    </select>
+                    <select name="type" class="u-full-width">
+                      <option value="RGB">RGB</option>
+                      <option value="RGBW">RGBW</option>
+                      <option value="RGBI">RGBI</option>
+                    </select>
+                    <select name="appTo" class="u-full-width">
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                      <option value="4">4</option>
+                    </select>
+                    <input type="color" id="rgbSelector_1" class="u-full-width" oninput="UpdateColor(this);"
+                        style="height: 70px;"><br>
+                    <button class="u-full-width" type="button" onclick="return onGetChannelValue(this, '/api/GetPort/genericRGB/')">Get Setting</button>  
+                    <input class="button-primary u-full-width" type="submit" value="Apply">
+                </div>
+                <div class="eight columns">
+                    <table>
+                        <tr>
+                            <td>
+                                <button type="button" class="u-full-width" style="background-color: darkred;"
+                                    onclick="rOut_ch.value = red_ch.value= 255; UpdateColor(this);">Red</button>
+                                <input type="range" id="red_ch"
+                                    oninput="rOut_ch.value = this.value; UpdateColor(this);" min="0" max="255"
+                                    step="1" value="0">
+                            </td>
+                            <td>
+                                <button type="button" class="u-full-width" style="background-color: darkgreen;"
+                                    onclick="gOut_ch.value = green_ch.value= 255; UpdateColor(this);">Green</button>
+                                <input type="range" id="green_ch"
+                                    oninput="gOut_ch.value = this.value; UpdateColor(this);" min="0" max="255"
+                                    step="1" value="0">
+                            </td>
+                            <td>
+                                <button type="button" class="u-full-width" style="background-color: darkblue;"
+                                    onclick="bOut_ch.value = blue_ch.value= 255; UpdateColor(this);">Blue</button>
+                                <input type="range" id="blue_ch"
+                                    oninput="bOut_ch.value = this.value; UpdateColor(this);" min="0" max="255"
+                                    step="1" value="0">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <input type="number" id="rOut_ch" name="R"
+                                    oninput="red_ch.value = this.value; UpdateColor(this);" class="u-full-width"
+                                    value="0" min="0" max="255">
+                            </td>
+                            <td>
+                                <input type="number" id="gOut_ch" name="G"
+                                    oninput="green_ch.value = this.value; UpdateColor(this);"
+                                    class="u-full-width" value="0" min="0" max="255">
+                            </td>
+                            <td>
+                                <input type="number" id="bOut_ch" name="B"
+                                    oninput="blue_ch.value = this.value; UpdateColor(this);" class="u-full-width"
+                                    value="0" min="0" max="255">
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </form>
+    </div>
+    </div>
+
     <div id="formSpace">
+      <h2 class="userWarning">Content is filled by js-App</h2>
       <!-- Content is filled by Script-->
+    </div>
+    <div id="loadSpace">
+      <h2 class="userWarning">Content is defined in html</h2>
+      <h2>Load Image</h2>
+      <div class="row">
+        <div class="three columns"><button type="button" onclick="onLoad(1)">Load Page 1</button></div>
+        <div class="three columns"><button type="button" onclick="onLoad(2)">Load Page 2</button></div>
+        <div class="three columns"><button type="button" onclick="onLoad(3)">Load Page 3</button></div>
+        <div class="three columns"><button type="button" onclick="onLoad(4)">Load Page 4</button></div>
+      </div>
     </div>
     <div id="saveSpace">
       <h2>Save Image</h2>
       <div class="row">
-        <div class="three columns"><button class="u-full-width" type="button" onclick="onSave(1)">Safe to Page 1</button></div>
-        <div class="three columns"><button class="u-full-width" type="button" onclick="onSave(2)">Safe to Page 2</button></div>
-        <div class="three columns"><button class="u-full-width" type="button" onclick="onSave(3)">Safe to Page 3</button></div>
-        <div class="three columns"><button class="u-full-width" type="button" onclick="onSave(4)">Safe to Page 4</button></div>
+        <div class="three columns"><button type="button" onclick="onSave(1)">Safe to Page 1</button></div>
+        <div class="three columns"><button type="button" onclick="onSave(2)">Safe to Page 2</button></div>
+        <div class="three columns"><button type="button" onclick="onSave(3)">Safe to Page 3</button></div>
+        <div class="three columns"><button type="button" onclick="onSave(4)">Safe to Page 4</button></div>
       </div>
       <div class="row">
-        <div class="four columns"><button class="button-primary u-full-width" type="button" onclick="onResetPages()">Reset Pages</button></div>
+        <div class="four columns"><button class="button-primary" type="button" onclick="onResetPages()">Reset Pages</button></div>
       </div>
     </div>
     
     <div id="getSpace">
       <h2>Get Values</h2>
       <div class="row">
-        <div class="four columns"><button class="button-primary u-full-width" type="button" onclick="onGetAllValues(this)">Get</button></div>
+        <div class="four columns"><button class="button-primary" type="button" onclick="onGetAllValues(this)">Get</button></div>
       </div>
       <div class="row">
         <input class="u-full-width" readonly="true" type="text" name="Values" style="height: 200px;">
